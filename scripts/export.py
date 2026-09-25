@@ -3,7 +3,11 @@
 - 只导出 catalog 里 done=true 的专辑。
 - 重复版本（dup_of）不参与计数，避免同一首歌被算成两首。
 - 词表只收出现在 ≥2 首歌里的词；语法点全部导出。
-- 每个词/语法点附带出现位置 loc：{歌曲id: [[行号, 起, 止], ...]}，网页据此显示原句并高亮。
+- 每个词/语法点附带出现位置 loc：{歌曲id: [[行号, 起, 止], ...]}，网页据此显示原句并高亮；
+  x = [歌曲id, 行号] 是从歌词里自动挑的例句（优先有中文翻译、长度适中的句子）。
+- 每行歌词：[日文, 中文, 分段]。分段是按"词+后面粘着的助动词/后缀"切开的列表，
+  每段由若干词组成；词是字符串（没有汉字，读音就是写法），或 [写法, 读音]（含汉字，或助词 は/へ）。
+  网页据此在汉字上注假名、在每段下面标罗马音。
 """
 import json
 import re
@@ -11,7 +15,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from analyze import _ok  # noqa: E402
+from analyze import seq_spans  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -30,10 +34,7 @@ def find_lemma(match, line):
         elif isinstance(alt, dict):
             spans += [[m.start(), m.end()] for m in re.finditer(alt["re"], line["ja"])]
         else:
-            n = len(alt)
-            for i in range(len(toks) - n + 1):
-                if all(_ok(toks[i + j], c) for j, c in enumerate(alt)):
-                    spans.append([toks[i]["i"][0], toks[i + n - 1]["i"][1]])
+            spans += seq_spans(alt, toks)
     # 去重（不同写法规则命中同一位置时只算一次）
     uniq = sorted({tuple(s) for s in spans})
     out = []
@@ -42,6 +43,62 @@ def find_lemma(match, line):
             continue
         out.append(list(s))
     return out
+
+
+KANJI = re.compile(r"[\u3400-\u9fff々〆ヶ]")
+
+
+def attaches(t, prev):
+    """这个词是否粘在前一个词后面（同属一段）：助动词（だ/です 除外）、后缀、て/で/ば，以及前缀后面的词。"""
+    if prev is None or prev["p"] in ("補助記号", "空白") or t["p"] in ("補助記号", "空白"):
+        return False
+    if prev["p"] == "接頭辞":
+        return True
+    if t["p"] == "助動詞":
+        return t["l"] not in ("だ", "です")  # だろう/です 这类判断词单独成段：shiteru darou
+    if t["p"] == "接尾辞":
+        return True
+    return t["p"] == "助詞" and t.get("p2") == "接続助詞" and t["s"] in ("て", "で", "ば", "ちゃ", "じゃ")
+
+
+def encode_tok(t):
+    if t.get("k") and KANJI.search(t["s"]):
+        return [t["s"], t["k"]]
+    if t["p"] == "助詞" and t["s"] in ("は", "へ"):
+        return [t["s"], {"は": "わ", "へ": "え"}[t["s"]]]
+    return t["s"]
+
+
+def segments(line):
+    """一行歌词 → 分段列表；词之间的空白单独成段，保证各段拼起来就是原文。"""
+    segs, cur, prev = [], 0, None
+    for t in line["tok"]:
+        a, b = t["i"]
+        if a > cur:
+            segs.append([line["ja"][cur:a]])
+            prev = None
+        if attaches(t, prev) and segs:
+            segs[-1].append(encode_tok(t))
+        else:
+            segs.append([encode_tok(t)])
+        cur, prev = b, t
+    if cur < len(line["ja"]):
+        segs.append([line["ja"][cur:]])
+    return segs
+
+
+def pick_example(loc, songs_by_id, order):
+    """从出现位置里挑一句做例句：有中文翻译、8–20 字的优先，再按出现次数多的歌、歌曲顺序。"""
+    best = None
+    for sid, hits in loc.items():
+        lines = songs_by_id[sid]["lines"]
+        for li, *_ in hits:
+            ja, zh = lines[li]["ja"], lines[li]["zh"]
+            n = len(ja)
+            key = (not zh, max(0, n - 20) + max(0, 8 - n), -len(hits), order[sid], li)
+            if best is None or key < best[0]:
+                best = (key, [sid, li])
+    return best[1] if best else None
 
 
 def collect(songs, finder):
@@ -65,13 +122,15 @@ def build():
     song_meta = [s for s in cat["songs"] if s["album"] in done_ids]
     songs = [load(f"songs/{s['id']}.json") for s in song_meta]
     counted = [s for s, m in zip(songs, song_meta) if "dup_of" not in m]
+    by_id = {s["id"]: s for s in songs}
+    order = {m["id"]: i for i, m in enumerate(song_meta)}
 
     vocab = []
     for lm in lemmas:
         occ, loc = collect(counted, lambda line: find_lemma(lm["match"], line))
         if len(occ) >= 2:
-            vocab.append({"w": lm["w"], "k": lm["k"], "r": lm["r"], "m": lm["m"], "ex": lm["ex"],
-                          "occ": occ, "loc": loc})
+            vocab.append({"w": lm["w"], "k": lm["k"], "r": lm["r"], "m": lm["m"],
+                          "occ": occ, "loc": loc, "x": pick_example(loc, by_id, order)})
     vocab.sort(key=lambda v: (-len(v["occ"]), -sum(v["occ"].values())))
 
     gram = []
@@ -79,13 +138,17 @@ def build():
         def finder(line, gid=g["id"]):
             return [h[1:] for h in line.get("gram", []) if h[0] == gid]
         occ, loc = collect(counted, finder)
-        gram.append({"id": g["id"], "g": g["g"], "r": g["r"], "m": g["m"], "ex": g["ex"], "occ": occ, "loc": loc})
+        gram.append({"id": g["id"], "g": g["g"], "r": g["r"], "m": g["m"], "occ": occ, "loc": loc,
+                     "x": pick_example(loc, by_id, order)})
 
+    album_keys = ("id", "band", "ja", "zh", "short", "year", "type", "note", "cover")
     return {
-        "albums": [{"id": a["id"], "artist": a["band"], "ja": a["ja"], "zh": a["zh"], "year": a["year"],
-                    "type": a["type"], "note": a["note"]} for a in done],
-        "songs": [{k: m[k] for k in ("id", "album", "ja", "zh", "dup_of") if k in m} for m in song_meta],
-        "lines": {s["id"]: [[l["ja"], l["zh"]] for l in s["lines"]] for s in songs},
+        "albums": [{("artist" if k == "band" else k): a[k] for k in album_keys if k in a} for a in done],
+        "pending": [{k: a[k] for k in ("id", "band", "ja", "zh", "short", "year", "cover") if k in a}
+                    for a in cat["albums"] if not a.get("done")],
+        "bands": cat["bands"],
+        "songs": [{k: m[k] for k in ("id", "album", "track", "ja", "zh", "dup_of") if k in m} for m in song_meta],
+        "lines": {s["id"]: [[l["ja"], l["zh"], segments(l)] for l in s["lines"]] for s in songs},
         "vocab": vocab,
         "grammar": gram,
     }

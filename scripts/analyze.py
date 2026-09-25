@@ -96,6 +96,8 @@ def tokenize(text):
 # rule = {"re": 正则}                  作用于整行日文
 #      | {"tok": [条件, ...]}          连续的词依次满足各条件
 # 条件的键：s(写法正则) l(原形，字符串或列表) p/p2(词性，可用 "!x" 表示排除) f(活用形正则)
+#          prev/next(前一个/后一个词须满足的条件)  !prev/!next(前一个/后一个词不能满足的条件)
+#          例：{"l": "居る", "!prev": {"l": "て", "p": "助詞"}} 只算「在」，不算「〜ている」
 
 def _ok(tok, cond):
     for key, want in cond.items():
@@ -118,6 +120,26 @@ def _ok(tok, cond):
     return True
 
 
+def _ctx_ok(toks, k, cond):
+    """检查第 k 个词的前后文条件（prev / next / !prev / !next）。"""
+    for key, off in (("prev", -1), ("next", 1)):
+        j = k + off
+        nb = toks[j] if 0 <= j < len(toks) else None
+        if key in cond and not (nb and _ok(nb, cond[key])):
+            return False
+        if "!" + key in cond and nb and _ok(nb, cond["!" + key]):
+            return False
+    return True
+
+
+def seq_spans(seq, toks):
+    """连续的词依次满足 seq 里的各条件，返回每处命中的 [起, 止]。"""
+    n = len(seq)
+    return [[toks[i]["i"][0], toks[i + n - 1]["i"][1]]
+            for i in range(len(toks) - n + 1)
+            if all(_ok(toks[i + j], c) and _ctx_ok(toks, i + j, c) for j, c in enumerate(seq))]
+
+
 def rule_spans(rule, text, toks):
     """rule 可以是 {"re": ...}、{"tok": [...]}，或 {"any": [rule, ...]}（取并集，重叠的只算一次）。"""
     if "any" in rule:
@@ -130,10 +152,7 @@ def rule_spans(rule, text, toks):
         return out
     if "re" in rule:
         return [[m.start(), m.end()] for m in re.finditer(rule["re"], text)]
-    seq = rule["tok"]
-    return [[toks[i]["i"][0], toks[i + len(seq) - 1]["i"][1]]
-            for i in range(len(toks) - len(seq) + 1)
-            if all(_ok(toks[i + j], c) for j, c in enumerate(seq))]
+    return seq_spans(rule["tok"], toks)
 
 
 def match_grammar(rules, text, toks):
@@ -150,8 +169,19 @@ def dump_song(song):
     return f'{h}, "lines": [\n{body}\n]}}\n'
 
 
+def fix_readings(fixes, toks):
+    """按 data/readings.json 修正 UniDic 读错的读音（只改 k，不改原形）。"""
+    for i, t in enumerate(toks):
+        for fx in fixes:
+            if _ok(t, fx["tok"]) and _ctx_ok(toks, i, fx["tok"]):
+                t["k"] = fx["k"]
+                break
+
+
 def main():
     catalog = json.loads((ROOT / "data" / "catalog.json").read_text(encoding="utf-8"))
+    fpath = ROOT / "data" / "readings.json"
+    fixes = json.loads(fpath.read_text(encoding="utf-8")) if fpath.exists() else []
     gpath = ROOT / "data" / "grammar.json"
     rules = json.loads(gpath.read_text(encoding="utf-8")) if gpath.exists() else []
     want = set(sys.argv[1:])
@@ -167,6 +197,7 @@ def main():
         lines = []
         for t, ja, zh in rows:
             toks = tokenize(ja)
+            fix_readings(fixes, toks)
             line = {"t": t, "ja": ja, "zh": zh, "tok": toks}
             gram = match_grammar(rules, ja, toks)
             if gram:

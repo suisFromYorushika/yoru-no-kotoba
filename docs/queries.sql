@@ -10,13 +10,16 @@ FROM (SELECT t.lemma, MAX(t.lemma_kana) AS lemma_kana, t.pos1, t.song_id, COUNT(
       GROUP BY t.lemma, t.pos1, t.song_id)
 GROUP BY lemma, pos1 ORDER BY songs DESC, total DESC LIMIT 20;
 
--- 2. 某张专辑（例：盗作）里出现 ≥3 首、但还没有整理成词条的词 → 下一批要加的候选
+-- 2. 某张专辑（例：盗作）里出现 ≥2 首、但还没有被任何词条覆盖的实词 → 下一批要加的候选
+--    （被词条命中区间完全覆盖的词不算，所以「神様」「このまま」这类多词词条也能正确排除）
+--    也可以直接运行：make cand ALBUM=tousaku（附原句）
+WITH covered AS (SELECT DISTINCT t.song_id, t.line_idx, t.pos FROM tokens t JOIN entry_hits h
+   ON h.song_id = t.song_id AND h.line_idx = t.line_idx AND t.c_start >= h.c_start AND t.c_end <= h.c_end)
 SELECT t.lemma, t.pos1, COUNT(DISTINCT t.song_id) AS songs, COUNT(*) AS total
 FROM tokens t JOIN counted_songs s ON s.id = t.song_id
-WHERE s.album = 'tousaku' AND t.pos1 IN ('名詞','動詞','形容詞','形状詞','副詞')
-  AND t.lemma NOT IN (SELECT DISTINCT e.lemma FROM tokens e JOIN entry_hits h
-                      ON h.song_id = e.song_id AND h.line_idx = e.line_idx AND e.c_start = h.c_start)
-GROUP BY t.lemma, t.pos1 HAVING songs >= 3 ORDER BY songs DESC, total DESC;
+WHERE s.album = 'tousaku' AND t.pos1 IN ('名詞','動詞','形容詞','形状詞','副詞','代名詞')
+  AND NOT EXISTS (SELECT 1 FROM covered c WHERE c.song_id = t.song_id AND c.line_idx = t.line_idx AND c.pos = t.pos)
+GROUP BY t.lemma, t.pos1 HAVING songs >= 2 ORDER BY songs DESC, total DESC;
 
 -- 3. 两个词出现在同一句：「君」和「夏」
 SELECT s.ja AS song, l.ja AS line, l.zh
