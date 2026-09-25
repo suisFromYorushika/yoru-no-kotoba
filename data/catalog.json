@@ -81,8 +81,8 @@
    "zh": "Singles & Collabs",
    "year": "2021-2026",
    "type": "独立单曲与影视跨界合唱作品全集",
-   "note": "本目录集中收录了未包含在 8 张录音室大碟之内的 Yorushika 独立动画单曲，以及主唱 suis 以个人名义受邀演唱的电影主题曲、跨界合唱神作。",
-   "done": false,
+   "note": "专辑之外的单曲、动画主题曲,以及 suis 参与演唱的合作曲与翻唱",
+   "done": true,
    "dir": "yorushika/yorushika-singles"
   },
   {
@@ -592,7 +592,8 @@
    "file": "yorushika/tousaku/04.爆弾魔",
    "dup_of": "s26",
    "links": {
-    "qq": "001nwesZ0LBp75"
+    "qq": "001nwesZ0LBp75",
+    "ne": 1466520413
    }
   },
   {
@@ -726,7 +727,11 @@
    "ja": "平行線",
    "zh": "平行线",
    "track": 5,
-   "file": "yorushika/yorushika-singles/05.平行線"
+   "file": "yorushika/yorushika-singles/05.平行線",
+   "links": {
+    "qq": "002Axk9Y26RvTz",
+    "ne": 1814361550
+   }
   },
   {
    "id": "s46",
@@ -736,6 +741,7 @@
    "track": 6,
    "file": "yorushika/yorushika-singles/06.若者のすべて",
    "links": {
+    "qq": "002TgQNc1X3BTP",
     "ne": 2658377579
    }
   },
@@ -745,23 +751,35 @@
    "ja": "少年時代 (あの夏のルカver.)",
    "zh": "少年时代",
    "track": 7,
-   "file": "yorushika/yorushika-singles/07.少年時代 (あの夏のルカver.)"
+   "file": "yorushika/yorushika-singles/07.少年時代 (あの夏のルカver.)",
+   "links": {
+    "qq": "001G40o343WUxv",
+    "ne": 1856210816
+   }
   },
   {
    "id": "s48",
    "album": "yorushika-singles",
-   "ja": "Paper Airplane",
+   "ja": "紙ひこうき",
    "zh": "纸飞机",
    "track": 8,
-   "file": "yorushika/yorushika-singles/08.Paper Airplane"
+   "file": "yorushika/yorushika-singles/08.紙ひこうき",
+   "links": {
+    "qq": "001Q6VH334a9Nz",
+    "ne": 2679282481
+   }
   },
   {
    "id": "s49",
    "album": "yorushika-singles",
-   "ja": "Around The Stars",
-   "zh": "星回之诗",
+   "ja": "星めぐる詩",
+   "zh": "星回诗歌",
    "track": 9,
-   "file": "yorushika/yorushika-singles/09.Around The Stars"
+   "file": "yorushika/yorushika-singles/09.星めぐる詩",
+   "links": {
+    "qq": "004JKPJu3GA6WI",
+    "ne": 2129123402
+   }
   },
   {
    "id": "s50",
@@ -771,16 +789,21 @@
    "track": 10,
    "file": "yorushika/yorushika-singles/10.サンサーラ",
    "links": {
-    "qq": "001AGvlF1QaS81"
+    "qq": "001AGvlF1QaS81",
+    "ne": 2008927087
    }
   },
   {
    "id": "s51",
    "album": "yorushika-singles",
-   "ja": "心眼",
-   "zh": "心眼",
+   "ja": "宇宙の季節",
+   "zh": "宇宙的季节",
    "track": 11,
-   "file": "yorushika/yorushika-singles/11.心眼"
+   "file": "yorushika/yorushika-singles/11.宇宙の季節",
+   "links": {
+    "qq": "000XpwNY12vmnN",
+    "ne": 1860608179
+   }
   },
   {
    "id": "s52",
@@ -790,7 +813,8 @@
    "track": 12,
    "file": "yorushika/yorushika-singles/12.B∀LK",
    "links": {
-    "qq": "000uuZsE1VpfM5"
+    "qq": "000uuZsE1VpfM5",
+    "ne": 2009678542
    }
   },
   {
@@ -1378,7 +1402,10 @@
    "ja": "知りたくなかった、失うのなら",
    "zh": "知りたくなかった、失うのなら",
    "track": 5,
-   "file": "atarayo/kyokuya/05.知りたくなかった、失うのなら"
+   "file": "atarayo/kyokuya/05.知りたくなかった、失うのなら",
+   "links": {
+    "ne": 1929062243
+   }
   },
   {
    "id": "s104",
@@ -1538,7 +1565,10 @@
    "ja": "優しいエイプリルフール (demo)",
    "zh": "温柔的愚人节 (小样)",
    "track": 8,
-   "file": "atarayo/acoustic/08.優しいエイプリルフール (demo)"
+   "file": "atarayo/acoustic/08.優しいエイプリルフール (demo)",
+   "links": {
+    "ne": 1960384349
+   }
   },
   {
    "id": "s118",
@@ -1891,7 +1921,10 @@
    "ja": "涼風",
    "zh": "凉风 (feat. 友成空)",
    "track": 1,
-   "file": "atarayo/watakushiame/01.涼風"
+   "file": "atarayo/watakushiame/01.涼風",
+   "links": {
+    "ne": 3419824395
+   }
   },
   {
    "id": "s149",
@@ -1922,7 +1955,10 @@
    "ja": "ふたり -Atarayo Cover-",
    "zh": "两个人 (翻唱版)",
    "track": 4,
-   "file": "atarayo/watakushiame/04.ふたり -Atarayo Cover-"
+   "file": "atarayo/watakushiame/04.ふたり -Atarayo Cover-",
+   "links": {
+    "ne": 3419827262
+   }
   },
   {
    "id": "s152",
@@ -1930,7 +1966,10 @@
    "ja": "バディ -Atarayo Cover-",
    "zh": "伙伴",
    "track": 5,
-   "file": "atarayo/watakushiame/05.バディ -Atarayo Cover-"
+   "file": "atarayo/watakushiame/05.バディ -Atarayo Cover-",
+   "links": {
+    "ne": 3419827263
+   }
   },
   {
    "id": "s153",

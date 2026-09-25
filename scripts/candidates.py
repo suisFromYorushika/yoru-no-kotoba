@@ -34,7 +34,7 @@ def candidates(con, albums, ph):
       SELECT t.lemma, MAX(t.lemma_kana), t.pos1, COUNT(DISTINCT t.song_id) AS songs,
              COUNT(DISTINCT CASE WHEN s.album IN ({ph}) THEN t.song_id END) AS here, COUNT(*) AS total
       FROM tokens t JOIN counted_songs s ON s.id = t.song_id
-      WHERE s.album IN ({sp}) AND t.pos1 IN ({','.join('?' * len(POS))})
+      WHERE s.album IN ({sp}) AND t.pos1 IN ({','.join('?' * len(POS))}) AND t.lemma GLOB '*[^ -~]*'
         AND NOT EXISTS (SELECT 1 FROM covered c WHERE c.song_id = t.song_id AND c.line_idx = t.line_idx AND c.pos = t.pos)
       GROUP BY t.lemma, t.pos1 HAVING songs >= 2 AND here >= 1 ORDER BY songs DESC, total DESC""",
                        albums + scope + list(POS)).fetchall()
