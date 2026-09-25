@@ -1011,14 +1011,22 @@ function lyricMatches(q,ids,limit){
     const at=ja.indexOf(n);if(at>=0||(zh&&zh.includes(n))){out.push([sid,li,at>=0?[[at,at+n.length]]:null]);if(out.length>=limit)return out;}}}
   return out;
 }
+let listToken=0;
 function renderList(){
+  const token=++listToken;
   const box=document.getElementById("v-list");box.innerHTML="";
   const list=filteredVocab().filter(v=>matchVocab(v,st.q));
   const exact=st.q&&list.findIndex(v=>v.w===st.q);
   if(exact>0)list.unshift(list.splice(exact,1)[0]);
   if(!list.length)box.appendChild(el("div","empty",st.q?"词表里没有找到「"+st.q+"」":"没有符合条件的词"));
-  let cur=null;
-  list.forEach(v=>{if(!st.q&&v.tier!==cur){cur=v.tier;box.appendChild(el("div","group",TIERNAME[cur]+"词"));}box.appendChild(vocabRow(v));});
+  // 词很多（上千个），先画前 150 行，其余分批接着画，切到词表时不卡
+  const items=[];let cur=null;
+  list.forEach(v=>{if(!st.q&&v.tier!==cur){cur=v.tier;const t=cur;items.push(()=>el("div","group",TIERNAME[t]+"词"));}items.push(()=>vocabRow(v));});
+  let i=0;
+  const draw=n=>{const f=document.createDocumentFragment(), end=Math.min(items.length,i+n);for(;i<end;i++)f.appendChild(items[i]());box.appendChild(f);};
+  draw(st.q?items.length:150);
+  const more=()=>{if(token!==listToken||i>=items.length)return;draw(250);setTimeout(more,30);};
+  if(i<items.length)setTimeout(more,30);
   if(st.q&&(list.length===1||exact>=0))box.querySelector(".row")._open();
   if(st.q){
     const ms=lyricMatches(st.q,activeSongIds(),30);
