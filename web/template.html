@@ -246,7 +246,7 @@ details.lyr>summary{cursor:pointer;color:var(--accent);padding:6px 0;font-size:.
 .authf label{font-size:.8rem;color:var(--muted);}
 .authf input{padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:.95rem;}
 .authf .srow{align-items:center;}
-#authGithub{margin-top:4px;}
+#authOauth{margin-top:4px;}
 #authOut{margin-top:8px;}
 .linkbtn{border:0;background:none;color:var(--accent);cursor:pointer;padding:8px 4px;font-size:.84rem;text-decoration:underline;}
 .who .ph{width:36px;height:36px;border-radius:50%;background:var(--soft);display:grid;place-items:center;color:var(--accent);font-weight:600;}
@@ -376,7 +376,10 @@ footer p{margin:0 0 6px;}
         <button class="btn" id="authUp" type="button">注册</button>
         <button class="linkbtn" id="authForgot" type="button">忘记密码</button>
       </div>
-      <button class="btn" id="authGithub" type="button" hidden>用 GitHub 账号登录</button>
+      <div class="srow" id="authOauth" hidden>
+        <button class="btn" id="authGithub" type="button" hidden>用 GitHub 账号登录</button>
+        <button class="btn" id="authGoogle" type="button" hidden>用 Google 账号登录</button>
+      </div>
     </form>
     <form class="authf" id="pwForm" hidden novalidate>
       <label for="newPw">设置新密码（至少 6 位）</label>
@@ -599,8 +602,8 @@ document.getElementById("authForgot").onclick=()=>{const f=authFields();if(!f)re
   authRun(document.getElementById("authForgot"),async()=>{
     const {error}=await sb.auth.resetPasswordForEmail(f.email,{redirectTo:pageUrl()});if(error)throw error;
     authMsg("authMsg","重设密码的邮件已发到 "+f.email+"。点邮件里的链接回到这里，就能设置新密码。");});};
-document.getElementById("authGithub").onclick=()=>authRun(document.getElementById("authGithub"),async()=>{
-  const {error}=await sb.auth.signInWithOAuth({provider:"github",options:{redirectTo:pageUrl()}});if(error)throw error;});
+["github","google"].forEach(pv=>{const b=document.getElementById("auth"+pv[0].toUpperCase()+pv.slice(1));
+  b.onclick=()=>authRun(b,async()=>{const {error}=await sb.auth.signInWithOAuth({provider:pv,options:{redirectTo:pageUrl()}});if(error)throw error;});});
 document.getElementById("authOut").onclick=()=>authRun(document.getElementById("authOut"),async()=>{
   const {error}=await sb.auth.signOut();if(error)throw error;authMsg("authMsg","已退出。进度仍然保存在这台设备上。");});
 document.getElementById("pwForm").addEventListener("submit",e=>{e.preventDefault();const pw=document.getElementById("newPw").value;
@@ -1148,6 +1151,8 @@ function renderAccount(){
   document.getElementById("pwForm").hidden=!(sbOn&&recovering);
   document.getElementById("authOut").hidden=!(sbOn&&sbUid);
   document.getElementById("authGithub").hidden=!SITE.supabase_github;
+  document.getElementById("authGoogle").hidden=!SITE.supabase_google;
+  document.getElementById("authOauth").hidden=!(SITE.supabase_github||SITE.supabase_google);
 }
 function streak(){let t=today();const act=d=>{const e=log[d];return e&&(e.r+e.q+e.n)>0;};if(!act(t))t--;let n=0;while(act(t)){n++;t--;}return n;}
 function renderStats(){
