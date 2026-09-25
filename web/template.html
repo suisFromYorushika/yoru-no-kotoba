@@ -241,6 +241,15 @@ details.lyr>summary{cursor:pointer;color:var(--accent);padding:6px 0;font-size:.
 .sheet textarea{width:100%;min-height:84px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--ink);padding:8px;font:inherit;font-size:.78rem;}
 .srow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
 .msg{font-size:.8rem;color:var(--ok);margin-top:6px;min-height:1em;}
+.msg.err{color:var(--bad);}
+.authf{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
+.authf label{font-size:.8rem;color:var(--muted);}
+.authf input{padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:.95rem;}
+.authf .srow{align-items:center;}
+#authGithub{margin-top:4px;}
+#authOut{margin-top:8px;}
+.linkbtn{border:0;background:none;color:var(--accent);cursor:pointer;padding:8px 4px;font-size:.84rem;text-decoration:underline;}
+.who .ph{width:36px;height:36px;border-radius:50%;background:var(--soft);display:grid;place-items:center;color:var(--accent);font-weight:600;}
 .close{position:absolute;right:12px;top:10px;border:0;background:none;font-size:1.4rem;cursor:pointer;color:var(--muted);padding:4px 8px;}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
 .kpi{background:var(--bg);border-radius:10px;padding:8px 10px;}
@@ -357,6 +366,26 @@ footer p{margin:0 0 6px;}
     <h3 id="sheetTitle">账号与同步</h3>
     <div class="who" id="who"></div>
     <p id="syncText"></p>
+    <form class="authf" id="authForm" hidden novalidate>
+      <label for="authEmail">邮箱</label>
+      <input id="authEmail" type="email" autocomplete="email" inputmode="email" spellcheck="false">
+      <label for="authPw">密码（至少 6 位）</label>
+      <input id="authPw" type="password" autocomplete="current-password">
+      <div class="srow">
+        <button class="btn primary" id="authIn" type="submit">登录</button>
+        <button class="btn" id="authUp" type="button">注册</button>
+        <button class="linkbtn" id="authForgot" type="button">忘记密码</button>
+      </div>
+      <button class="btn" id="authGithub" type="button" hidden>用 GitHub 账号登录</button>
+    </form>
+    <form class="authf" id="pwForm" hidden novalidate>
+      <label for="newPw">设置新密码（至少 6 位）</label>
+      <input id="newPw" type="password" autocomplete="new-password">
+      <div class="srow"><button class="btn primary" type="submit">保存新密码</button></div>
+      <div class="msg" id="pwMsg" role="status"></div>
+    </form>
+    <div class="msg" id="authMsg" role="status"></div>
+    <button class="btn" id="authOut" type="button" hidden>退出登录</button>
   </section>
   <section>
     <h3>学习记录</h3>
@@ -437,8 +466,12 @@ const today=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*60000)/864
 function bump(k,d=1){const t=today();const e=log[t]||(log[t]={r:0,n:0,i:0,q:0});e[k]=(e[k]||0)+d;}
 function learnedWords(){return Object.keys(learned).filter(w=>learned[w]).sort();}
 
-// ================= 云端同步（在 claude.ai 打开时可用） =================
-let cloudDoc=null, account=null, syncState="local", writing=Promise.resolve(), pendingWrite=null;
+// ================= 云端同步 =================
+// claude.ai 版：用 claude.ai 账号（window.claude 的 user + db 能力）
+// GitHub Pages 版：用 Supabase 账号（data/site.json 里填了 supabase_url 和 supabase_key 才启用）
+// 两边存的是同一种 JSON（packCloud），合并规则也一样。
+const CLOUD=SITE.host==="claude"?"claude":(SITE.supabase_url&&SITE.supabase_key?"supabase":"none");
+let backend=null, account=null, syncState="local", writing=Promise.resolve(), pendingWrite=null, dirty=false;
 function packCloud(){const since=today()-180;
   return {v:2,learned:learnedWords(),srs:Object.entries(srs).map(([w,[b,d]])=>[w,b,d]),
     log:Object.entries(log).filter(([d])=>+d>=since).map(([d,e])=>[+d,e.r||0,e.n||0,e.i||0,e.q||0])};}
@@ -452,9 +485,29 @@ function unpackCloud(o,merge){
 }
 function saveLocal(){lsSet(LS,learned);lsSet(LS_SRS,srs);lsSet(LS_LOG,log);}
 function setSync(s){syncState=s;renderAccount();}
-async function initCloud(){
+const sameAsLocal=o=>JSON.stringify(o||{})===JSON.stringify(packCloud());
+// 这台设备第一次同步：本机进度和云端合并；以前同步过：以云端为准
+async function adoptRemote(remote,flagKey){
+  const before=JSON.stringify(packCloud());
+  unpackCloud(remote||{},!lsGet(flagKey,false));
+  if(!remote||!sameAsLocal(remote)) await backend.save(packCloud());
+  lsSet(flagKey,true);
+  if(JSON.stringify(packCloud())!==before) render();
+}
+function queueCloudWrite(){
+  if(!backend||syncState==="readonly")return;
+  dirty=true;clearTimeout(pendingWrite);
+  pendingWrite=setTimeout(()=>{
+    writing=writing.then(()=>backend.save(packCloud()))
+      .then(()=>{dirty=false;if(syncState!=="synced")setSync("synced");})
+      .catch(e=>setSync(e&&(e.code==="not_granted"||e.code==="invalid_argument")?"readonly":"error"));
+  },800);
+}
+
+// ---------- claude.ai 账号 ----------
+async function initClaude(){
   const c=window.claude;
-  if(!c||typeof c.use!=="function"){if(!initCloud.retried){initCloud.retried=true;setTimeout(initCloud,1500);}setSync("local");return;}
+  if(!c||typeof c.use!=="function"){if(!initClaude.retried){initClaude.retried=true;setTimeout(initClaude,1500);}setSync("local");return;}
   setSync("connecting");
   try{
     const [user,db]=await Promise.all([c.use("user"),c.use("db")]);
@@ -462,31 +515,100 @@ async function initCloud(){
     const me=await user.me();
     if(!me||!me.id){setSync("signedout");return;}
     account={name:me.name,avatar:me.avatarUrl};
-    cloudDoc=db.doc("data/users/"+me.id+"/progress");
-    const snap=await cloudDoc.get();
-    const before=JSON.stringify(packCloud());
-    // 这台设备以前同步过：以云端为准；第一次登录：把本机进度和云端合并
-    unpackCloud(snap.exists?(snap.data()||{}):{},!lsGet(LS_SYNC,false));
-    const after=JSON.stringify(packCloud());
-    if(!snap.exists||JSON.stringify(snap.data())!==after) await cloudDoc.set(packCloud());
-    lsSet(LS_SYNC,true);setSync("synced");
-    if(before!==after) render();
-    cloudDoc.onSnapshot(sn=>{
-      if(!sn.exists||sn.metadata.hasPendingWrites) return;
-      if(JSON.stringify(sn.data())===JSON.stringify(packCloud())) return;
+    const doc=db.doc("data/users/"+me.id+"/progress");
+    backend={save:d=>doc.set(d)};
+    const snap=await doc.get();
+    await adoptRemote(snap.exists?(snap.data()||{}):null,LS_SYNC);
+    setSync("synced");
+    doc.onSnapshot(sn=>{
+      if(!sn.exists||sn.metadata.hasPendingWrites||dirty||sameAsLocal(sn.data()))return;
       unpackCloud(sn.data()||{},false);render();
     },()=>setSync("error"));
   }catch(e){setSync(e&&e.code==="not_granted"?"readonly":"error");}
 }
-function queueCloudWrite(){
-  if(!cloudDoc||syncState==="readonly")return;
-  clearTimeout(pendingWrite);
-  pendingWrite=setTimeout(()=>{
-    writing=writing.then(()=>cloudDoc.set(packCloud()))
-      .then(()=>{if(syncState!=="synced")setSync("synced");})
-      .catch(e=>setSync(e&&(e.code==="not_granted"||e.code==="invalid_argument")?"readonly":"error"));
-  },800);
+
+// ---------- Supabase 账号（GitHub Pages 版） ----------
+const SUPABASE_JS="vendor/supabase-js-2.117.2.js";
+let sb=null, sbUid=null, lastPull=0, recovering=false;
+function loadScript(src){return new Promise((ok,no)=>{const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=()=>no(new Error("无法加载 "+src));document.head.appendChild(s);});}
+async function initSupabase(){
+  setSync("connecting");
+  try{await loadScript(SUPABASE_JS);sb=window.supabase.createClient(SITE.supabase_url,SITE.supabase_key);}
+  catch(e){setSync("error");return;}
+  // 创建后会马上以 INITIAL_SESSION 回调一次当前登录状态；之后登录、退出、改密码都会回调
+  sb.auth.onAuthStateChange((event,session)=>{
+    if(event==="PASSWORD_RECOVERY"){recovering=true;openSheet(true);}
+    setTimeout(()=>onSession(session),0);   // 官方建议：不要在回调里直接调用其他 supabase 方法
+  });
 }
+async function onSession(session){
+  const u=session&&session.user;
+  if(!u){
+    if(sbUid)lsSet(LS_SYNC+":"+sbUid,false);   // 退出后本机再学的内容，下次登录时合并上去
+    sbUid=null;backend=null;account=null;dirty=false;setSync("signedout");return;
+  }
+  if(u.id===sbUid)return;
+  sbUid=u.id;
+  const md=u.user_metadata||{};
+  account={name:u.email||md.user_name||md.name||"已登录",avatar:md.avatar_url||null};
+  backend={save:async d=>{const {error}=await sb.from("progress").upsert({user_id:u.id,data:d,updated_at:new Date().toISOString()});if(error)throw error;}};
+  setSync("connecting");
+  await pullSupabase(true);
+}
+async function pullSupabase(first){
+  const uid=sbUid;if(!uid)return;
+  try{
+    const {data,error}=await sb.from("progress").select("data").eq("user_id",uid).maybeSingle();
+    if(error)throw error;
+    if(uid!==sbUid)return;
+    lastPull=Date.now();
+    if(first)await adoptRemote(data?data.data:null,LS_SYNC+":"+uid);
+    else if(data&&!dirty&&!sameAsLocal(data.data)){unpackCloud(data.data,false);render();}
+    setSync("synced");
+  }catch(e){setSync("error");}
+}
+// 切回这个页面时：有没保存的改动就补存；否则从云端拉一次（别的设备可能改过）
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState!=="visible"||!backend)return;
+  if(dirty)queueCloudWrite();
+  else if(CLOUD==="supabase"&&Date.now()-lastPull>30000)pullSupabase(false);
+});
+const pageUrl=()=>location.origin+location.pathname;
+const AUTH_ERR=[[/invalid login credentials/i,"邮箱或密码不对。"],[/email not confirmed/i,"这个邮箱还没确认。请先去邮箱点确认链接，再回来登录。"],
+  [/already (been )?registered/i,"这个邮箱已经注册过了，请直接登录。"],[/password.*(at least|characters)/i,"密码至少要 6 位。"],
+  [/rate limit|too many/i,"操作太频繁了，请过一会儿再试。"],[/signups? not allowed|signup.*disabled/i,"这个网站没有开放注册。"],
+  [/fetch|network/i,"连不上 Supabase，请检查网络。"],[/invalid.*email|validate email/i,"邮箱格式不对。"],[/same.*password|different from the old/i,"新密码不能和旧密码一样。"]];
+function authErr(e){const m=(e&&e.message)||String(e);const hit=AUTH_ERR.find(([re])=>re.test(m));return hit?hit[1]:"出错了："+m;}
+function authMsg(id,text,err){const m=document.getElementById(id);m.textContent=text||"";m.classList.toggle("err",!!err);}
+async function authRun(btn,fn){btn.disabled=true;try{await fn();}catch(e){authMsg("authMsg",authErr(e),true);}finally{btn.disabled=false;}}
+function authFields(){const email=document.getElementById("authEmail").value.trim(), pw=document.getElementById("authPw").value;
+  if(!email){authMsg("authMsg","请填写邮箱。",true);return null;}return {email,pw};}
+document.getElementById("authForm").addEventListener("submit",e=>{e.preventDefault();const f=authFields();if(!f)return;
+  if(f.pw.length<6){authMsg("authMsg","密码至少要 6 位。",true);return;}
+  authRun(document.getElementById("authIn"),async()=>{authMsg("authMsg","正在登录…");
+    const {error}=await sb.auth.signInWithPassword({email:f.email,password:f.pw});if(error)throw error;
+    authMsg("authMsg","");document.getElementById("authPw").value="";});});
+document.getElementById("authUp").onclick=()=>{const f=authFields();if(!f)return;
+  if(f.pw.length<6){authMsg("authMsg","密码至少要 6 位。",true);return;}
+  authRun(document.getElementById("authUp"),async()=>{authMsg("authMsg","正在注册…");
+    const {data,error}=await sb.auth.signUp({email:f.email,password:f.pw,options:{emailRedirectTo:pageUrl()}});if(error)throw error;
+    if(data.user&&Array.isArray(data.user.identities)&&!data.user.identities.length){authMsg("authMsg","这个邮箱已经注册过了，请直接登录。",true);return;}
+    document.getElementById("authPw").value="";
+    authMsg("authMsg",data.session?"注册成功，已经登录。":"注册成功。确认邮件已发到 "+f.email+"，点邮件里的链接后回到这里登录。");});};
+document.getElementById("authForgot").onclick=()=>{const f=authFields();if(!f)return;
+  authRun(document.getElementById("authForgot"),async()=>{
+    const {error}=await sb.auth.resetPasswordForEmail(f.email,{redirectTo:pageUrl()});if(error)throw error;
+    authMsg("authMsg","重设密码的邮件已发到 "+f.email+"。点邮件里的链接回到这里，就能设置新密码。");});};
+document.getElementById("authGithub").onclick=()=>authRun(document.getElementById("authGithub"),async()=>{
+  const {error}=await sb.auth.signInWithOAuth({provider:"github",options:{redirectTo:pageUrl()}});if(error)throw error;});
+document.getElementById("authOut").onclick=()=>authRun(document.getElementById("authOut"),async()=>{
+  const {error}=await sb.auth.signOut();if(error)throw error;authMsg("authMsg","已退出。进度仍然保存在这台设备上。");});
+document.getElementById("pwForm").addEventListener("submit",e=>{e.preventDefault();const pw=document.getElementById("newPw").value;
+  if(pw.length<6){authMsg("pwMsg","密码至少要 6 位。",true);return;}
+  const b=e.submitter||document.querySelector("#pwForm button");b.disabled=true;
+  sb.auth.updateUser({password:pw}).then(({error})=>{if(error)throw error;recovering=false;document.getElementById("newPw").value="";renderAccount();authMsg("authMsg","新密码已保存。");})
+    .catch(err=>authMsg("pwMsg",authErr(err),true)).finally(()=>b.disabled=false);});
+
 function persist(){saveLocal();queueCloudWrite();}
 function setLearned(w,v){if(v&&!learned[w]){learned[w]=true;bump("n");}else if(!v)delete learned[w];persist();}
 function toggleLearned(w,val){setLearned(w,val===undefined?!learned[w]:val);render();}
@@ -1000,22 +1122,32 @@ function renderSongs(){
 
 // ================= 我的：账号 / 记录 / 设置 =================
 const SYNC_TEXT={
-  local:"当前是本机模式：进度只保存在这个浏览器里，换设备或清除浏览器数据就没有了。",
-  connecting:"正在连接 claude.ai 账号…",
-  signedout:"没有检测到 claude.ai 登录。登录后再打开这个页面，进度会自动保存到你的账号。现在进度只保存在本机。",
-  synced:"已登录，进度（已掌握的词、复习记录）自动保存到你的 claude.ai 账号，在任何设备上打开这个页面都能接着学。",
-  readonly:"你对这个页面只有查看权限，进度不能保存到云端，只保存在本机。",
-  error:"暂时连不上云端，进度先保存在本机，恢复连接后会继续同步。"};
+  claude:{local:"当前是本机模式：进度只保存在这个浏览器里，换设备或清除浏览器数据就没有了。",
+    connecting:"正在连接 claude.ai 账号…",
+    signedout:"没有检测到 claude.ai 登录。登录后再打开这个页面，进度会自动保存到你的账号。现在进度只保存在本机。",
+    synced:"已登录，进度（已掌握的词、复习记录）自动保存到你的 claude.ai 账号，在任何设备上打开这个页面都能接着学。",
+    readonly:"你对这个页面只有查看权限，进度不能保存到云端，只保存在本机。",
+    error:"暂时连不上云端，进度先保存在本机，恢复连接后会继续同步。"},
+  supabase:{local:"正在准备登录…",connecting:"正在连接云端…",
+    signedout:"登录后，已掌握的词、复习记录和每天的学习记录会保存到云端，在别的设备上登录同一个账号就能接着学。第一次用请先注册。",
+    synced:"已登录，进度自动保存到云端。在别的设备上登录同一个账号就能接着学。",
+    error:"暂时连不上云端，进度先保存在本机，恢复后会自动同步。"},
+  none:{local:"当前是本机模式：进度只保存在这个浏览器里，换设备或清除浏览器数据就没有了。"}};
+function avatarNode(cls){if(account&&account.avatar){const i=el("img");i.src=account.avatar;i.alt="";return i;}
+  return el("span","ph",account?(account.name||"?").trim().charAt(0).toUpperCase():"⚙");}
 function renderAccount(){
+  const synced=syncState==="synced", shortName=account?(account.name||"").split("@")[0]:"";
   const b=document.getElementById("acct");b.innerHTML="";
-  const synced=syncState==="synced";
-  if(account&&account.avatar){const img=el("img");img.src=account.avatar;img.alt="";b.appendChild(img);}else b.appendChild(el("span","ph","⚙"));
-  b.appendChild(el("span","dot"+(synced?" on":"")));
-  b.appendChild(el("span","an",synced?(account.name||"已同步"):syncState==="connecting"?"连接中":"我的"));
+  b.append(avatarNode(),el("span","dot"+(synced?" on":"")),el("span","an",synced?(shortName||"已同步"):syncState==="connecting"?"连接中":"我的"));
   const who=document.getElementById("who");who.innerHTML="";
-  if(account){if(account.avatar){const i=el("img");i.src=account.avatar;i.alt="";who.appendChild(i);}who.appendChild(el("b",null,account.name||"已登录"));}
-  const p=document.getElementById("syncText");p.textContent=SYNC_TEXT[syncState]||"";
-  if(!synced&&SITE.cloud_url&&!window.claude){p.append(" 想登录并云端同步，请打开 ");const a=el("a",null,"claude.ai 版");a.href=SITE.cloud_url;a.target="_blank";a.rel="noopener";p.append(a,"。");}
+  if(account)who.append(avatarNode(),el("b",null,account.name||"已登录"));
+  const p=document.getElementById("syncText");p.textContent=(SYNC_TEXT[CLOUD]||{})[syncState]||SYNC_TEXT.claude[syncState]||"";
+  if(CLOUD==="none"&&SITE.cloud_url){p.append(" 想登录并云端同步，请打开 ");const a=el("a",null,"claude.ai 版");a.href=SITE.cloud_url;a.target="_blank";a.rel="noopener";p.append(a,"。");}
+  const sbOn=CLOUD==="supabase"&&!!sb;
+  document.getElementById("authForm").hidden=!(sbOn&&!sbUid&&!recovering);
+  document.getElementById("pwForm").hidden=!(sbOn&&recovering);
+  document.getElementById("authOut").hidden=!(sbOn&&sbUid);
+  document.getElementById("authGithub").hidden=!SITE.supabase_github;
 }
 function streak(){let t=today();const act=d=>{const e=log[d];return e&&(e.r+e.q+e.n)>0;};if(!act(t))t--;let n=0;while(act(t)){n++;t--;}return n;}
 function renderStats(){
@@ -1084,6 +1216,7 @@ function render(){
   ["flash","list","gram","songs"].forEach(v=>document.getElementById("v-"+v).hidden=(ui.view!==v));
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.v===ui.view));
   renderView();
+  if(!document.getElementById("sheet").hidden)renderStats();
 }
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{ui.view=t.dataset.v;saveUI();closePop();render();window.scrollTo(0,0);});
 document.getElementById("ftoggle").onclick=()=>{ui.filtersOpen=!ui.filtersOpen;saveUI();renderFilters();};
@@ -1108,7 +1241,8 @@ document.addEventListener("keydown",e=>{
   if(ui.fmode==="browse"){if(e.key==="ArrowRight")step(1);if(e.key==="ArrowLeft")step(-1);}
   if(ui.fmode==="review"&&card.classList.contains("flipped")&&/^[123]$/.test(e.key))grade(+e.key-1);
 });
-applyDisplay();renderAccount();renderFooter();render();initCloud();
+applyDisplay();renderAccount();renderFooter();render();
+if(CLOUD==="claude")initClaude();else if(CLOUD==="supabase")initSupabase();
 </script>
 </body>
 </html>

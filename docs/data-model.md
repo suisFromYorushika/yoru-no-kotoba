@@ -76,10 +76,21 @@ UniDic 有些读音在歌词里不对（何も 读成 なんも、君 读成 く
   词是 `[写法, 读音, 词性, 原形, 原形读音]`（末尾空项省略；读音只在含汉字或助词 は/へ 时给出），标点是字符串。
   网页据此注假名、生成罗马音、点词时显示原形和词性
 
-## 云端进度（claude.ai 版）
+## 云端进度
 
-文档 `data/users/<账号>/progress`：`{"v": 2, "learned": [词…], "srs": [[词, 盒子, 到期日]…], "log": [[日, 复习, 新掌握, 新词, 测验]…]}`。
-日期是本地时间的"自 1970 年起第几天"。只有账号本人能读写。
+进度 JSON：`{"v": 2, "learned": [词…], "srs": [[词, 盒子, 到期日]…], "log": [[日, 复习, 新掌握, 新词, 测验]…]}`。
+日期是本地时间的"自 1970 年起第几天"。两个版本存的格式相同，只有账号本人能读写：
+
+- claude.ai 版：claude.ai 的数据库，文档 `data/users/<账号>/progress`
+- GitHub Pages 版：Supabase 的 `progress` 表（`user_id`、`data`、`updated_at`），建表和权限见 [`db/supabase.sql`](../db/supabase.sql)，开启步骤见 [supabase.md](supabase.md)
+
+## data/site.json
+
+| 键 | 含义 |
+|---|---|
+| repo_url / pages_url / cloud_url | GitHub 仓库、Pages 网址、claude.ai 版网址 |
+| supabase_url / supabase_key | Supabase 项目地址和 publishable key（公开的）；都填了 Pages 版才会显示登录 |
+| supabase_github | `true` 时显示「用 GitHub 账号登录」（需要先在 Supabase 里配置 GitHub 登录） |
 
 ## data/lemmas.json（整理过的词条）
 

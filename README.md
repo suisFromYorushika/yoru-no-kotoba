@@ -8,7 +8,7 @@
 
 | 版本 | 网址 | 进度保存在哪 |
 |---|---|---|
-| GitHub Pages | https://suisfromyorushika.github.io/yoru-no-kotoba/ （main 分支更新后自动发布） | 本机浏览器 |
+| GitHub Pages | https://suisfromyorushika.github.io/yoru-no-kotoba/ （main 分支更新后自动发布） | 本机浏览器；配置 Supabase 后可以注册登录、云端同步（见 [docs/supabase.md](docs/supabase.md)） |
 | claude.ai | https://claude.ai/artifact/52Y32vb5QvrzcKwEekrmNK | 登录 claude.ai 后自动存到账号，换设备也能接着学 |
 
 也可以直接双击打开 `web/index.html`，离线可用。
@@ -22,7 +22,7 @@
 - 所有歌词都在汉字上注假名、按词分段、每段下标罗马音，附中文翻译和 LRC 时间；**点任意一个词**会弹出词卡（词表词显示意思，助词助动词显示用法说明，还有原形、词性和相关语法点）。
 - 词、例句和每行歌词都有朗读按钮（用设备自带的日语语音，不需要联网服务）。
 - 「我的」面板：账号同步状态、学习记录（今天复习数、新掌握、连续天数、最近 14 天）、显示和朗读设置、进度备份。
-- 进度保存在本机 `localStorage`（`yorushika_learned_v1` 已掌握、`yoru_srs_v1` 复习记录、`yoru_log_v1` 每日记录）；claude.ai 版登录后存到 `data/users/<账号>/progress`。「我的 → 备份进度」可以在两个版本或设备之间搬运进度。
+- 进度保存在本机 `localStorage`（`yorushika_learned_v1` 已掌握、`yoru_srs_v1` 复习记录、`yoru_log_v1` 每日记录）；claude.ai 版登录后存到 claude.ai 账号，GitHub Pages 版登录后存到 Supabase。两边分开存，「我的 → 备份进度」可以在两个版本或设备之间搬运进度。
 - 歌名和专辑名的中文译名取自 QQ 音乐（优先）和网易云音乐。
 
 ## 进度
@@ -51,6 +51,8 @@ data/legacy/           v1 的数据，留作对照
 web/template.html      网页模板；web/index.html 为生成的成品，web/artifact.html 是发布到 claude.ai 的版本（不入库）
 web/covers/            专辑封面缩略图
 db/schema.sql          SQLite 表结构；docs/queries.sql 为示例查询
+db/supabase.sql        Supabase 建表和权限（GitHub Pages 版的云端进度）
+web/vendor/            第三方文件（supabase-js）
 scripts/               ingest → analyze → export → build，以及 make_db
 ```
 
