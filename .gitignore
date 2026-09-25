@@ -1,0 +1,11 @@
+*下载直达指南*
+
+# 查询用数据库，可由 scripts/make_db.py 随时重建
+local/
+*.sqlite
+*.sqlite3
+
+.venv/
+__pycache__/
+*.pyc
+.DS_Store

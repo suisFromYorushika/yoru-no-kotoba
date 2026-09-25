@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ヨルシカ × あたらよ 歌词词汇本</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f3ec;--card:#fff;--ink:#241f1a;--muted:#7a7368;--accent:#8a6d3b;--soft:#efe6d2;--border:#e0dacb;
+--c0:#4a6fa5;--c1:#b5655a;--c2:#5f8a4e;--c3:#8a5fa0;--c4:#b0802f;--c5:#3f8f93;--c6:#a8577e;--c7:#6b6f7c;--ok:#4a9d6f;--mark:#f3dc9a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12172b;--card:#1c2340;--ink:#e8e6f0;--muted:#8b92b8;--accent:#d4b876;--soft:#262e52;--border:#2a3155;--c0:#7fa3d9;--c1:#e0928a;--c2:#94c084;--c3:#bf97d6;--c4:#e0b466;--c5:#79c4c7;--c6:#df8fb6;--c7:#a4a9b8;--mark:#6b5a2a;}}
+:root[data-theme="dark"]{--bg:#12172b;--card:#1c2340;--ink:#e8e6f0;--muted:#8b92b8;--accent:#d4b876;--soft:#262e52;--border:#2a3155;--c0:#7fa3d9;--c1:#e0928a;--c2:#94c084;--c3:#bf97d6;--c4:#e0b466;--c5:#79c4c7;--c6:#df8fb6;--c7:#a4a9b8;--mark:#6b5a2a;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;}
+.wrap{max-width:720px;margin:0 auto;padding:28px 18px 70px;}
+h1{font-family:"Shippori Mincho",serif;font-size:1.5rem;margin:0 0 4px;}
+.sub{color:var(--muted);font-size:.82rem;margin:0 0 6px;line-height:1.5;}
+.sync{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted);margin-bottom:16px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);}.dot.on{background:var(--ok);}
+.tabs{display:flex;gap:6px;margin-bottom:14px;}
+.tab{flex:1;padding:9px 4px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--ink);font-size:.9rem;cursor:pointer;}
+.tab.active{background:var(--accent);color:var(--card);border-color:var(--accent);}
+.filters{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:16px;}
+.frow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0;}
+.flabel{font-size:.75rem;color:var(--muted);width:36px;flex:none;}
+.chip{border:1px solid var(--border);background:transparent;color:var(--ink);padding:4px 10px;border-radius:999px;font-size:.8rem;cursor:pointer;}
+.chip.on{background:var(--soft);border-color:var(--accent);font-weight:600;}
+.chip:disabled{opacity:.4;cursor:not-allowed;}
+.stat{font-size:.78rem;color:var(--muted);margin-top:6px;}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:.7rem;padding:2px 8px;border-radius:999px;border:1px solid;white-space:nowrap;}
+.bw{color:var(--muted);border-color:var(--border);}
+.bw.learned{color:var(--ok);border-color:var(--ok);}
+.tier{font-size:.7rem;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--accent);}
+/* flashcard */
+.stage{perspective:1400px;margin-bottom:14px;}
+.card{display:grid;cursor:pointer;transform-style:preserve-3d;transition:transform .5s;}
+.card.flipped{transform:rotateY(180deg);}
+.face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:1px solid var(--border);border-radius:16px;background:var(--card);padding:22px 18px;min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;}
+.back{transform:rotateY(180deg);}
+.bigword{font-family:"Shippori Mincho",serif;font-size:2.3rem;font-weight:700;line-height:1.2;}
+.kana{color:var(--muted);font-size:.95rem;}
+.romaji{color:var(--accent);font-size:1.05rem;letter-spacing:.02em;}
+.tags{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px;}
+.meaning{font-size:1.35rem;font-weight:600;}
+.exbox{background:var(--soft);border-radius:10px;padding:10px 12px;font-size:.88rem;line-height:1.6;text-align:left;width:100%;}
+.exbox .jp{font-family:"Shippori Mincho",serif;font-size:1rem;}
+.exbox .ro{color:var(--accent);font-size:.8rem;}
+.exbox .zh{color:var(--muted);}
+.freq{font-size:.8rem;color:var(--muted);}
+details{width:100%;text-align:left;font-size:.82rem;}
+details summary{cursor:pointer;color:var(--accent);padding:4px 0;}
+.songline{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px dashed var(--border);}
+.songline .zh{color:var(--muted);font-size:.75rem;}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.btn{border:1px solid var(--border);background:var(--card);color:var(--ink);padding:9px 14px;border-radius:10px;cursor:pointer;font-size:.9rem;}
+.prog{color:var(--muted);font-size:.82rem;}
+.learn{margin-top:12px;width:100%;padding:10px;border-radius:10px;border:1px solid var(--accent);background:var(--soft);color:var(--ink);cursor:pointer;}
+.learn.on{background:var(--accent);color:var(--card);}
+.tools{display:flex;gap:8px;margin-top:8px;}
+.tools .btn{flex:1;font-size:.82rem;padding:7px;}
+/* list */
+.group{font-size:.82rem;color:var(--muted);margin:20px 0 6px;font-weight:600;}
+.row{border-bottom:1px solid var(--border);}
+.rowhead{display:flex;align-items:center;gap:10px;padding:10px 2px;cursor:pointer;}
+.rowhead input{width:19px;height:19px;flex:none;}
+.rw{font-family:"Shippori Mincho",serif;font-size:1.15rem;font-weight:700;min-width:5.5em;}
+.rr{color:var(--accent);font-size:.8rem;display:block;font-family:inherit;font-weight:400;}
+.rm{flex:1;font-size:.9rem;}
+.rc{font-size:.75rem;color:var(--muted);white-space:nowrap;}
+.rowbody{display:none;padding:0 4px 12px 31px;}
+.row.open .rowbody{display:block;}
+.rowbody .tags{justify-content:flex-start;margin:4px 0 8px;}
+.done .rw,.done .rm{opacity:.5;}
+.empty{color:var(--muted);text-align:center;padding:30px 0;font-size:.9rem;}
+.albumhead{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin:16px 0 8px;}
+.albumhead .t{font-family:"Shippori Mincho",serif;font-size:1.1rem;font-weight:700;}
+.albumhead .m{font-size:.78rem;color:var(--muted);margin-top:3px;line-height:1.5;}
+.gcount{font-size:.75rem;color:var(--muted);}
+/* 原文对照 */
+.ctxsong{padding:6px 0 8px;border-bottom:1px dashed var(--border);}
+.ctxhead{display:flex;justify-content:space-between;gap:8px;}
+.ctxhead .zh{color:var(--muted);font-size:.75rem;}
+.ctxline{margin:6px 0 0 2px;padding-left:8px;border-left:2px solid var(--soft);}
+.ctxline .jp{font-family:"Shippori Mincho",serif;font-size:.95rem;line-height:1.6;}
+.ctxline .zh{color:var(--muted);font-size:.78rem;}
+mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 1px;}
+.lyrics{margin-top:6px;}
+.dupnote{font-size:.75rem;color:var(--muted);margin:2px 0 6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>ヨルシカ × あたらよ 歌词词汇本</h1>
+  <p class="sub">按跨歌曲出现频率排序 · 只收录在 2 首及以上歌里出现的词 · 例句为自编 · 展开「出现在哪些歌」可看歌词原句和中文翻译</p>
+  <div class="sync"><span class="dot" id="dot"></span><span id="synctxt">正在连接同步…</span></div>
+
+  <div class="tabs">
+    <button class="tab active" data-v="flash">闪卡</button>
+    <button class="tab" data-v="list">词表</button>
+    <button class="tab" data-v="gram">语法</button>
+    <button class="tab" data-v="songs">歌曲</button>
+  </div>
+
+  <div class="filters" id="filters">
+    <div class="frow"><span class="flabel">乐队</span><div id="fArtist" class="frow" style="margin:0"></div></div>
+    <div class="frow"><span class="flabel">专辑</span><div id="fAlbum" class="frow" style="margin:0"></div></div>
+    <div class="frow"><span class="flabel">频率</span><div id="fTier" class="frow" style="margin:0"></div></div>
+    <div class="frow"><span class="flabel">状态</span><div id="fState" class="frow" style="margin:0"></div></div>
+    <div class="stat" id="stat"></div>
+  </div>
+
+  <div id="v-flash">
+    <div class="stage"><div class="card" id="card">
+      <div class="face front" id="front"></div>
+      <div class="face back" id="back"></div>
+    </div></div>
+    <div class="nav">
+      <button class="btn" id="prev">← 上一个</button>
+      <span class="prog" id="prog"></span>
+      <button class="btn" id="next">下一个 →</button>
+    </div>
+    <button class="learn" id="learn">标记为已掌握</button>
+    <div class="tools"><button class="btn" id="shuffle">随机打乱</button><button class="btn" id="resetorder">恢复频率顺序</button></div>
+  </div>
+  <div id="v-list" hidden></div>
+  <div id="v-gram" hidden></div>
+  <div id="v-songs" hidden></div>
+</div>
+
+<script>
+const DATA = __DATA__;
+const ARTISTS=[{id:"all",label:"全部(整合)"},{id:"yorushika",label:"ヨルシカ"},{id:"atarayo",label:"あたらよ"}];
+const TIERS=[{id:"all",label:"全部"},{id:"core",label:"核心",min:10},{id:"high",label:"高频",min:6},{id:"mid",label:"中频",min:3},{id:"base",label:"基础",min:2}];
+const TIERNAME={core:"核心",high:"高频",mid:"中频",base:"基础"};
+const albumById=Object.fromEntries(DATA.albums.map(a=>[a.id,a]));
+const albumColor=Object.fromEntries(DATA.albums.map((a,i)=>[a.id,"var(--c"+(i%8)+")"]));
+const songById=Object.fromEntries(DATA.songs.map(s=>[s.id,s]));
+
+const st={artist:"all",albums:new Set(),tier:"all",state:"all",view:"flash",idx:0,order:null};
+
+// ---------- persistence ----------
+const LS="yorushika_learned_v1";
+function loadLocal(){try{return JSON.parse(localStorage.getItem(LS)||"{}");}catch(e){return {};}}
+function saveLocal(o){try{localStorage.setItem(LS,JSON.stringify(o));}catch(e){}}
+let learned=loadLocal(),cloud=null,wq=Promise.resolve();
+function setSync(on){document.getElementById("dot").classList.toggle("on",on);document.getElementById("synctxt").textContent=on?"已同步到云端(跨设备)":"仅保存在本机浏览器";}
+async function initCloud(){
+  try{
+    const user=await claude.use("user"); const db=await claude.use("db");
+    if(!user||!db){setSync(false);return;}
+    const uid=await user.id(); if(!uid){setSync(false);return;}
+    cloud=db.doc("data/users/"+uid+"/learned");
+    const snap=await cloud.get();
+    if(snap.exists){learned=Object.assign({},learned,snap.data()||{});saveLocal(learned);} else {await cloud.set(learned);}
+    setSync(true); render();
+  }catch(e){setSync(false);}
+}
+function persist(){saveLocal(learned);if(cloud){wq=wq.then(()=>cloud.set(learned)).catch(()=>setSync(false));}}
+function toggleLearned(w,val){learned[w]=val===undefined?!learned[w]:val;persist();render();}
+
+// ---------- filtering ----------
+function activeSongIds(){
+  return DATA.songs.filter(s=>{
+    const a=albumById[s.album];
+    if(st.artist!=="all"&&a.artist!==st.artist)return false;
+    if(st.albums.size&&!st.albums.has(s.album))return false;
+    return true;
+  }).map(s=>s.id);
+}
+function scoped(item,ids){
+  const set=new Set(ids); let songs=0,total=0; const hits=[];
+  for(const [sid,c] of Object.entries(item.occ)){ if(set.has(sid)){songs++;total+=c;hits.push([sid,c]);} }
+  return {songs,total,hits};
+}
+function tierOf(n){return n>=10?"core":n>=6?"high":n>=3?"mid":"base";}
+function filteredVocab(){
+  const ids=activeSongIds();
+  let list=DATA.vocab.map(v=>{const s=scoped(v,ids);return {...v,...s,tier:tierOf(s.songs)};}).filter(v=>v.songs>=2);
+  if(st.tier!=="all")list=list.filter(v=>v.tier===st.tier);
+  if(st.state==="todo")list=list.filter(v=>!learned[v.w]);
+  if(st.state==="done")list=list.filter(v=>learned[v.w]);
+  list.sort((a,b)=>b.songs-a.songs||b.total-a.total);
+  return list;
+}
+
+// ---------- helpers ----------
+function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;}
+function albumBadges(hits){
+  const box=el("div","tags"); const seen=new Set();
+  hits.forEach(([sid])=>{const a=songById[sid].album; if(seen.has(a))return; seen.add(a);
+    box.appendChild(albumBadge(a));});
+  return box;
+}
+function albumBadge(aid){const al=albumById[aid];const b=el("span","badge",al.ja+" · "+al.zh);b.style.color=b.style.borderColor=albumColor[aid];return b;}
+// 日文行 + 高亮区间 → 元素（不用 innerHTML）
+function markLine(text,spans){
+  const d=el("div","jp"); let cur=0;
+  spans.slice().sort((a,b)=>a[0]-b[0]).forEach(([s,e])=>{if(s<cur)return; if(s>cur)d.appendChild(document.createTextNode(text.slice(cur,s))); d.appendChild(el("mark",null,text.slice(s,e))); cur=e;});
+  if(cur<text.length)d.appendChild(document.createTextNode(text.slice(cur)));
+  return d;
+}
+// 展开：每首歌的出现次数 + 原句（高亮）+ 中文翻译
+function songDetails(item,hits,label){
+  const d=el("details"); d.appendChild(el("summary",null,label));
+  let built=false;
+  d.addEventListener("toggle",()=>{ if(!d.open||built)return; built=true;
+    hits.slice().sort((x,y)=>y[1]-x[1]).forEach(([sid,c])=>{
+      const s=songById[sid]; const box=el("div","ctxsong");
+      const head=el("div","ctxhead"); const left=el("div");
+      left.appendChild(el("div",null,s.ja)); left.appendChild(el("div","zh",s.zh+" · 《"+albumById[s.album].ja+"》"));
+      head.append(left,el("div","gcount",c+" 次")); box.appendChild(head);
+      const byLine=new Map();
+      ((item.loc||{})[sid]||[]).forEach(([li,a,b])=>{if(!byLine.has(li))byLine.set(li,[]);byLine.get(li).push([a,b]);});
+      const lines=DATA.lines[sid]||[];
+      [...byLine.keys()].sort((a,b)=>a-b).forEach(li=>{
+        const [ja,zh]=lines[li]||["",""]; const ln=el("div","ctxline");
+        ln.appendChild(markLine(ja,byLine.get(li))); if(zh)ln.appendChild(el("div","zh",zh)); box.appendChild(ln);
+      });
+      d.appendChild(box);
+    });
+  });
+  d.addEventListener("click",e=>e.stopPropagation());
+  return d;
+}
+function exBox(ex){const b=el("div","exbox");b.appendChild(el("div","jp",ex[0]));if(ex[1])b.appendChild(el("div","ro",ex[1]));if(ex[2])b.appendChild(el("div","zh",ex[2]));return b;}
+
+// ---------- filters UI ----------
+function renderFilters(){
+  const fa=document.getElementById("fArtist"); fa.innerHTML="";
+  ARTISTS.forEach(a=>{const c=el("button","chip"+(st.artist===a.id?" on":""),a.label);
+    const has=a.id==="all"||DATA.albums.some(x=>x.artist===a.id);
+    if(!has){c.disabled=true;c.textContent=a.label+"(待收录)";}
+    c.onclick=()=>{st.artist=a.id;st.albums.clear();st.idx=0;st.order=null;render();}; fa.appendChild(c);});
+  const fb=document.getElementById("fAlbum"); fb.innerHTML="";
+  const all=el("button","chip"+(st.albums.size===0?" on":""),"全部"); all.onclick=()=>{st.albums.clear();st.idx=0;st.order=null;render();}; fb.appendChild(all);
+  DATA.albums.filter(a=>st.artist==="all"||a.artist===st.artist).forEach(a=>{
+    const c=el("button","chip"+(st.albums.has(a.id)?" on":""),a.ja);
+    c.title=a.zh+" · "+a.year;
+    c.onclick=()=>{st.albums.has(a.id)?st.albums.delete(a.id):st.albums.add(a.id);st.idx=0;st.order=null;render();}; fb.appendChild(c);});
+  const ft=document.getElementById("fTier"); ft.innerHTML="";
+  TIERS.forEach(t=>{const c=el("button","chip"+(st.tier===t.id?" on":""),t.label+(t.min?" ≥"+t.min+"首":""));c.onclick=()=>{st.tier=t.id;st.idx=0;st.order=null;render();};ft.appendChild(c);});
+  const fs=document.getElementById("fState"); fs.innerHTML="";
+  [["all","全部"],["todo","未掌握"],["done","已掌握"]].forEach(([id,l])=>{const c=el("button","chip"+(st.state===id?" on":""),l);c.onclick=()=>{st.state=id;st.idx=0;st.order=null;render();};fs.appendChild(c);});
+  const ids=activeSongIds(); const vl=filteredVocab();
+  const totalScope=DATA.vocab.filter(v=>scoped(v,ids).songs>=2);
+  const doneN=totalScope.filter(v=>learned[v.w]).length;
+  document.getElementById("stat").textContent=`当前范围 ${ids.length} 首歌 · 显示 ${vl.length} 个词 · 已掌握 ${doneN}/${totalScope.length}`;
+  document.getElementById("filters").style.display=(st.view==="songs")?"none":"block";
+}
+
+// ---------- flash ----------
+function currentList(){const l=filteredVocab(); if(st.order){const m=new Map(l.map(v=>[v.w,v]));const o=st.order.map(w=>m.get(w)).filter(Boolean);return o.length===l.length?o:l;} return l;}
+function renderFlash(){
+  const list=currentList(); const front=document.getElementById("front"),back=document.getElementById("back");
+  front.innerHTML="";back.innerHTML=""; document.getElementById("card").classList.remove("flipped");
+  const learnBtn=document.getElementById("learn");
+  if(!list.length){front.appendChild(el("div","empty","这个筛选条件下没有词了 🎉"));document.getElementById("prog").textContent="0 / 0";learnBtn.style.display="none";return;}
+  learnBtn.style.display="";
+  if(st.idx>=list.length)st.idx=0;
+  const v=list[st.idx];
+  front.appendChild(el("span","tier",TIERNAME[v.tier]));
+  front.appendChild(el("div","bigword",v.w));
+  if(v.k!==v.w)front.appendChild(el("div","kana",v.k));
+  front.appendChild(el("div","romaji",v.r));
+  front.appendChild(albumBadges(v.hits));
+  front.appendChild(el("div","freq","点击卡片查看释义"));
+  back.appendChild(el("div","meaning",v.m));
+  back.appendChild(el("div","romaji",v.w+" · "+v.r));
+  if(v.ex)back.appendChild(exBox(v.ex));
+  back.appendChild(el("div","freq",`出现在 ${v.songs} 首歌 · 共 ${v.total} 次`));
+  back.appendChild(songDetails(v,v.hits,"展开:出现在哪些歌(附原句)"));
+  document.getElementById("prog").textContent=(st.idx+1)+" / "+list.length;
+  learnBtn.textContent=learned[v.w]?"✓ 已掌握(点击取消)":"标记为已掌握";
+  learnBtn.classList.toggle("on",!!learned[v.w]);
+}
+
+// ---------- list ----------
+function renderList(){
+  const box=document.getElementById("v-list"); box.innerHTML="";
+  const list=filteredVocab(); if(!list.length){box.appendChild(el("div","empty","没有符合条件的词"));return;}
+  let cur=null;
+  list.forEach(v=>{
+    if(v.tier!==cur){cur=v.tier;box.appendChild(el("div","group",TIERNAME[cur]+"词"));}
+    const row=el("div","row"+(learned[v.w]?" done":""));
+    const head=el("div","rowhead");
+    const cb=el("input");cb.type="checkbox";cb.checked=!!learned[v.w];
+    cb.onclick=e=>e.stopPropagation(); cb.onchange=()=>toggleLearned(v.w,cb.checked);
+    const w=el("div","rw",v.w); w.appendChild(el("span","rr",v.r));
+    head.append(cb,w,el("div","rm",v.m),el("div","rc",v.songs+" 首 · "+v.total+" 次"));
+    head.onclick=()=>row.classList.toggle("open");
+    const body=el("div","rowbody");
+    if(v.k!==v.w)body.appendChild(el("div","kana","读音:"+v.k));
+    body.appendChild(albumBadges(v.hits)); if(v.ex)body.appendChild(exBox(v.ex));
+    body.appendChild(songDetails(v,v.hits,"出现在哪些歌(附原句)"));
+    row.append(head,body); box.appendChild(row);
+  });
+}
+
+// ---------- grammar ----------
+function renderGram(){
+  const box=document.getElementById("v-gram"); box.innerHTML="";
+  const ids=activeSongIds();
+  const list=DATA.grammar.map(g=>({...g,...scoped(g,ids)})).filter(g=>g.songs>0).sort((a,b)=>b.songs-a.songs||b.total-a.total);
+  box.appendChild(el("div","sub","按「在几首歌里出现」排序。计数由程序根据分词结果匹配,可能有少量误差,主要用于排优先级。"));
+  list.forEach((g,i)=>{
+    const row=el("div","row"); const head=el("div","rowhead");
+    const w=el("div","rw",(i+1)+". "+g.g); w.appendChild(el("span","rr",g.r));
+    head.append(w,el("div","rm",g.m),el("div","rc",g.songs+" 首 · 约"+g.total+" 次"));
+    head.onclick=()=>row.classList.toggle("open");
+    const body=el("div","rowbody"); body.style.paddingLeft="4px";
+    body.appendChild(exBox(g.ex));
+    body.appendChild(songDetails(g,g.hits,"出现在哪些歌(附原句)"));
+    row.append(head,body); box.appendChild(row);
+  });
+}
+
+// ---------- songs ----------
+function renderSongs(){
+  const box=document.getElementById("v-songs"); box.innerHTML="";
+  DATA.albums.forEach(a=>{
+    const h=el("div","albumhead"); const t=el("div","t",a.ja+"  "); const bd=el("span","badge",a.zh); bd.style.color=bd.style.borderColor=albumColor[a.id]; t.appendChild(bd);
+    h.appendChild(t); h.appendChild(el("div","m",`${a.year} · ${a.type} · ${a.note}`)); box.appendChild(h);
+    DATA.songs.filter(s=>s.album===a.id).forEach(s=>{
+      const words=DATA.vocab.filter(v=>v.occ[s.id]); const learnedN=words.filter(v=>learned[v.w]).length;
+      const row=el("div","row"); const head=el("div","rowhead");
+      const w=el("div","rw",s.ja); w.appendChild(el("span","rr",s.zh));
+      head.append(w,el("div","rm",""),el("div","rc",`词表词 ${words.length} 个 · 已掌握 ${learnedN}`));
+      head.onclick=()=>row.classList.toggle("open");
+      const body=el("div","rowbody"); body.style.paddingLeft="4px";
+      const tg=el("div","tags"); tg.style.justifyContent="flex-start";
+      if(s.dup_of){const o=songById[s.dup_of];body.appendChild(el("div","dupnote","与《"+(o?o.ja:s.dup_of)+"》是同一首歌的不同版本,不重复计数"));}
+      words.sort((x,y)=>y.occ[s.id]-x.occ[s.id]).forEach(v=>{const c=el("span","badge bw"+(learned[v.w]?" learned":""),v.w+" "+v.m);tg.appendChild(c);});
+      body.appendChild(tg);
+      const lyr=el("details","lyrics"); lyr.appendChild(el("summary",null,"歌词对照"));
+      let built=false;
+      lyr.addEventListener("toggle",()=>{if(!lyr.open||built)return;built=true;
+        (DATA.lines[s.id]||[]).forEach(([ja,zh])=>{const ln=el("div","ctxline");ln.appendChild(el("div","jp",ja));if(zh)ln.appendChild(el("div","zh",zh));lyr.appendChild(ln);});});
+      body.appendChild(lyr); row.append(head,body); box.appendChild(row);
+    });
+  });
+  if(!DATA.albums.some(a=>a.artist==="atarayo"))box.appendChild(el("div","sub","あたらよ 的专辑待收录。"));
+}
+
+// ---------- main ----------
+function render(){
+  renderFilters();
+  ["flash","list","gram","songs"].forEach(v=>document.getElementById("v-"+v).hidden=(st.view!==v));
+  if(st.view==="flash")renderFlash(); if(st.view==="list")renderList(); if(st.view==="gram")renderGram(); if(st.view==="songs")renderSongs();
+}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");st.view=t.dataset.v;render();});
+document.getElementById("card").onclick=()=>document.getElementById("card").classList.toggle("flipped");
+document.getElementById("prev").onclick=()=>{const n=currentList().length;if(n){st.idx=(st.idx-1+n)%n;renderFlash();}};
+document.getElementById("next").onclick=()=>{const n=currentList().length;if(n){st.idx=(st.idx+1)%n;renderFlash();}};
+document.getElementById("learn").onclick=()=>{const l=currentList();if(l[st.idx])toggleLearned(l[st.idx].w);};
+document.getElementById("shuffle").onclick=()=>{const l=filteredVocab().map(v=>v.w);for(let i=l.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[l[i],l[j]]=[l[j],l[i]];}st.order=l;st.idx=0;renderFlash();};
+document.getElementById("resetorder").onclick=()=>{st.order=null;st.idx=0;renderFlash();};
+document.addEventListener("keydown",e=>{if(st.view!=="flash")return;
+  if(e.key==="ArrowRight")document.getElementById("next").click();
+  if(e.key==="ArrowLeft")document.getElementById("prev").click();
+  if(e.key===" "){e.preventDefault();document.getElementById("card").classList.toggle("flipped");}});
+render(); initCloud(); setTimeout(()=>{if(!cloud)setSync(false);},4000);
+</script>
+</body>
+</html>
