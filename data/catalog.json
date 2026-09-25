@@ -22,7 +22,6 @@
    "note": "《夏草が邪魔をする》是 Yorushika 于 2017 年夏推出的首张迷你专辑，也是 n-buna 与 suis 结成组合后的开山之作。",
    "done": false,
    "dir": "yorushika/natsukusa",
-   "short": "夏草",
    "cover": "covers/natsukusa.jpg"
   },
   {
@@ -35,8 +34,8 @@
    "note": "2018 年 5 月发行的第 2 张迷你专辑，不仅诞生了播放量数亿的现象级神曲《ただ君に晴れ》，更确立了 Yorushika 对“失败者与边缘人”的深刻社会关怀。",
    "done": false,
    "dir": "yorushika/makeinu",
-   "short": "败犬",
-   "cover": "covers/makeinu.jpg"
+   "cover": "covers/makeinu.jpg",
+   "short": "負け犬"
   },
   {
    "id": "dakara",
@@ -48,8 +47,8 @@
    "note": "青年艾米放弃音乐后在瑞典旅行,写给艾尔玛的信与歌",
    "done": true,
    "dir": "yorushika/dakara",
-   "short": "音辞",
-   "cover": "covers/dakara.jpg"
+   "cover": "covers/dakara.jpg",
+   "short": "音辞"
   },
   {
    "id": "elma",
@@ -61,7 +60,6 @@
    "note": "前作续篇:艾尔玛循着艾米的日记踏上同一段旅程",
    "done": true,
    "dir": "yorushika/elma",
-   "short": "エルマ",
    "cover": "covers/elma.jpg"
   },
   {
@@ -74,7 +72,6 @@
    "note": "2020 年发行的第 3 张正规概念大碟。",
    "done": false,
    "dir": "yorushika/tousaku",
-   "short": "盗作",
    "cover": "covers/tousaku.jpg"
   },
   {
@@ -86,8 +83,7 @@
    "type": "独立单曲与影视跨界合唱作品全集",
    "note": "本目录集中收录了未包含在 8 张录音室大碟之内的 Yorushika 独立动画单曲，以及主唱 suis 以个人名义受邀演唱的电影主题曲、跨界合唱神作。",
    "done": false,
-   "dir": "yorushika/yorushika-singles",
-   "short": "单曲"
+   "dir": "yorushika/yorushika-singles"
   },
   {
    "id": "sousaku",
@@ -99,7 +95,6 @@
    "note": "探讨“何为创作”的哲学小品概念 EP。",
    "done": false,
    "dir": "yorushika/sousaku",
-   "short": "創作",
    "cover": "covers/sousaku.jpg"
   },
   {
@@ -112,7 +107,6 @@
    "note": "与画家加藤隆跨界合作的实体音乐画册大碟。",
    "done": false,
    "dir": "yorushika/gentou",
-   "short": "幻燈",
    "cover": "covers/gentou.jpg"
   },
   {
@@ -125,34 +119,32 @@
    "note": "2026 年 3 月推出的正规第 4 张概念全长专辑。",
    "done": false,
    "dir": "yorushika/nininshou",
-   "short": "二人称",
    "cover": "covers/nininshou.jpg"
   },
   {
    "id": "yoakemae",
    "band": "atarayo",
    "ja": "夜明け前",
-   "zh": "黎明之前",
+   "zh": "破晓之前",
    "year": "2021.10",
    "type": "1st EP",
    "note": "“悲しみをたべて育つバンド。",
    "done": false,
    "dir": "atarayo/yoakemae",
-   "short": "夜明け前",
    "cover": "covers/yoakemae.jpg"
   },
   {
    "id": "kyokuya",
    "band": "atarayo",
    "ja": "極夜において月は語らず",
-   "zh": "极夜月不语",
+   "zh": "在极夜里月亮沉默不语",
    "year": "2022.03",
    "type": "1st 全长专辑",
    "note": "首张正规全长专辑。",
    "done": false,
    "dir": "atarayo/kyokuya",
-   "short": "極夜",
-   "cover": "covers/kyokuya.jpg"
+   "cover": "covers/kyokuya.jpg",
+   "short": "極夜"
   },
   {
    "id": "acoustic",
@@ -164,7 +156,6 @@
    "note": "洗尽铅华的纯粹原声现场。",
    "done": false,
    "dir": "atarayo/acoustic",
-   "short": "Acoustic",
    "cover": "covers/acoustic.jpg"
   },
   {
@@ -177,21 +168,20 @@
    "note": "あたらよ 官方明确定义的第一张“コンセプトアルバム”（Concept Album / 概念大碟）。",
    "done": false,
    "dir": "atarayo/kioku",
-   "short": "季億",
    "cover": "covers/kioku.jpg"
   },
   {
    "id": "asatsuyu",
    "band": "atarayo",
    "ja": "朝露は木漏れ日に溶けて",
-   "zh": "朝露溶于叶隙之阳",
+   "zh": "融化在叶隙流光中的晨露",
    "year": "2024.09",
    "type": "迷你专辑",
    "note": "2024 年 9 月推出的重磅迷你专辑。",
    "done": false,
    "dir": "atarayo/asatsuyu",
-   "short": "朝露",
-   "cover": "covers/asatsuyu.jpg"
+   "cover": "covers/asatsuyu.jpg",
+   "short": "朝露"
   },
   {
    "id": "utakata",
@@ -203,20 +193,18 @@
    "note": "2025 年秋推出的叙事迷你大碟。",
    "done": false,
    "dir": "atarayo/utakata",
-   "short": "泡沫",
    "cover": "covers/utakata.jpg"
   },
   {
    "id": "watakushiame",
    "band": "atarayo",
    "ja": "私雨に夏の灯を知る",
-   "zh": "私雨知晓夏日之灯",
+   "zh": "阵雨中知晓夏日灯火",
    "year": "2026.08",
    "type": "3rd 全长专辑",
    "note": "2026 年 8 月发行的最新第 3 张正规全长专辑。",
    "done": false,
    "dir": "atarayo/watakushiame",
-   "short": "私雨",
    "cover": "covers/watakushiame.jpg"
   }
  ],
@@ -225,57 +213,79 @@
    "id": "s0",
    "album": "dakara",
    "ja": "藍二乗",
-   "zh": "蓝二乘",
+   "zh": "靛蓝平方",
    "track": 2,
-   "file": "yorushika/dakara/02.藍二乗"
+   "file": "yorushika/dakara/02.藍二乗",
+   "links": {
+    "ne": 1357960253
+   }
   },
   {
    "id": "s1",
    "album": "dakara",
    "ja": "八月、某、月明かり",
-   "zh": "八月、某日、月光",
+   "zh": "八月、某、月光",
    "track": 3,
-   "file": "yorushika/dakara/03.八月、某、月明かり"
+   "file": "yorushika/dakara/03.八月、某、月明かり",
+   "links": {
+    "ne": 1357953772
+   }
   },
   {
    "id": "s2",
    "album": "dakara",
    "ja": "詩書きとコーヒー",
-   "zh": "写诗人与咖啡",
+   "zh": "作诗和咖啡",
    "track": 4,
-   "file": "yorushika/dakara/04.詩書きとコーヒー"
+   "file": "yorushika/dakara/04.詩書きとコーヒー",
+   "links": {
+    "ne": 1357953770
+   }
   },
   {
    "id": "s3",
    "album": "dakara",
    "ja": "踊ろうぜ",
-   "zh": "一起跳舞吧",
+   "zh": "起舞吧",
    "track": 6,
-   "file": "yorushika/dakara/06.踊ろうぜ"
+   "file": "yorushika/dakara/06.踊ろうぜ",
+   "links": {
+    "ne": 1357953774
+   }
   },
   {
    "id": "s4",
    "album": "dakara",
    "ja": "六月は雨上がりの街を書く",
-   "zh": "六月描绘雨后的街",
+   "zh": "六月、抒写雨后的街道",
    "track": 7,
-   "file": "yorushika/dakara/07.六月は雨上がりの街を書く"
+   "file": "yorushika/dakara/07.六月は雨上がりの街を書く",
+   "links": {
+    "ne": 1357953771
+   }
   },
   {
    "id": "s5",
    "album": "dakara",
    "ja": "五月は花緑青の窓辺から",
-   "zh": "五月,自花绿青的窗边",
+   "zh": "五月 窗边的花绿青",
    "track": 8,
-   "file": "yorushika/dakara/08.五月は花緑青の窓辺から"
+   "file": "yorushika/dakara/08.五月は花緑青の窓辺から",
+   "links": {
+    "ne": 1357953769
+   }
   },
   {
    "id": "s6",
    "album": "dakara",
    "ja": "夜紛い",
-   "zh": "似夜",
+   "zh": "难辨夜色",
    "track": 9,
-   "file": "yorushika/dakara/09.夜紛い"
+   "file": "yorushika/dakara/09.夜紛い",
+   "links": {
+    "qq": "001VyfVF0AbNnW",
+    "ne": 1357960254
+   }
   },
   {
    "id": "s7",
@@ -283,7 +293,11 @@
    "ja": "パレード",
    "zh": "游行",
    "track": 11,
-   "file": "yorushika/dakara/11.パレード"
+   "file": "yorushika/dakara/11.パレード",
+   "links": {
+    "qq": "003F73wK00frKN",
+    "ne": 1357628744
+   }
   },
   {
    "id": "s8",
@@ -291,7 +305,11 @@
    "ja": "エルマ",
    "zh": "艾尔玛",
    "track": 12,
-   "file": "yorushika/dakara/12.エルマ"
+   "file": "yorushika/dakara/12.エルマ",
+   "links": {
+    "qq": "002UItGt4YU3w5",
+    "ne": 1357960252
+   }
   },
   {
    "id": "s9",
@@ -299,63 +317,93 @@
    "ja": "だから僕は音楽を辞めた",
    "zh": "所以我放弃了音乐",
    "track": 14,
-   "file": "yorushika/dakara/14.だから僕は音楽を辞めた"
+   "file": "yorushika/dakara/14.だから僕は音楽を辞めた",
+   "links": {
+    "qq": "000rIBew065PCy",
+    "ne": 1357953768
+   }
   },
   {
    "id": "s10",
    "album": "elma",
    "ja": "憂一乗",
-   "zh": "忧一乘",
+   "zh": "仅有忧伤",
    "track": 2,
-   "file": "yorushika/elma/02.憂一乗"
+   "file": "yorushika/elma/02.憂一乗",
+   "links": {
+    "qq": "000VpWFn4g7xcX",
+    "ne": 1387099644
+   }
   },
   {
    "id": "s11",
    "album": "elma",
    "ja": "夕凪、某、花惑い",
-   "zh": "夕凪、某日、花迷",
+   "zh": "傍晚风平浪静、某处、烟火",
    "track": 3,
-   "file": "yorushika/elma/03.夕凪、某、花惑い"
+   "file": "yorushika/elma/03.夕凪、某、花惑い",
+   "links": {
+    "qq": "0030G5Eh3BuJKp",
+    "ne": 1387099645
+   }
   },
   {
    "id": "s12",
    "album": "elma",
    "ja": "雨とカプチーノ",
-   "zh": "雨与卡布奇诺",
+   "zh": "雨和卡布奇诺",
    "track": 4,
-   "file": "yorushika/elma/04.雨とカプチーノ"
+   "file": "yorushika/elma/04.雨とカプチーノ",
+   "links": {
+    "qq": "002Qmu6V3rWyMX",
+    "ne": 1381706151
+   }
   },
   {
    "id": "s13",
    "album": "elma",
    "ja": "神様のダンス",
-   "zh": "神明之舞",
+   "zh": "神之舞",
    "track": 6,
-   "file": "yorushika/elma/06.神様のダンス"
+   "file": "yorushika/elma/06.神様のダンス",
+   "links": {
+    "qq": "002RKbF03OMfDy",
+    "ne": 1387098935
+   }
   },
   {
    "id": "s14",
    "album": "elma",
    "ja": "雨晴るる",
-   "zh": "雨过天晴",
+   "zh": "雨后天晴",
    "track": 7,
-   "file": "yorushika/elma/07.雨晴るる"
+   "file": "yorushika/elma/07.雨晴るる",
+   "links": {
+    "qq": "003N7qBc1JVER1",
+    "ne": 1387098936
+   }
   },
   {
    "id": "s15",
    "album": "elma",
    "ja": "歩く",
-   "zh": "行走",
+   "zh": "漫步",
    "track": 8,
-   "file": "yorushika/elma/08.歩く"
+   "file": "yorushika/elma/08.歩く",
+   "links": {
+    "ne": 1387098937
+   }
   },
   {
    "id": "s16",
    "album": "elma",
    "ja": "心に穴が空いた",
-   "zh": "心上开了个洞",
+   "zh": "心里的缺口",
    "track": 9,
-   "file": "yorushika/elma/09.心に穴が空いた"
+   "file": "yorushika/elma/09.心に穴が空いた",
+   "links": {
+    "ne": 1373789511
+   }
   },
   {
    "id": "s17",
@@ -363,7 +411,10 @@
    "ja": "声",
    "zh": "声音",
    "track": 11,
-   "file": "yorushika/elma/11.声"
+   "file": "yorushika/elma/11.声",
+   "links": {
+    "ne": 1387099649
+   }
   },
   {
    "id": "s18",
@@ -371,15 +422,21 @@
    "ja": "エイミー",
    "zh": "艾米",
    "track": 12,
-   "file": "yorushika/elma/12.エイミー"
+   "file": "yorushika/elma/12.エイミー",
+   "links": {
+    "ne": 1387098938
+   }
   },
   {
    "id": "s19",
    "album": "elma",
    "ja": "ノーチラス",
-   "zh": "鹦鹉螺号",
+   "zh": "鹦鹉螺",
    "track": 14,
-   "file": "yorushika/elma/14.ノーチラス"
+   "file": "yorushika/elma/14.ノーチラス",
+   "links": {
+    "ne": 1387098940
+   }
   },
   {
    "id": "s20",
@@ -387,7 +444,10 @@
    "ja": "カトレア",
    "zh": "卡特兰",
    "track": 2,
-   "file": "yorushika/natsukusa/02.カトレア"
+   "file": "yorushika/natsukusa/02.カトレア",
+   "links": {
+    "ne": 487527979
+   }
   },
   {
    "id": "s21",
@@ -395,23 +455,32 @@
    "ja": "言って。",
    "zh": "说吧。",
    "track": 3,
-   "file": "yorushika/natsukusa/03.言って。"
+   "file": "yorushika/natsukusa/03.言って。",
+   "links": {
+    "ne": 487527980
+   }
   },
   {
    "id": "s22",
    "album": "natsukusa",
    "ja": "あの夏に咲け",
-   "zh": "在那年盛夏绽放",
+   "zh": "在那个夏天绽放吧！",
    "track": 4,
-   "file": "yorushika/natsukusa/04.あの夏に咲け"
+   "file": "yorushika/natsukusa/04.あの夏に咲け",
+   "links": {
+    "ne": 487527981
+   }
   },
   {
    "id": "s23",
    "album": "natsukusa",
    "ja": "靴の花火",
-   "zh": "鞋之烟火",
+   "zh": "靴上烟火",
    "track": 6,
-   "file": "yorushika/natsukusa/06.靴の花火"
+   "file": "yorushika/natsukusa/06.靴の花火",
+   "links": {
+    "ne": 3400022206
+   }
   },
   {
    "id": "s24",
@@ -419,7 +488,10 @@
    "ja": "雲と幽霊",
    "zh": "云与幽灵",
    "track": 7,
-   "file": "yorushika/natsukusa/07.雲と幽霊"
+   "file": "yorushika/natsukusa/07.雲と幽霊",
+   "links": {
+    "ne": 487527984
+   }
   },
   {
    "id": "s25",
@@ -427,7 +499,10 @@
    "ja": "負け犬にアンコールはいらない",
    "zh": "败犬不需要安可",
    "track": 2,
-   "file": "yorushika/makeinu/02.負け犬にアンコールはいらない"
+   "file": "yorushika/makeinu/02.負け犬にアンコールはいらない",
+   "links": {
+    "ne": 557581314
+   }
   },
   {
    "id": "s26",
@@ -443,23 +518,34 @@
    "ja": "ヒッチコック",
    "zh": "希区柯克",
    "track": 4,
-   "file": "yorushika/makeinu/04.ヒッチコック"
+   "file": "yorushika/makeinu/04.ヒッチコック",
+   "links": {
+    "ne": 557581315
+   }
   },
   {
    "id": "s28",
    "album": "makeinu",
    "ja": "準透明少年",
-   "zh": "半透明少年",
+   "zh": "准透明少年",
    "track": 6,
-   "file": "yorushika/makeinu/06.準透明少年"
+   "file": "yorushika/makeinu/06.準透明少年",
+   "links": {
+    "qq": "0011mMzJ1mkWeL",
+    "ne": 557581317
+   }
   },
   {
    "id": "s29",
    "album": "makeinu",
    "ja": "ただ君に晴れ",
-   "zh": "仅予以你的晴天",
+   "zh": "只为你拨云放晴",
    "track": 7,
-   "file": "yorushika/makeinu/07.ただ君に晴れ"
+   "file": "yorushika/makeinu/07.ただ君に晴れ",
+   "links": {
+    "qq": "000HVNPt0k7pO7",
+    "ne": 557579321
+   }
   },
   {
    "id": "s30",
@@ -467,15 +553,23 @@
    "ja": "冬眠",
    "zh": "冬眠",
    "track": 8,
-   "file": "yorushika/makeinu/08.冬眠"
+   "file": "yorushika/makeinu/08.冬眠",
+   "links": {
+    "qq": "0037aTFR0WrQjI",
+    "ne": 557583336
+   }
   },
   {
    "id": "s31",
    "album": "tousaku",
    "ja": "昼鳶",
-   "zh": "白昼鸢",
+   "zh": "白日窃贼",
    "track": 2,
-   "file": "yorushika/tousaku/02.昼鳶"
+   "file": "yorushika/tousaku/02.昼鳶",
+   "links": {
+    "qq": "004DvFCE4SEYgH",
+    "ne": 1466520409
+   }
   },
   {
    "id": "s32",
@@ -483,7 +577,11 @@
    "ja": "春ひさぎ",
    "zh": "卖春",
    "track": 3,
-   "file": "yorushika/tousaku/03.春ひさぎ"
+   "file": "yorushika/tousaku/03.春ひさぎ",
+   "links": {
+    "qq": "004WMeKL0zX0Yv",
+    "ne": 1466520411
+   }
   },
   {
    "id": "s33",
@@ -492,23 +590,34 @@
    "zh": "炸弹魔 (盗作版)",
    "track": 4,
    "file": "yorushika/tousaku/04.爆弾魔",
-   "dup_of": "s26"
+   "dup_of": "s26",
+   "links": {
+    "qq": "001nwesZ0LBp75"
+   }
   },
   {
    "id": "s34",
    "album": "tousaku",
    "ja": "レプリカント",
-   "zh": "仿生人",
+   "zh": "复制人",
    "track": 6,
-   "file": "yorushika/tousaku/06.レプリカント"
+   "file": "yorushika/tousaku/06.レプリカント",
+   "links": {
+    "qq": "000kzMHc2ckRaj",
+    "ne": 1466519472
+   }
   },
   {
    "id": "s35",
    "album": "tousaku",
    "ja": "花人局",
-   "zh": "以花设局",
+   "zh": "花人局",
    "track": 7,
-   "file": "yorushika/tousaku/07.花人局"
+   "file": "yorushika/tousaku/07.花人局",
+   "links": {
+    "qq": "004RiQSW2XEMGP",
+    "ne": 1466519473
+   }
   },
   {
    "id": "s36",
@@ -516,7 +625,11 @@
    "ja": "盗作",
    "zh": "盗作",
    "track": 9,
-   "file": "yorushika/tousaku/09.盗作"
+   "file": "yorushika/tousaku/09.盗作",
+   "links": {
+    "qq": "002pJo3r0u4Yh2",
+    "ne": 1464737240
+   }
   },
   {
    "id": "s37",
@@ -524,7 +637,11 @@
    "ja": "思想犯",
    "zh": "思想犯",
    "track": 10,
-   "file": "yorushika/tousaku/10.思想犯"
+   "file": "yorushika/tousaku/10.思想犯",
+   "links": {
+    "qq": "003PtqUi1f59aA",
+    "ne": 1457709580
+   }
   },
   {
    "id": "s38",
@@ -532,7 +649,10 @@
    "ja": "逃亡",
    "zh": "逃亡",
    "track": 11,
-   "file": "yorushika/tousaku/11.逃亡"
+   "file": "yorushika/tousaku/11.逃亡",
+   "links": {
+    "ne": 1466519476
+   }
   },
   {
    "id": "s39",
@@ -540,15 +660,21 @@
    "ja": "夜行",
    "zh": "夜行",
    "track": 13,
-   "file": "yorushika/tousaku/13.夜行"
+   "file": "yorushika/tousaku/13.夜行",
+   "links": {
+    "ne": 1428153831
+   }
   },
   {
    "id": "s40",
    "album": "tousaku",
    "ja": "花に亡霊",
-   "zh": "花中亡灵",
+   "zh": "花上亡灵",
    "track": 14,
-   "file": "yorushika/tousaku/14.花に亡霊"
+   "file": "yorushika/tousaku/14.花に亡霊",
+   "links": {
+    "ne": 1442466883
+   }
   },
   {
    "id": "s41",
@@ -556,15 +682,21 @@
    "ja": "斜陽",
    "zh": "斜阳",
    "track": 1,
-   "file": "yorushika/yorushika-singles/01.斜陽"
+   "file": "yorushika/yorushika-singles/01.斜陽",
+   "links": {
+    "ne": 2045828022
+   }
   },
   {
    "id": "s42",
    "album": "yorushika-singles",
    "ja": "テレパス",
-   "zh": "心电感应",
+   "zh": "心灵感应",
    "track": 2,
-   "file": "yorushika/yorushika-singles/02.テレパス"
+   "file": "yorushika/yorushika-singles/02.テレパス",
+   "links": {
+    "ne": 2013921197
+   }
   },
   {
    "id": "s43",
@@ -572,15 +704,21 @@
    "ja": "あぶく",
    "zh": "泡沫",
    "track": 3,
-   "file": "yorushika/yorushika-singles/03.あぶく"
+   "file": "yorushika/yorushika-singles/03.あぶく",
+   "links": {
+    "ne": 3373113236
+   }
   },
   {
    "id": "s44",
    "album": "yorushika-singles",
    "ja": "憂、燦々",
-   "zh": "忧、灿烂",
+   "zh": "忧伤、璀璨其中",
    "track": 4,
-   "file": "yorushika/yorushika-singles/04.憂、燦々"
+   "file": "yorushika/yorushika-singles/04.憂、燦々",
+   "links": {
+    "ne": 2621539053
+   }
   },
   {
    "id": "s45",
@@ -594,9 +732,12 @@
    "id": "s46",
    "album": "yorushika-singles",
    "ja": "若者のすべて",
-   "zh": "年轻人的全部",
+   "zh": "年轻人的一切",
    "track": 6,
-   "file": "yorushika/yorushika-singles/06.若者のすべて"
+   "file": "yorushika/yorushika-singles/06.若者のすべて",
+   "links": {
+    "ne": 2658377579
+   }
   },
   {
    "id": "s47",
@@ -628,7 +769,10 @@
    "ja": "サンサーラ",
    "zh": "轮回",
    "track": 10,
-   "file": "yorushika/yorushika-singles/10.サンサーラ"
+   "file": "yorushika/yorushika-singles/10.サンサーラ",
+   "links": {
+    "qq": "001AGvlF1QaS81"
+   }
   },
   {
    "id": "s51",
@@ -644,7 +788,10 @@
    "ja": "B∀LK",
    "zh": "B∀LK",
    "track": 12,
-   "file": "yorushika/yorushika-singles/12.B∀LK"
+   "file": "yorushika/yorushika-singles/12.B∀LK",
+   "links": {
+    "qq": "000uuZsE1VpfM5"
+   }
   },
   {
    "id": "s53",
@@ -652,23 +799,35 @@
    "ja": "強盗と花束",
    "zh": "强盗与花束",
    "track": 1,
-   "file": "yorushika/sousaku/01.強盗と花束"
+   "file": "yorushika/sousaku/01.強盗と花束",
+   "links": {
+    "qq": "002jWLZX24OxAb",
+    "ne": 1815109506
+   }
   },
   {
    "id": "s54",
    "album": "sousaku",
    "ja": "春泥棒",
-   "zh": "偷春贼",
+   "zh": "盗春者",
    "track": 2,
-   "file": "yorushika/sousaku/02.春泥棒"
+   "file": "yorushika/sousaku/02.春泥棒",
+   "links": {
+    "qq": "003TQ3mA06OqmM",
+    "ne": 1810759765
+   }
   },
   {
    "id": "s55",
    "album": "sousaku",
    "ja": "風を食む",
-   "zh": "风之食",
+   "zh": "蚕食清风",
    "track": 4,
-   "file": "yorushika/sousaku/04.風を食む"
+   "file": "yorushika/sousaku/04.風を食む",
+   "links": {
+    "qq": "002evzVJ1OQeYU",
+    "ne": 1485319473
+   }
   },
   {
    "id": "s56",
@@ -676,7 +835,11 @@
    "ja": "嘘月",
    "zh": "谎月",
    "track": 5,
-   "file": "yorushika/sousaku/05.嘘月"
+   "file": "yorushika/sousaku/05.嘘月",
+   "links": {
+    "qq": "003WkhSf2FOUwq",
+    "ne": 1815109509
+   }
   },
   {
    "id": "s57",
@@ -684,15 +847,23 @@
    "ja": "夏の肖像",
    "zh": "夏之肖像",
    "track": 1,
-   "file": "yorushika/gentou/01.夏の肖像"
+   "file": "yorushika/gentou/01.夏の肖像",
+   "links": {
+    "qq": "000P6sRy1q7csJ",
+    "ne": 3400022202
+   }
   },
   {
    "id": "s58",
    "album": "gentou",
    "ja": "都落ち",
-   "zh": "逃离京城",
+   "zh": "回乡",
    "track": 2,
-   "file": "yorushika/gentou/02.都落ち"
+   "file": "yorushika/gentou/02.都落ち",
+   "links": {
+    "qq": "003fiyiC2Yf997",
+    "ne": 3400022203
+   }
   },
   {
    "id": "s59",
@@ -700,15 +871,22 @@
    "ja": "ブレーメン",
    "zh": "不莱梅",
    "track": 3,
-   "file": "yorushika/gentou/03.ブレーメン"
+   "file": "yorushika/gentou/03.ブレーメン",
+   "links": {
+    "qq": "003Puabj3Uxed3",
+    "ne": 1961279178
+   }
   },
   {
    "id": "s60",
    "album": "gentou",
    "ja": "チノカテ",
-   "zh": "地之粮",
+   "zh": "人间食粮",
    "track": 4,
-   "file": "yorushika/gentou/04.チノカテ"
+   "file": "yorushika/gentou/04.チノカテ",
+   "links": {
+    "ne": 3400023085
+   }
   },
   {
    "id": "s61",
@@ -716,15 +894,21 @@
    "ja": "雪国",
    "zh": "雪国",
    "track": 5,
-   "file": "yorushika/gentou/05.雪国"
+   "file": "yorushika/gentou/05.雪国",
+   "links": {
+    "ne": 3400022205
+   }
   },
   {
    "id": "s62",
    "album": "gentou",
    "ja": "月に吠える",
-   "zh": "向月吠叫",
+   "zh": "对月长啸",
    "track": 6,
-   "file": "yorushika/gentou/06.月に吠える"
+   "file": "yorushika/gentou/06.月に吠える",
+   "links": {
+    "ne": 1884380173
+   }
   },
   {
    "id": "s63",
@@ -732,7 +916,10 @@
    "ja": "451",
    "zh": "华氏 451 度",
    "track": 7,
-   "file": "yorushika/gentou/07.451"
+   "file": "yorushika/gentou/07.451",
+   "links": {
+    "ne": 3400023087
+   }
   },
   {
    "id": "s64",
@@ -740,7 +927,10 @@
    "ja": "パドドゥ",
    "zh": "双人舞",
    "track": 8,
-   "file": "yorushika/gentou/08.パドドゥ"
+   "file": "yorushika/gentou/08.パドドゥ",
+   "links": {
+    "ne": 3400023088
+   }
   },
   {
    "id": "s65",
@@ -748,16 +938,22 @@
    "ja": "又三郎",
    "zh": "又三郎",
    "track": 9,
-   "file": "yorushika/gentou/09.又三郎"
+   "file": "yorushika/gentou/09.又三郎",
+   "links": {
+    "ne": 1850977722
+   }
   },
   {
    "id": "s66",
    "album": "gentou",
    "ja": "靴の花火",
-   "zh": "鞋之烟火 (画集重编版)",
+   "zh": "靴上烟火 (画集重编版)",
    "track": 10,
    "file": "yorushika/gentou/10.靴の花火",
-   "dup_of": "s23"
+   "dup_of": "s23",
+   "links": {
+    "ne": 3400022206
+   }
   },
   {
    "id": "s67",
@@ -765,7 +961,10 @@
    "ja": "老人と海",
    "zh": "老人与海",
    "track": 11,
-   "file": "yorushika/gentou/11.老人と海"
+   "file": "yorushika/gentou/11.老人と海",
+   "links": {
+    "ne": 1870469768
+   }
   },
   {
    "id": "s68",
@@ -773,7 +972,10 @@
    "ja": "さよならモルテン",
    "zh": "再见，莫顿",
    "track": 12,
-   "file": "yorushika/gentou/12.さよならモルテン"
+   "file": "yorushika/gentou/12.さよならモルテン",
+   "links": {
+    "ne": 3400022208
+   }
   },
   {
    "id": "s69",
@@ -781,7 +983,10 @@
    "ja": "いさな",
    "zh": "勇鱼",
    "track": 13,
-   "file": "yorushika/gentou/13.いさな"
+   "file": "yorushika/gentou/13.いさな",
+   "links": {
+    "ne": 3400023090
+   }
   },
   {
    "id": "s70",
@@ -789,7 +994,10 @@
    "ja": "左右盲",
    "zh": "左右盲",
    "track": 14,
-   "file": "yorushika/gentou/14.左右盲"
+   "file": "yorushika/gentou/14.左右盲",
+   "links": {
+    "ne": 1966766526
+   }
   },
   {
    "id": "s71",
@@ -797,23 +1005,34 @@
    "ja": "アルジャーノン",
    "zh": "阿尔吉侬",
    "track": 15,
-   "file": "yorushika/gentou/15.アルジャーノン"
+   "file": "yorushika/gentou/15.アルジャーノン",
+   "links": {
+    "ne": 2020247157
+   }
   },
   {
    "id": "s72",
    "album": "nininshou",
    "ja": "雲になる",
-   "zh": "化作浮云",
+   "zh": "化云",
    "track": 2,
-   "file": "yorushika/nininshou/02.雲になる"
+   "file": "yorushika/nininshou/02.雲になる",
+   "links": {
+    "qq": "003aURnE0meBwo",
+    "ne": 3355479288
+   }
   },
   {
    "id": "s73",
    "album": "nininshou",
    "ja": "花も騒めく",
-   "zh": "繁花喧嚣",
+   "zh": "花亦喧嚣",
    "track": 3,
-   "file": "yorushika/nininshou/03.花も騒めく"
+   "file": "yorushika/nininshou/03.花も騒めく",
+   "links": {
+    "qq": "001EjBKB4NbNKE",
+    "ne": 3355480210
+   }
   },
   {
    "id": "s74",
@@ -821,7 +1040,11 @@
    "ja": "魔性",
    "zh": "魔性",
    "track": 4,
-   "file": "yorushika/nininshou/04.魔性"
+   "file": "yorushika/nininshou/04.魔性",
+   "links": {
+    "qq": "000y7U3n2apY6U",
+    "ne": 3355480211
+   }
   },
   {
    "id": "s75",
@@ -829,15 +1052,23 @@
    "ja": "プレイシック",
    "zh": "厌玩",
    "track": 5,
-   "file": "yorushika/nininshou/05.プレイシック"
+   "file": "yorushika/nininshou/05.プレイシック",
+   "links": {
+    "qq": "001U9CJS1hQrhI",
+    "ne": 3331553739
+   }
   },
   {
    "id": "s76",
    "album": "nininshou",
    "ja": "ポスト春",
-   "zh": "晚春",
+   "zh": "暮春",
    "track": 6,
-   "file": "yorushika/nininshou/06.ポスト春"
+   "file": "yorushika/nininshou/06.ポスト春",
+   "links": {
+    "qq": "002HxWVB3qjnLh",
+    "ne": 3355479289
+   }
   },
   {
    "id": "s77",
@@ -845,23 +1076,35 @@
    "ja": "太陽",
    "zh": "太阳",
    "track": 7,
-   "file": "yorushika/nininshou/07.太陽"
+   "file": "yorushika/nininshou/07.太陽",
+   "links": {
+    "qq": "001vj5Ax0sMYM1",
+    "ne": 2649156123
+   }
   },
   {
    "id": "s78",
    "album": "nininshou",
    "ja": "晴る",
-   "zh": "晴",
+   "zh": "放晴",
    "track": 8,
-   "file": "yorushika/nininshou/08.晴る"
+   "file": "yorushika/nininshou/08.晴る",
+   "links": {
+    "qq": "001YD7382RBzjI",
+    "ne": 2114614108
+   }
   },
   {
    "id": "s79",
    "album": "nininshou",
    "ja": "忘れてください",
-   "zh": "请将我遗忘",
+   "zh": "还请遗忘",
    "track": 9,
-   "file": "yorushika/nininshou/09.忘れてください"
+   "file": "yorushika/nininshou/09.忘れてください",
+   "links": {
+    "qq": "000kT3pK23BJaP",
+    "ne": 2607716396
+   }
   },
   {
    "id": "s80",
@@ -869,7 +1112,11 @@
    "ja": "修羅",
    "zh": "修罗",
    "track": 10,
-   "file": "yorushika/nininshou/10.修羅"
+   "file": "yorushika/nininshou/10.修羅",
+   "links": {
+    "qq": "0047wzR819aS9D",
+    "ne": 2734279861
+   }
   },
   {
    "id": "s81",
@@ -877,7 +1124,11 @@
    "ja": "火星人",
    "zh": "火星人",
    "track": 11,
-   "file": "yorushika/nininshou/11.火星人"
+   "file": "yorushika/nininshou/11.火星人",
+   "links": {
+    "qq": "000Bs9nd2RtrQB",
+    "ne": 2702969612
+   }
   },
   {
    "id": "s82",
@@ -885,7 +1136,10 @@
    "ja": "ルバート",
    "zh": "自由速度",
    "track": 12,
-   "file": "yorushika/nininshou/12.ルバート"
+   "file": "yorushika/nininshou/12.ルバート",
+   "links": {
+    "ne": 3355480214
+   }
   },
   {
    "id": "s83",
@@ -893,31 +1147,43 @@
    "ja": "火葬",
    "zh": "火葬",
    "track": 13,
-   "file": "yorushika/nininshou/13.火葬"
+   "file": "yorushika/nininshou/13.火葬",
+   "links": {
+    "ne": 3355480215
+   }
   },
   {
    "id": "s84",
    "album": "nininshou",
    "ja": "アポリア",
-   "zh": "二律背反",
+   "zh": "困惑",
    "track": 14,
-   "file": "yorushika/nininshou/14.アポリア"
+   "file": "yorushika/nininshou/14.アポリア",
+   "links": {
+    "ne": 2634153295
+   }
   },
   {
    "id": "s85",
    "album": "nininshou",
    "ja": "へび",
-   "zh": "长蛇",
+   "zh": "蛇",
    "track": 15,
-   "file": "yorushika/nininshou/15.へび"
+   "file": "yorushika/nininshou/15.へび",
+   "links": {
+    "ne": 2666842841
+   }
   },
   {
    "id": "s86",
    "album": "nininshou",
    "ja": "うめき",
-   "zh": "呻吟",
+   "zh": "痛吟",
    "track": 16,
-   "file": "yorushika/nininshou/16.うめき"
+   "file": "yorushika/nininshou/16.うめき",
+   "links": {
+    "ne": 3355479294
+   }
   },
   {
    "id": "s87",
@@ -925,7 +1191,10 @@
    "ja": "啄木鳥",
    "zh": "啄木鸟",
    "track": 17,
-   "file": "yorushika/nininshou/17.啄木鳥"
+   "file": "yorushika/nininshou/17.啄木鳥",
+   "links": {
+    "ne": 3355479295
+   }
   },
   {
    "id": "s88",
@@ -934,7 +1203,10 @@
    "zh": "希区柯克 (2026版)",
    "track": 18,
    "file": "yorushika/nininshou/18.ヒッチコック",
-   "dup_of": "s27"
+   "dup_of": "s27",
+   "links": {
+    "ne": 557581315
+   }
   },
   {
    "id": "s89",
@@ -942,7 +1214,10 @@
    "ja": "月光浴",
    "zh": "月光浴",
    "track": 19,
-   "file": "yorushika/nininshou/19.月光浴"
+   "file": "yorushika/nininshou/19.月光浴",
+   "links": {
+    "ne": 3355480218
+   }
   },
   {
    "id": "s90",
@@ -950,7 +1225,10 @@
    "ja": "千鳥",
    "zh": "千鸟",
    "track": 20,
-   "file": "yorushika/nininshou/20.千鳥"
+   "file": "yorushika/nininshou/20.千鳥",
+   "links": {
+    "ne": 3355479297
+   }
   },
   {
    "id": "s91",
@@ -958,15 +1236,21 @@
    "ja": "櫂",
    "zh": "船桨",
    "track": 21,
-   "file": "yorushika/nininshou/21.櫂"
+   "file": "yorushika/nininshou/21.櫂",
+   "links": {
+    "ne": 3355480219
+   }
   },
   {
    "id": "s92",
    "album": "yoakemae",
    "ja": "10月無口な君を忘れる",
-   "zh": "忘却十月沉默寡言的你",
+   "zh": "忘却10月沉默的你",
    "track": 1,
-   "file": "atarayo/yoakemae/01.10月無口な君を忘れる"
+   "file": "atarayo/yoakemae/01.10月無口な君を忘れる",
+   "links": {
+    "ne": 1830636201
+   }
   },
   {
    "id": "s93",
@@ -974,15 +1258,21 @@
    "ja": "夏霞",
    "zh": "夏霞",
    "track": 2,
-   "file": "atarayo/yoakemae/02.夏霞"
+   "file": "atarayo/yoakemae/02.夏霞",
+   "links": {
+    "ne": 1867150097
+   }
   },
   {
    "id": "s94",
    "album": "yoakemae",
    "ja": "晴るる",
-   "zh": "晴空",
+   "zh": "放晴",
    "track": 3,
-   "file": "atarayo/yoakemae/03.晴るる"
+   "file": "atarayo/yoakemae/03.晴るる",
+   "links": {
+    "ne": 1839931917
+   }
   },
   {
    "id": "s95",
@@ -990,7 +1280,11 @@
    "ja": "祥月",
    "zh": "祥月",
    "track": 4,
-   "file": "atarayo/yoakemae/04.祥月"
+   "file": "atarayo/yoakemae/04.祥月",
+   "links": {
+    "qq": "003tWdRx1DtyEb",
+    "ne": 1878896691
+   }
   },
   {
    "id": "s96",
@@ -998,23 +1292,35 @@
    "ja": "8.8",
    "zh": "八月八日",
    "track": 5,
-   "file": "atarayo/yoakemae/05.8.8"
+   "file": "atarayo/yoakemae/05.8.8",
+   "links": {
+    "qq": "000dOSH54M9WKJ",
+    "ne": 1856336348
+   }
   },
   {
    "id": "s97",
    "album": "yoakemae",
    "ja": "ピアス",
-   "zh": "耳钉",
+   "zh": "耳环",
    "track": 6,
-   "file": "atarayo/yoakemae/06.ピアス"
+   "file": "atarayo/yoakemae/06.ピアス",
+   "links": {
+    "qq": "003TFHmE2tEMif",
+    "ne": 1882029901
+   }
   },
   {
    "id": "s98",
    "album": "yoakemae",
    "ja": "嘘つき",
-   "zh": "说谎者",
+   "zh": "骗子",
    "track": 7,
-   "file": "atarayo/yoakemae/07.嘘つき"
+   "file": "atarayo/yoakemae/07.嘘つき",
+   "links": {
+    "qq": "000b7Z66409jzV",
+    "ne": 1882027031
+   }
   },
   {
    "id": "s99",
@@ -1022,7 +1328,11 @@
    "ja": "交差点",
    "zh": "十字路口",
    "track": 1,
-   "file": "atarayo/kyokuya/01.交差点"
+   "file": "atarayo/kyokuya/01.交差点",
+   "links": {
+    "qq": "002PHozb13eQwQ",
+    "ne": 1929062239
+   }
   },
   {
    "id": "s100",
@@ -1031,7 +1341,11 @@
    "zh": "夏霞",
    "track": 2,
    "file": "atarayo/kyokuya/02.夏霞",
-   "dup_of": "s93"
+   "dup_of": "s93",
+   "links": {
+    "qq": "000QkPlX3FhqTI",
+    "ne": 1867150097
+   }
   },
   {
    "id": "s101",
@@ -1039,7 +1353,11 @@
    "ja": "極夜",
    "zh": "极夜",
    "track": 3,
-   "file": "atarayo/kyokuya/03.極夜"
+   "file": "atarayo/kyokuya/03.極夜",
+   "links": {
+    "qq": "004eTakG3tvcVF",
+    "ne": 1929062241
+   }
   },
   {
    "id": "s102",
@@ -1048,7 +1366,11 @@
    "zh": "祥月",
    "track": 4,
    "file": "atarayo/kyokuya/04.祥月",
-   "dup_of": "s95"
+   "dup_of": "s95",
+   "links": {
+    "qq": "003tWdRx1DtyEb",
+    "ne": 1878896691
+   }
   },
   {
    "id": "s103",
@@ -1062,26 +1384,35 @@
    "id": "s104",
    "album": "kyokuya",
    "ja": "悲しいラブソング",
-   "zh": "悲伤情歌",
+   "zh": "悲伤的情歌",
    "track": 6,
-   "file": "atarayo/kyokuya/06.悲しいラブソング"
+   "file": "atarayo/kyokuya/06.悲しいラブソング",
+   "links": {
+    "ne": 1929065680
+   }
   },
   {
    "id": "s105",
    "album": "kyokuya",
    "ja": "嘘つき",
-   "zh": "说谎者",
+   "zh": "骗子",
    "track": 7,
    "file": "atarayo/kyokuya/07.嘘つき",
-   "dup_of": "s98"
+   "dup_of": "s98",
+   "links": {
+    "ne": 1882027031
+   }
   },
   {
    "id": "s106",
    "album": "kyokuya",
    "ja": "outcry",
-   "zh": "抗争呼喊",
+   "zh": "呐喊",
    "track": 8,
-   "file": "atarayo/kyokuya/08.outcry"
+   "file": "atarayo/kyokuya/08.outcry",
+   "links": {
+    "ne": 1929062245
+   }
   },
   {
    "id": "s107",
@@ -1089,16 +1420,22 @@
    "ja": "52",
    "zh": "五十二赫兹",
    "track": 9,
-   "file": "atarayo/kyokuya/09.52"
+   "file": "atarayo/kyokuya/09.52",
+   "links": {
+    "ne": 1929065681
+   }
   },
   {
    "id": "s108",
    "album": "kyokuya",
    "ja": "10月無口な君を忘れる",
-   "zh": "忘却十月沉默寡言的你",
+   "zh": "忘却10月沉默的你",
    "track": 10,
    "file": "atarayo/kyokuya/10.10月無口な君を忘れる",
-   "dup_of": "s92"
+   "dup_of": "s92",
+   "links": {
+    "ne": 1830636201
+   }
   },
   {
    "id": "s109",
@@ -1106,16 +1443,22 @@
    "ja": "差異",
    "zh": "差异",
    "track": 11,
-   "file": "atarayo/kyokuya/11.差異"
+   "file": "atarayo/kyokuya/11.差異",
+   "links": {
+    "ne": 1929062246
+   }
   },
   {
    "id": "s110",
    "album": "acoustic",
    "ja": "10月無口な君を忘れる (Piano ver.)",
-   "zh": "忘却十月沉默寡言的你 (钢琴版)",
+   "zh": "忘却10月沉默的你 (钢琴版)",
    "track": 1,
    "file": "atarayo/acoustic/01.10月無口な君を忘れる (Piano ver.)",
-   "dup_of": "s92"
+   "dup_of": "s92",
+   "links": {
+    "ne": 1830636201
+   }
   },
   {
    "id": "s111",
@@ -1124,16 +1467,22 @@
    "zh": "夏霞 (不插电版)",
    "track": 2,
    "file": "atarayo/acoustic/02.夏霞 (Acoustic ver.)",
-   "dup_of": "s93"
+   "dup_of": "s93",
+   "links": {
+    "ne": 1867150097
+   }
   },
   {
    "id": "s112",
    "album": "acoustic",
    "ja": "晴るる (Acoustic ver.)",
-   "zh": "晴空 (不插电版)",
+   "zh": "放晴 (不插电版)",
    "track": 3,
    "file": "atarayo/acoustic/03.晴るる (Acoustic ver.)",
-   "dup_of": "s94"
+   "dup_of": "s94",
+   "links": {
+    "ne": 1839931917
+   }
   },
   {
    "id": "s113",
@@ -1142,16 +1491,22 @@
    "zh": "八月八日 (不插电版)",
    "track": 4,
    "file": "atarayo/acoustic/04.8.8 (Acoustic ver.)",
-   "dup_of": "s96"
+   "dup_of": "s96",
+   "links": {
+    "ne": 1856336348
+   }
   },
   {
    "id": "s114",
    "album": "acoustic",
    "ja": "ピアス (Acoustic ver.)",
-   "zh": "耳钉 (不插电版)",
+   "zh": "耳环 (不插电版)",
    "track": 5,
    "file": "atarayo/acoustic/05.ピアス (Acoustic ver.)",
-   "dup_of": "s97"
+   "dup_of": "s97",
+   "links": {
+    "ne": 1882029901
+   }
   },
   {
    "id": "s115",
@@ -1160,16 +1515,22 @@
    "zh": "祥月 (不插电版)",
    "track": 6,
    "file": "atarayo/acoustic/06.祥月 (Acoustic ver.)",
-   "dup_of": "s95"
+   "dup_of": "s95",
+   "links": {
+    "ne": 1878896691
+   }
   },
   {
    "id": "s116",
    "album": "acoustic",
    "ja": "嘘つき (Acoustic ver.)",
-   "zh": "说谎者 (不插电版)",
+   "zh": "骗子 (不插电版)",
    "track": 7,
    "file": "atarayo/acoustic/07.嘘つき (Acoustic ver.)",
-   "dup_of": "s98"
+   "dup_of": "s98",
+   "links": {
+    "ne": 1882027031
+   }
   },
   {
    "id": "s117",
@@ -1183,17 +1544,25 @@
    "id": "s118",
    "album": "kioku",
    "ja": "ただ好きと言えたら",
-   "zh": "若能单单说出喜欢",
+   "zh": "若能就说出喜欢你",
    "track": 1,
-   "file": "atarayo/kioku/01.ただ好きと言えたら"
+   "file": "atarayo/kioku/01.ただ好きと言えたら",
+   "links": {
+    "qq": "001VIYof4Kalc8",
+    "ne": 2059134037
+   }
   },
   {
    "id": "s119",
    "album": "kioku",
    "ja": "今夜2人だけのダンスを",
-   "zh": "今晚跳一支属于两人的舞",
+   "zh": "今晚跳支属于我们两个人的舞",
    "track": 2,
-   "file": "atarayo/kioku/02.今夜2人だけのダンスを"
+   "file": "atarayo/kioku/02.今夜2人だけのダンスを",
+   "links": {
+    "qq": "001KXZr43xbcgY",
+    "ne": 2071843860
+   }
   },
   {
    "id": "s120",
@@ -1201,87 +1570,125 @@
    "ja": "夏が来るたび",
    "zh": "每当夏天来临",
    "track": 3,
-   "file": "atarayo/kioku/03.夏が来るたび"
+   "file": "atarayo/kioku/03.夏が来るたび",
+   "links": {
+    "qq": "0002KWru2ATMZz",
+    "ne": 2074462291
+   }
   },
   {
    "id": "s121",
    "album": "kioku",
    "ja": "僕らはそれを愛と呼んだ",
-   "zh": "我们曾将那称为爱",
+   "zh": "我们称其为爱",
    "track": 4,
-   "file": "atarayo/kioku/04.僕らはそれを愛と呼んだ"
+   "file": "atarayo/kioku/04.僕らはそれを愛と呼んだ",
+   "links": {
+    "qq": "00437Ldp3eqzqp",
+    "ne": 2051328176
+   }
   },
   {
    "id": "s122",
    "album": "kioku",
    "ja": "また夏を追う",
-   "zh": "再度追逐夏天",
+   "zh": "再次追逐夏天",
    "track": 5,
-   "file": "atarayo/kioku/05.また夏を追う"
+   "file": "atarayo/kioku/05.また夏を追う",
+   "links": {
+    "qq": "001dSEuA3YfUKs",
+    "ne": 1973608593
+   }
   },
   {
    "id": "s123",
    "album": "kioku",
    "ja": "憂い桜",
-   "zh": "忧伤之樱",
+   "zh": "忧郁樱花",
    "track": 6,
-   "file": "atarayo/kioku/06.憂い桜"
+   "file": "atarayo/kioku/06.憂い桜",
+   "links": {
+    "qq": "002XKmgI1PKvDP",
+    "ne": 2025204598
+   }
   },
   {
    "id": "s124",
    "album": "kioku",
    "ja": "アカネチル",
-   "zh": "茜色飘落",
+   "zh": "茜色飘零",
    "track": 7,
-   "file": "atarayo/kioku/07.アカネチル"
+   "file": "atarayo/kioku/07.アカネチル",
+   "links": {
+    "qq": "003VmoZl1qt8Lu",
+    "ne": 2071844825
+   }
   },
   {
    "id": "s125",
    "album": "kioku",
    "ja": "クリスマスのよる",
-   "zh": "圣诞之夜",
+   "zh": "圣诞夜",
    "track": 8,
-   "file": "atarayo/kioku/08.クリスマスのよる"
+   "file": "atarayo/kioku/08.クリスマスのよる",
+   "links": {
+    "ne": 2002397763
+   }
   },
   {
    "id": "s126",
    "album": "kioku",
    "ja": "青を掬う",
-   "zh": "掬起青蓝",
+   "zh": "掬青",
    "track": 9,
-   "file": "atarayo/kioku/09.青を掬う"
+   "file": "atarayo/kioku/09.青を掬う",
+   "links": {
+    "ne": 1941665884
+   }
   },
   {
    "id": "s127",
    "album": "kioku",
    "ja": "届く、未来へ",
-   "zh": "传达吧，去往未来",
+   "zh": "触及、未来",
    "track": 10,
-   "file": "atarayo/kioku/10.届く、未来へ"
+   "file": "atarayo/kioku/10.届く、未来へ",
+   "links": {
+    "ne": 2037937776
+   }
   },
   {
    "id": "s128",
    "album": "kioku",
    "ja": "眠れない夜を君に",
-   "zh": "将失眠之夜赠予你",
+   "zh": "无眠的夜晚只为你",
    "track": 11,
-   "file": "atarayo/kioku/11.眠れない夜を君に"
+   "file": "atarayo/kioku/11.眠れない夜を君に",
+   "links": {
+    "ne": 2019583879
+   }
   },
   {
    "id": "s129",
    "album": "kioku",
    "ja": "雪冴ゆる",
-   "zh": "寒雪凛冽",
+   "zh": "雪冽",
    "track": 12,
-   "file": "atarayo/kioku/12.雪冴ゆる"
+   "file": "atarayo/kioku/12.雪冴ゆる",
+   "links": {
+    "ne": 2008006028
+   }
   },
   {
    "id": "s130",
    "album": "kioku",
    "ja": "空蒼いまま",
-   "zh": "天空依然湛蓝",
+   "zh": "天空依旧苍蓝",
    "track": 13,
-   "file": "atarayo/kioku/13.空蒼いまま"
+   "file": "atarayo/kioku/13.空蒼いまま",
+   "links": {
+    "ne": 2014227976
+   }
   },
   {
    "id": "s131",
@@ -1289,23 +1696,32 @@
    "ja": "13月",
    "zh": "十三月",
    "track": 14,
-   "file": "atarayo/kioku/14.13月"
+   "file": "atarayo/kioku/14.13月",
+   "links": {
+    "ne": 2074460524
+   }
   },
   {
    "id": "s132",
    "album": "asatsuyu",
    "ja": "「僕は...」",
-   "zh": "我是...",
+   "zh": "我…",
    "track": 1,
-   "file": "atarayo/asatsuyu/01.「僕は...」"
+   "file": "atarayo/asatsuyu/01.「僕は...」",
+   "links": {
+    "ne": 2112531307
+   }
   },
   {
    "id": "s133",
    "album": "asatsuyu",
    "ja": "明け方の夏",
-   "zh": "拂晓盛夏",
+   "zh": "夏日拂晓",
    "track": 2,
-   "file": "atarayo/asatsuyu/02.明け方の夏"
+   "file": "atarayo/asatsuyu/02.明け方の夏",
+   "links": {
+    "ne": 2622391689
+   }
   },
   {
    "id": "s134",
@@ -1313,7 +1729,10 @@
    "ja": "リフレイン",
    "zh": "叠句",
    "track": 3,
-   "file": "atarayo/asatsuyu/03.リフレイン"
+   "file": "atarayo/asatsuyu/03.リフレイン",
+   "links": {
+    "ne": 2623889446
+   }
   },
   {
    "id": "s135",
@@ -1321,15 +1740,21 @@
    "ja": "realize",
    "zh": "觉醒",
    "track": 4,
-   "file": "atarayo/asatsuyu/04.realize"
+   "file": "atarayo/asatsuyu/04.realize",
+   "links": {
+    "ne": 2623889447
+   }
   },
   {
    "id": "s136",
    "album": "asatsuyu",
    "ja": "少年、風薫る",
-   "zh": "风清气爽少年时",
+   "zh": "少年，风中捎来清新气息",
    "track": 5,
-   "file": "atarayo/asatsuyu/05.少年、風薫る"
+   "file": "atarayo/asatsuyu/05.少年、風薫る",
+   "links": {
+    "ne": 2164294439
+   }
   },
   {
    "id": "s137",
@@ -1337,32 +1762,44 @@
    "ja": "君と",
    "zh": "与你",
    "track": 6,
-   "file": "atarayo/asatsuyu/06.君と"
+   "file": "atarayo/asatsuyu/06.君と",
+   "links": {
+    "ne": 2623888120
+   }
   },
   {
    "id": "s138",
    "album": "asatsuyu",
    "ja": "光れ",
-   "zh": "闪耀吧",
+   "zh": "发光吧",
    "track": 7,
-   "file": "atarayo/asatsuyu/07.光れ"
+   "file": "atarayo/asatsuyu/07.光れ",
+   "links": {
+    "ne": 2623888121
+   }
   },
   {
    "id": "s139",
    "album": "asatsuyu",
    "ja": "「僕は...」(Piano Ver.)",
-   "zh": "我是... (深情钢琴版)",
+   "zh": "我… (深情钢琴版)",
    "track": 8,
    "file": "atarayo/asatsuyu/08.「僕は...」(Piano Ver.)",
-   "dup_of": "s132"
+   "dup_of": "s132",
+   "links": {
+    "ne": 2112531307
+   }
   },
   {
    "id": "s140",
    "album": "utakata",
    "ja": "朝凪",
-   "zh": "晨风初止",
+   "zh": "晨海无风",
    "track": 1,
-   "file": "atarayo/utakata/01.朝凪"
+   "file": "atarayo/utakata/01.朝凪",
+   "links": {
+    "ne": 2745058436
+   }
   },
   {
    "id": "s141",
@@ -1370,31 +1807,47 @@
    "ja": "ツキノフネ",
    "zh": "月之舟",
    "track": 2,
-   "file": "atarayo/utakata/02.ツキノフネ"
+   "file": "atarayo/utakata/02.ツキノフネ",
+   "links": {
+    "qq": "002OBxLq1tzhik",
+    "ne": 2690226185
+   }
   },
   {
    "id": "s142",
    "album": "utakata",
    "ja": "夜空を蝕んで",
-   "zh": "侵蚀夜空",
+   "zh": "吞噬夜空",
    "track": 3,
-   "file": "atarayo/utakata/03.夜空を蝕んで"
+   "file": "atarayo/utakata/03.夜空を蝕んで",
+   "links": {
+    "qq": "001xfJ4728P3z3",
+    "ne": 2750091949
+   }
   },
   {
    "id": "s143",
    "album": "utakata",
    "ja": "忘愛",
-   "zh": "遗忘之爱",
+   "zh": "忘爱",
    "track": 4,
-   "file": "atarayo/utakata/04.忘愛"
+   "file": "atarayo/utakata/04.忘愛",
+   "links": {
+    "qq": "003jIA2O46Fq87",
+    "ne": 2695651389
+   }
   },
   {
    "id": "s144",
    "album": "utakata",
    "ja": "溺れている",
-   "zh": "沉溺",
+   "zh": "沉溺其中",
    "track": 5,
-   "file": "atarayo/utakata/05.溺れている"
+   "file": "atarayo/utakata/05.溺れている",
+   "links": {
+    "qq": "002vfSfr3ddSG3",
+    "ne": 2750093401
+   }
   },
   {
    "id": "s145",
@@ -1402,23 +1855,35 @@
    "ja": "雫",
    "zh": "水滴",
    "track": 6,
-   "file": "atarayo/utakata/06.雫"
+   "file": "atarayo/utakata/06.雫",
+   "links": {
+    "qq": "0041aHLu1HfC9K",
+    "ne": 2630211850
+   }
   },
   {
    "id": "s146",
    "album": "utakata",
    "ja": "しないで",
-   "zh": "请不要这样",
+   "zh": "别这样",
    "track": 7,
-   "file": "atarayo/utakata/07.しないで"
+   "file": "atarayo/utakata/07.しないで",
+   "links": {
+    "qq": "000RVQBM3HtZXm",
+    "ne": 2750093403
+   }
   },
   {
    "id": "s147",
    "album": "utakata",
    "ja": "夢現、夏風薫る",
-   "zh": "半梦半醒，夏风送香",
+   "zh": "梦境与现实，夏风拂香",
    "track": 8,
-   "file": "atarayo/utakata/08.夢現、夏風薫る"
+   "file": "atarayo/utakata/08.夢現、夏風薫る",
+   "links": {
+    "qq": "001mK89m1QVQSz",
+    "ne": 2750093404
+   }
   },
   {
    "id": "s148",
@@ -1434,15 +1899,22 @@
    "ja": "魚",
    "zh": "游鱼",
    "track": 2,
-   "file": "atarayo/watakushiame/02.魚"
+   "file": "atarayo/watakushiame/02.魚",
+   "links": {
+    "qq": "000i9bEx1qOSNp",
+    "ne": 3406903610
+   }
   },
   {
    "id": "s150",
    "album": "watakushiame",
    "ja": "春となり",
-   "zh": "立春将至",
+   "zh": "春天来临时",
    "track": 3,
-   "file": "atarayo/watakushiame/03.春となり"
+   "file": "atarayo/watakushiame/03.春となり",
+   "links": {
+    "ne": 3346455829
+   }
   },
   {
    "id": "s151",
@@ -1466,7 +1938,10 @@
    "ja": "ハク",
    "zh": "白",
    "track": 6,
-   "file": "atarayo/watakushiame/06.ハク"
+   "file": "atarayo/watakushiame/06.ハク",
+   "links": {
+    "ne": 3419827264
+   }
   },
   {
    "id": "s154",
@@ -1474,23 +1949,32 @@
    "ja": "√",
    "zh": "根号",
    "track": 7,
-   "file": "atarayo/watakushiame/07.√"
+   "file": "atarayo/watakushiame/07.√",
+   "links": {
+    "ne": 3419824398
+   }
   },
   {
    "id": "s155",
    "album": "watakushiame",
    "ja": "蝉とトリトマ",
-   "zh": "火炬花与蝉",
+   "zh": "蝉与火炬花",
    "track": 8,
-   "file": "atarayo/watakushiame/08.蝉とトリトマ"
+   "file": "atarayo/watakushiame/08.蝉とトリトマ",
+   "links": {
+    "ne": 3419827265
+   }
   },
   {
    "id": "s156",
    "album": "watakushiame",
    "ja": "伝えたかったこと",
-   "zh": "未能传达的心意",
+   "zh": "想告诉你的事",
    "track": 9,
-   "file": "atarayo/watakushiame/09.伝えたかったこと"
+   "file": "atarayo/watakushiame/09.伝えたかったこと",
+   "links": {
+    "ne": 3419824399
+   }
   }
  ]
 }
