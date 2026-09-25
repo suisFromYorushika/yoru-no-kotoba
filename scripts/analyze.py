@@ -23,6 +23,8 @@ from kana import to_hira  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CREDIT = re.compile(r"^\s*(作词|作詞|作曲|编曲|編曲|演唱|制作人|标题|歌)\s*[:：]")
+TITLE = re.compile(r"^(ヨルシカ|あたらよ)\s*[-－–—]\s|\s[-－–—]\s*(ヨルシカ|あたらよ)$")  # 「ヨルシカ - 曲名」这类标题行
+RUBY = re.compile(r"([\u3400-\u9fff々〆ヶ]+)[(（]([ぁ-ゖァ-ヺー]+)[)）]")  # 歌词里用括号标的读音：噤(つぐ)んだ
 TS = re.compile(r"\[(\d+):(\d+)(?:[.:](\d+))?\]")
 
 tagger = fugashi.Tagger()
@@ -43,8 +45,8 @@ def parse_lrc(path):
             mm, ss, frac = m.group(1), m.group(2), m.group(3) or "0"
             stamps.append(int(mm) * 60000 + int(ss) * 1000 + int(frac.ljust(3, "0")[:3]))
             pos = m.end()
-        text = line[pos:].strip()
-        if not stamps or not text or CREDIT.match(text):
+        text = line[pos:].strip().strip("\u200b\u200e\u200f\ufeff").strip()  # 去掉看不见的方向标记
+        if not stamps or not text or CREDIT.match(text) or TITLE.search(text):
             continue
         rows.extend((t, text) for t in stamps)
     rows.sort(key=lambda r: r[0])
@@ -92,10 +94,38 @@ def tokenize(text):
     return toks
 
 
+def strip_ruby(text):
+    """去掉歌词里括号标注的读音（塵(ごみ) → 塵），返回新文本和 [(起, 止, 读音)]，分词后再把读音写回去。"""
+    out, notes, pos = "", [], 0
+    for m in RUBY.finditer(text):
+        out += text[pos:m.start()]
+        notes.append((len(out), len(out) + len(m.group(1)), m.group(2)))
+        out += m.group(1)
+        pos = m.end()
+    return out + text[pos:], notes
+
+
+def apply_ruby(text, toks, notes):
+    """把括号里的读音写到对应的词上：正好是一个词就直接改读音；词后面还带假名（噤ん）就接上；
+    被拆成几个词（山桜桃梅）就合成一个名词。"""
+    for a, b, r in notes:
+        first = next((t for t in toks if t["i"][0] == a), None)
+        inside = [t for t in toks if t["i"][0] >= a and t["i"][1] <= b]
+        if first and first["i"][1] == b:
+            first["k"] = r
+        elif first and first["i"][1] > b and re.fullmatch(r"[ぁ-ゖ]+", first["s"][b - a:]):
+            first["k"] = r + first["s"][b - a:]
+        elif inside and inside[0]["i"][0] == a and inside[-1]["i"][1] == b:
+            word = text[a:b]
+            merged = {"s": word, "l": word, "p": "名詞", "k": r, "p2": "普通名詞", "lk": r, "i": [a, b]}
+            k = toks.index(inside[0])
+            toks[k:k + len(inside)] = [merged]
+
+
 # ── 语法规则 ──────────────────────────────────────────────
 # rule = {"re": 正则}                  作用于整行日文
 #      | {"tok": [条件, ...]}          连续的词依次满足各条件
-# 条件的键：s(写法正则) l(原形，字符串或列表) p/p2(词性，可用 "!x" 表示排除) f(活用形正则)
+# 条件的键：s(写法正则) k(读音正则，平假名) l(原形，字符串或列表) p/p2(词性，可用 "!x" 表示排除) f(活用形正则)
 #          prev/next(前一个/后一个词须满足的条件)  !prev/!next(前一个/后一个词不能满足的条件)
 #          例：{"l": "居る", "!prev": {"l": "て", "p": "助詞"}} 只算「在」，不算「〜ている」
 
@@ -103,6 +133,9 @@ def _ok(tok, cond):
     for key, want in cond.items():
         if key == "s":
             if not re.fullmatch(want, tok["s"]):
+                return False
+        elif key == "k":
+            if not re.fullmatch(want, tok.get("k", "")):
                 return False
         elif key == "f":
             if not re.match(want, tok.get("f", "")):
@@ -169,8 +202,10 @@ def dump_song(song):
     return f'{h}, "lines": [\n{body}\n]}}\n'
 
 
-def fix_readings(fixes, toks):
-    """按 data/readings.json 修正 UniDic 读错的读音（只改 k，不改原形）。"""
+def fix_readings(fixes, toks, text=""):
+    """按 data/readings.json 修正 UniDic 读错的读音（只改 k，不改原形）。
+    可以加 "line": 正则，只在这一行日文包含它时才改（用来区分 溜息を吐く(つく) 和 息を吐く(はく)）。"""
+    fixes = [fx for fx in fixes if "line" not in fx or re.search(fx["line"], text)]
     for i, t in enumerate(toks):
         for fx in fixes:
             if _ok(t, fx["tok"]) and _ctx_ok(toks, i, fx["tok"]):
@@ -196,8 +231,10 @@ def main():
                      parse_lrc(base.with_name(base.name + ".zh.lrc")))
         lines = []
         for t, ja, zh in rows:
+            ja, notes = strip_ruby(ja)
             toks = tokenize(ja)
-            fix_readings(fixes, toks)
+            fix_readings(fixes, toks, ja)
+            apply_ruby(ja, toks, notes)
             line = {"t": t, "ja": ja, "zh": zh, "tok": toks}
             gram = match_grammar(rules, ja, toks)
             if gram:
