@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parent.parent
 POS = ("名詞", "動詞", "形容詞", "形状詞", "副詞", "代名詞")
 # 这些语法点命中的词本身就是语法成分，不再列为候选
 GRAMMAR_WORDS = ("mama", "you", "mitai", "hoshii", "teiru", "teiku", "teshimau", "tekureru", "temiru", "koto", "mono",
-                 "sou", "kuseni", "tame", "teoku", "nitotte", "tabi", "sugiru", "teyaru", "tekudasai", "hazu", "toori", "teageru", "uchini")
+                 "sou", "kuseni", "tame", "teoku", "nitotte", "tabi", "sugiru", "teyaru", "tekudasai", "hazu", "toori", "teageru", "uchini", "temorau")
 
 
 def candidates(con, albums, ph):
