@@ -39,6 +39,8 @@ make setup     # 第一次：创建 .venv，安装 fugashi + unidic-lite
 make ingest    # 从 ~/Documents/Gemini Spark/Lyrics 导入新歌（可用 LYRICS=路径 指定）
 make all       # 分词 → 导出 data.json → 生成 web/index.html
 make db        # 生成 local/kotoba.sqlite，用来做 SQL 组合查询
+make cand ALBUM=tousaku    # 这张专辑还没收录的候选词（附原句），需先 make db
+make audit ALBUM=tousaku   # 核对词条在这张专辑里命中的读音，抽查分词
 ```
 
 ## 词表规则
@@ -46,6 +48,7 @@ make db        # 生成 local/kotoba.sqlite，用来做 SQL 组合查询
 - 按「出现在几首歌里」排序，再按总次数排序；只收出现在 2 首及以上歌里的词。同一首歌的不同版本（`dup_of`）只算一次。
 - 分档：核心 ≥10 首 / 高频 6–9 / 中频 3–5 / 基础 2。
 - 每个词包含：写法、假名、罗马音、中文意思、自编例句（附罗马音和中文）、每首歌的出现次数和位置。
+- 收词范围：出现在 ≥2 首歌里的实词（名词/动词/形容词/形容动词/副词/代词）都收；人名、地名不收；「こと」「もの」「よう」这类放进语法。
 - 语法点单独统计，方法相同。
 
 数据结构的详细说明见 [docs/data-model.md](docs/data-model.md)。

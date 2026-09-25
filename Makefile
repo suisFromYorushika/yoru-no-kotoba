@@ -1,7 +1,7 @@
 PY ?= .venv/bin/python
 LYRICS ?= $(HOME)/Documents/Gemini Spark/Lyrics
 
-.PHONY: all setup ingest analyze export build db
+.PHONY: all setup ingest analyze export build db cand audit
 
 all: analyze export build          ## 分词 → 导出 → 生成网页
 
@@ -22,3 +22,9 @@ build:
 
 db:                                ## 生成 local/kotoba.sqlite
 	$(PY) scripts/make_db.py
+
+cand:                              ## 某张专辑的候选词（附原句）：make cand ALBUM=tousaku
+	$(PY) scripts/candidates.py $(ALBUM)
+
+audit:                             ## 核对词条在某张专辑里命中的读音：make audit ALBUM=tousaku
+	$(PY) scripts/candidates.py $(ALBUM) --audit

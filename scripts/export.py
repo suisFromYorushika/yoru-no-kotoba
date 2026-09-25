@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from analyze import _ok  # noqa: E402
+from analyze import seq_spans  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -30,10 +30,7 @@ def find_lemma(match, line):
         elif isinstance(alt, dict):
             spans += [[m.start(), m.end()] for m in re.finditer(alt["re"], line["ja"])]
         else:
-            n = len(alt)
-            for i in range(len(toks) - n + 1):
-                if all(_ok(toks[i + j], c) for j, c in enumerate(alt)):
-                    spans.append([toks[i]["i"][0], toks[i + n - 1]["i"][1]])
+            spans += seq_spans(alt, toks)
     # 去重（不同写法规则命中同一位置时只算一次）
     uniq = sorted({tuple(s) for s in spans})
     out = []

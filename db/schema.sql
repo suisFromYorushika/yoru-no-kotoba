@@ -70,7 +70,7 @@ CREATE TABLE entry_hits (
 );
 
 CREATE TABLE grammar (
-  id TEXT PRIMARY KEY, pattern TEXT, romaji TEXT, meaning TEXT, ex_ja TEXT, ex_zh TEXT
+  id TEXT PRIMARY KEY, pattern TEXT, romaji TEXT, meaning TEXT, ex_ja TEXT, ex_romaji TEXT, ex_zh TEXT
 );
 
 CREATE TABLE grammar_hits (
