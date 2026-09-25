@@ -104,8 +104,8 @@
    "zh": "幻灯",
    "year": "2023.04",
    "type": "音乐画集特别大碟",
-   "note": "与画家加藤隆跨界合作的实体音乐画册大碟。",
-   "done": false,
+   "note": "音乐画集:每首歌取材一部文学作品(川端康成《雪国》、海明威《老人与海》等)",
+   "done": true,
    "dir": "yorushika/gentou",
    "cover": "covers/gentou.jpg"
   },

@@ -45,7 +45,7 @@ def parse_lrc(path):
             mm, ss, frac = m.group(1), m.group(2), m.group(3) or "0"
             stamps.append(int(mm) * 60000 + int(ss) * 1000 + int(frac.ljust(3, "0")[:3]))
             pos = m.end()
-        text = line[pos:].strip()
+        text = line[pos:].strip().strip("\u200b\u200e\u200f\ufeff").strip()  # 去掉看不见的方向标记
         if not stamps or not text or CREDIT.match(text) or TITLE.search(text):
             continue
         rows.extend((t, text) for t in stamps)
