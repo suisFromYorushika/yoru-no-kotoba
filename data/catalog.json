@@ -153,8 +153,8 @@
    "zh": "原声不插电专场",
    "year": "2022.07",
    "type": "Acoustic Album",
-   "note": "洗尽铅华的纯粹原声现场。",
-   "done": false,
+   "note": "原声重录:早期歌曲的钢琴与木吉他版,外加 demo《優しいエイプリルフール》",
+   "done": true,
    "dir": "atarayo/acoustic",
    "cover": "covers/acoustic.jpg"
   },
