@@ -95,7 +95,7 @@ def tokenize(text):
 # ── 语法规则 ──────────────────────────────────────────────
 # rule = {"re": 正则}                  作用于整行日文
 #      | {"tok": [条件, ...]}          连续的词依次满足各条件
-# 条件的键：s(写法正则) l(原形，字符串或列表) p/p2(词性，可用 "!x" 表示排除) f(活用形正则)
+# 条件的键：s(写法正则) k(读音正则，平假名) l(原形，字符串或列表) p/p2(词性，可用 "!x" 表示排除) f(活用形正则)
 #          prev/next(前一个/后一个词须满足的条件)  !prev/!next(前一个/后一个词不能满足的条件)
 #          例：{"l": "居る", "!prev": {"l": "て", "p": "助詞"}} 只算「在」，不算「〜ている」
 
@@ -103,6 +103,9 @@ def _ok(tok, cond):
     for key, want in cond.items():
         if key == "s":
             if not re.fullmatch(want, tok["s"]):
+                return False
+        elif key == "k":
+            if not re.fullmatch(want, tok.get("k", "")):
                 return False
         elif key == "f":
             if not re.match(want, tok.get("f", "")):

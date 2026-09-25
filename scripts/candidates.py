@@ -1,6 +1,7 @@
 """整理专辑用的辅助查询（需先 make db）。
 
-用法：python scripts/candidates.py tousaku            # 候选词：≥2 首、实词、还没被任何词条覆盖，附原句
+用法：python scripts/candidates.py tousaku            # 候选词：这张专辑里出现、还没被任何词条覆盖的实词，
+                                                      # 在「已整理的专辑 + 这张」里出现 ≥2 首，附原句
       python scripts/candidates.py tousaku --audit    # 核对：已有词条在这张专辑里命中的读音和首数
 可以写多张专辑：python scripts/candidates.py dakara,elma
 """
@@ -12,31 +13,44 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 POS = ("名詞", "動詞", "形容詞", "形状詞", "副詞", "代名詞")
+# 这些语法点命中的词本身就是语法成分，不再列为候选
+GRAMMAR_WORDS = ("mama", "you", "mitai", "hoshii", "teiru", "teiku", "teshimau", "tekureru", "temiru", "koto", "mono")
 
 
 def candidates(con, albums, ph):
-    # 被某个词条命中区间完全覆盖的词不算候选（多词组成的词条也能正确排除）
+    # 统计范围 = 已整理（done）的专辑 + 这次要整理的专辑；候选词必须在这次的专辑里出现
+    scope = sorted({r[0] for r in con.execute("SELECT id FROM albums WHERE done = 1")} | set(albums))
+    sp = ",".join("?" * len(scope))
+    # 被某个词条命中区间完全覆盖的词不算候选（多词组成的词条也能正确排除）；
+    # 已经作为语法点统计的（こと/もの/よう/まま/みたい/〜ている 的 いる 等）也不算
+    gids = ",".join(f"'{g}'" for g in GRAMMAR_WORDS)
     rows = con.execute(f"""
       WITH covered AS (SELECT DISTINCT t.song_id, t.line_idx, t.pos FROM tokens t JOIN entry_hits h
-         ON h.song_id = t.song_id AND h.line_idx = t.line_idx AND t.c_start >= h.c_start AND t.c_end <= h.c_end)
-      SELECT t.lemma, MAX(t.lemma_kana), t.pos1, COUNT(DISTINCT t.song_id) AS songs, COUNT(*) AS total
+         ON h.song_id = t.song_id AND h.line_idx = t.line_idx AND t.c_start >= h.c_start AND t.c_end <= h.c_end
+       UNION SELECT DISTINCT t.song_id, t.line_idx, t.pos FROM tokens t JOIN grammar_hits g
+         ON g.song_id = t.song_id AND g.line_idx = t.line_idx AND t.c_start >= g.c_start AND t.c_end <= g.c_end
+         AND g.grammar_id IN ({gids}))
+      SELECT t.lemma, MAX(t.lemma_kana), t.pos1, COUNT(DISTINCT t.song_id) AS songs,
+             COUNT(DISTINCT CASE WHEN s.album IN ({ph}) THEN t.song_id END) AS here, COUNT(*) AS total
       FROM tokens t JOIN counted_songs s ON s.id = t.song_id
-      WHERE s.album IN ({ph}) AND t.pos1 IN ({','.join('?' * len(POS))})
+      WHERE s.album IN ({sp}) AND t.pos1 IN ({','.join('?' * len(POS))})
         AND NOT EXISTS (SELECT 1 FROM covered c WHERE c.song_id = t.song_id AND c.line_idx = t.line_idx AND c.pos = t.pos)
-      GROUP BY t.lemma, t.pos1 HAVING songs >= 2 ORDER BY songs DESC, total DESC""", albums + list(POS)).fetchall()
-    print(f"{len(rows)} 个候选")
-    for lemma, kana, pos, songs, total in rows:
-        print(f"\n## {lemma}  {kana}  {pos}  {songs} 首 / {total} 次")
+      GROUP BY t.lemma, t.pos1 HAVING songs >= 2 AND here >= 1 ORDER BY songs DESC, total DESC""",
+                       albums + scope + list(POS)).fetchall()
+    print(f"{len(rows)} 个候选（统计范围：{', '.join(scope)}）")
+    for lemma, kana, pos, songs, here, total in rows:
+        print(f"\n## {lemma}  {kana}  {pos}  {songs} 首（本次 {here} 首）/ {total} 次")
         seen = set()
-        for sid, ja, a, b, zh in con.execute(f"""
-            SELECT t.song_id, l.ja, t.c_start, t.c_end, l.zh FROM tokens t JOIN counted_songs s ON s.id = t.song_id
+        # 先列这次专辑里的原句，再列已整理专辑里的
+        for sid, ja, a, b, zh, k in con.execute(f"""
+            SELECT t.song_id, l.ja, t.c_start, t.c_end, l.zh, t.kana FROM tokens t JOIN counted_songs s ON s.id = t.song_id
             JOIN lines l ON l.song_id = t.song_id AND l.idx = t.line_idx
-            WHERE s.album IN ({ph}) AND t.lemma = ? AND t.pos1 = ? ORDER BY t.song_id, t.line_idx""",
-                albums + [lemma, pos]):
+            WHERE s.album IN ({sp}) AND t.lemma = ? AND t.pos1 = ?
+            ORDER BY s.album NOT IN ({ph}), t.song_id, t.line_idx""", scope + [lemma, pos] + albums):
             if sid in seen:
                 continue
             seen.add(sid)
-            print(f"   {sid}: {ja[:a]}【{ja[a:b]}】{ja[b:]}  // {zh}")
+            print(f"   {sid}: {ja[:a]}【{ja[a:b]}|{k}】{ja[b:]}  // {zh}")
             if len(seen) >= 3:
                 break
 

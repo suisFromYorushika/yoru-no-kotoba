@@ -37,7 +37,7 @@ def main():
     con.executemany("INSERT INTO songs VALUES (?,?,?,?,?,?)",
                     [(s["id"], s["album"], s.get("track"), s["ja"], s["zh"], s.get("dup_of")) for s in cat["songs"]])
     con.executemany("INSERT INTO entries VALUES (?,?,?,?,?,?,?)",
-                    [(l["w"], l["k"], l["r"], l["m"], *(l["ex"] or [None, None, None])) for l in lemmas])
+                    [(l["w"], l["k"], l["r"], l["m"], *(l.get("ex") or [None, None, None])) for l in lemmas])
     con.executemany("INSERT INTO grammar VALUES (?,?,?,?,?,?,?)",
                     [(g["id"], g["g"], g["r"], g["m"], *g["ex"]) for g in grammar])
 
