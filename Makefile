@@ -8,8 +8,8 @@ all: analyze export build          ## 分词 → 导出 → 生成网页
 setup:                             ## 创建虚拟环境并安装依赖
 	python3 -m venv .venv && $(PY) -m pip install -r requirements.txt
 
-ingest:                            ## 从本地歌词库导入新歌
-	$(PY) scripts/ingest.py "$(LYRICS)"
+ingest:                            ## 从本地歌词库导入新歌；FORCE=1 时覆盖仓库里改过的歌词
+	$(PY) scripts/ingest.py "$(LYRICS)" $(if $(FORCE),--force)
 
 analyze:
 	$(PY) scripts/analyze.py

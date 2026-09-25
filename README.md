@@ -61,6 +61,7 @@ scripts/               ingest → analyze → export → build，以及 make_db
 ```bash
 make setup     # 第一次：创建 .venv，安装 fugashi + unidic-lite
 make ingest    # 从 ~/Documents/Gemini Spark/Lyrics 导入新歌（可用 LYRICS=路径 指定）
+               # 仓库里改过的歌词默认不覆盖；要用歌词库的版本覆盖：make ingest FORCE=1
 make all       # 分词 → 导出 data.json → 生成 web/index.html 和 web/artifact.html
 make db        # 生成 local/kotoba.sqlite，用来做 SQL 组合查询
 make cand ALBUM=tousaku    # 这张专辑还没收录的候选词（附原句），需先 make db

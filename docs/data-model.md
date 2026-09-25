@@ -4,7 +4,7 @@
 
 ```
 ~/Documents/Gemini Spark/Lyrics      （本地歌词库，原始来源）
-        │ scripts/ingest.py    复制 .ja/.zh.lrc，NFC 文件名，更新 catalog.json
+        │ scripts/ingest.py    复制 .ja/.zh.lrc（仓库里改过的不覆盖），NFC 文件名，更新 catalog.json
         ▼
 lyrics/**.lrc  +  data/catalog.json
         │ scripts/analyze.py   解析 LRC → 按时间戳对齐中日行 → fugashi+UniDic 分词 → 匹配 grammar.json
@@ -37,6 +37,8 @@ data/data.json  ──scripts/build.py──▶  web/index.html（GitHub Pages�
 - `zh`（歌名、专辑名的中文）优先用 QQ 音乐上的译名，没有再用网易云音乐的；平台上只有英文或版本说明的保留自译。
 - 专辑的 `short` 只给很长的名字（例：音辞）；`cover` 是 `web/covers/` 里的封面。
 - 歌曲的 `links`：`{"qq": QQ 音乐 songmid, "ne": 网易云歌曲 id}`，网页据此直接跳到那首歌；没有的就用搜索链接。
+- 歌曲的 `lib_ja`：本地歌词库里的旧歌名，只有歌名更正过的歌才有（例：紙ひこうき 在歌词库里叫 Paper Airplane）。`make ingest` 会跳过歌词库里这个旧文件，不会把它当成新歌加回来。
+- 整理时修过的歌词（错字、整首换成正确版本）只改仓库里的 `lyrics/`。`make ingest` 发现仓库里的文件和歌词库不同时会保留仓库的版本并列出来；`make ingest FORCE=1` 才会用歌词库的版本覆盖。
 
 ## data/songs/sN.json
 
