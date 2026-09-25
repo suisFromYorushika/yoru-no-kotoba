@@ -5,9 +5,8 @@
 - 词表只收出现在 ≥2 首歌里的词；语法点全部导出。
 - 每个词/语法点附带出现位置 loc：{歌曲id: [[行号, 起, 止], ...]}，网页据此显示原句并高亮；
   x = [歌曲id, 行号] 是从歌词里自动挑的例句（优先有中文翻译、长度适中的句子）。
-- 每行歌词：[日文, 中文, 分段]。分段是按"词+后面粘着的助动词/后缀"切开的列表，
-  每段由若干词组成；词是字符串（没有汉字，读音就是写法），或 [写法, 读音]（含汉字，或助词 は/へ）。
-  网页据此在汉字上注假名、在每段下面标罗马音。
+- 每行歌词：[日文, 中文, 分段, 时间戳毫秒]。分段是按"词+后面粘着的助动词/后缀"切开的列表，
+  每段由若干词组成；词见 encode_tok（标点是字符串）。网页据此注假名、标罗马音、点词查看原形和词性。
 """
 import json
 import re
@@ -61,12 +60,27 @@ def attaches(t, prev):
     return t["p"] == "助詞" and t.get("p2") == "接続助詞" and t["s"] in ("て", "で", "ば", "ちゃ", "じゃ")
 
 
+POS = {"名詞": "n", "動詞": "v", "形容詞": "a", "形状詞": "na", "副詞": "adv", "代名詞": "pr", "助詞": "p",
+       "助動詞": "aux", "接尾辞": "suf", "接頭辞": "pre", "接続詞": "cj", "連体詞": "adn", "感動詞": "int"}
+
+
 def encode_tok(t):
+    """词 → [写法, 读音, 词性, 原形, 原形读音]，末尾的空项省略。
+    读音只在含汉字（或助词 は/へ）时给出，否则读音就是写法；原形只在和写法不同时给出。"""
+    if t["p"] in ("補助記号", "空白"):
+        return t["s"]
     if t.get("k") and KANJI.search(t["s"]):
-        return [t["s"], t["k"]]
-    if t["p"] == "助詞" and t["s"] in ("は", "へ"):
-        return [t["s"], {"は": "わ", "へ": "え"}[t["s"]]]
-    return t["s"]
+        k = t["k"]
+    elif t["p"] == "助詞" and t["s"] in ("は", "へ"):
+        k = {"は": "わ", "へ": "え"}[t["s"]]
+    else:
+        k = ""
+    out = [t["s"], k, POS.get(t["p"], "")]
+    if t["l"] != t["s"]:
+        out += [t["l"], t.get("lk", "") if KANJI.search(t["l"]) else ""]
+    while out and out[-1] == "":
+        out.pop()
+    return out[0] if len(out) == 1 else out
 
 
 def segments(line):
@@ -147,8 +161,8 @@ def build():
         "pending": [{k: a[k] for k in ("id", "band", "ja", "zh", "short", "year", "cover") if k in a}
                     for a in cat["albums"] if not a.get("done")],
         "bands": cat["bands"],
-        "songs": [{k: m[k] for k in ("id", "album", "track", "ja", "zh", "dup_of") if k in m} for m in song_meta],
-        "lines": {s["id"]: [[l["ja"], l["zh"], segments(l)] for l in s["lines"]] for s in songs},
+        "songs": [{k: m[k] for k in ("id", "album", "track", "ja", "zh", "dup_of", "links") if k in m} for m in song_meta],
+        "lines": {s["id"]: [[l["ja"], l["zh"], segments(l), l["t"]] for l in s["lines"]] for s in songs},
         "vocab": vocab,
         "grammar": gram,
     }
