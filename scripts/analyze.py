@@ -202,8 +202,10 @@ def dump_song(song):
     return f'{h}, "lines": [\n{body}\n]}}\n'
 
 
-def fix_readings(fixes, toks):
-    """按 data/readings.json 修正 UniDic 读错的读音（只改 k，不改原形）。"""
+def fix_readings(fixes, toks, text=""):
+    """按 data/readings.json 修正 UniDic 读错的读音（只改 k，不改原形）。
+    可以加 "line": 正则，只在这一行日文包含它时才改（用来区分 溜息を吐く(つく) 和 息を吐く(はく)）。"""
+    fixes = [fx for fx in fixes if "line" not in fx or re.search(fx["line"], text)]
     for i, t in enumerate(toks):
         for fx in fixes:
             if _ok(t, fx["tok"]) and _ctx_ok(toks, i, fx["tok"]):
@@ -231,7 +233,7 @@ def main():
         for t, ja, zh in rows:
             ja, notes = strip_ruby(ja)
             toks = tokenize(ja)
-            fix_readings(fixes, toks)
+            fix_readings(fixes, toks, ja)
             apply_ruby(ja, toks, notes)
             line = {"t": t, "ja": ja, "zh": zh, "tok": toks}
             gram = match_grammar(rules, ja, toks)
