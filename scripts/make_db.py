@@ -39,7 +39,7 @@ def main():
     con.executemany("INSERT INTO entries VALUES (?,?,?,?,?,?,?)",
                     [(l["w"], l["k"], l["r"], l["m"], *(l.get("ex") or [None, None, None])) for l in lemmas])
     con.executemany("INSERT INTO grammar VALUES (?,?,?,?,?,?,?)",
-                    [(g["id"], g["g"], g["r"], g["m"], *g["ex"]) for g in grammar])
+                    [(g["id"], g["g"], g["r"], g["m"], *(g.get("ex") or [None, None, None])) for g in grammar])
 
     for s in cat["songs"]:
         song = load(f"songs/{s['id']}.json")
