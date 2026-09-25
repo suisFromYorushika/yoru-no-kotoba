@@ -91,6 +91,7 @@ UniDic 有些读音在歌词里不对（何も 读成 なんも、君 读成 く
 | repo_url / pages_url / cloud_url | GitHub 仓库、Pages 网址、claude.ai 版网址 |
 | supabase_url / supabase_key | Supabase 项目地址和 publishable key（公开的）；都填了 Pages 版才会显示登录 |
 | supabase_github | `true` 时显示「用 GitHub 账号登录」（需要先在 Supabase 里配置 GitHub 登录） |
+| supabase_google | `true` 时显示「用 Google 账号登录」（需要先在 Supabase 里配置 Google 登录） |
 
 ## data/lemmas.json（整理过的词条）
 

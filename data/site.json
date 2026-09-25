@@ -4,5 +4,6 @@
  "cloud_url": "https://claude.ai/artifact/52Y32vb5QvrzcKwEekrmNK",
  "supabase_url": "https://dgsqypzwqkjryvmydiix.supabase.co",
  "supabase_key": "sb_publishable_ITvseLxe0FsaQF1fPaFImA_aLq-bCyI",
- "supabase_github": false
+ "supabase_github": false,
+ "supabase_google": false
 }

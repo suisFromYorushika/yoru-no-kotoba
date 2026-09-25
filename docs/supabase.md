@@ -43,7 +43,11 @@ claude.ai 版不受影响，继续用 claude.ai 账号同步（claude.ai 不允�
 
    然后 `make build`，提交并合并到 main。GitHub Pages 会自动更新，打开网页 →「我的」→ 注册 → 登录。
 
-### 可选：用 GitHub 账号登录
+### 可选：用 GitHub / Google 账号登录
+
+网页上两个按钮都已经做好，默认隐藏。在 Supabase 里配置好对应的登录方式后，把 `data/site.json` 里的 `supabase_github` / `supabase_google` 改成 `true` 就会显示。
+
+**GitHub**
 
 1. GitHub → Settings → Developer settings → **OAuth Apps** → New OAuth App
    - Homepage URL：`https://suisfromyorushika.github.io/yoru-no-kotoba/`
@@ -51,6 +55,16 @@ claude.ai 版不受影响，继续用 claude.ai 账号同步（claude.ai 不允�
 2. 建好后复制 Client ID，再生成一个 Client secret。
 3. Supabase → Authentication → Sign In / Providers → **GitHub**：打开，填入 Client ID 和 Client secret，保存。
 4. 把 `data/site.json` 里的 `"supabase_github"` 改成 `true`，重新 `make build`，提交。登录框下面会出现「用 GitHub 账号登录」。
+
+**Google**（在中国大陆需要翻墙才能用）
+
+1. 打开 [Google Cloud Console](https://console.cloud.google.com/)，新建一个项目。
+2. APIs & Services → **OAuth consent screen**：User type 选 External，填应用名和你的邮箱；Publishing status 可以保持 Testing，并把你自己的 Google 邮箱加到 Test users。
+3. APIs & Services → **Credentials** → Create credentials → **OAuth client ID** → Application type 选 Web application：
+   - Authorized JavaScript origins：`https://suisfromyorushika.github.io`
+   - Authorized redirect URIs：`https://<你的项目>.supabase.co/auth/v1/callback`
+4. 复制 Client ID 和 Client secret，填到 Supabase → Authentication → Sign In / Providers → **Google**，打开并保存。
+5. 把 `data/site.json` 里的 `"supabase_google"` 改成 `true`。
 
 ## 需要知道的限制
 
