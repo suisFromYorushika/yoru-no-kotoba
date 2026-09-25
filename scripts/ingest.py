@@ -1,10 +1,12 @@
 """把本地歌词库导入仓库：复制 .ja.lrc / .zh.lrc 和专辑背景 md 到 lyrics/，并生成/更新 data/catalog.json。
 
-用法：python scripts/ingest.py [歌词库路径]
+用法：python scripts/ingest.py [歌词库路径] [--force]
 默认路径：~/Documents/Gemini Spark/Lyrics
 
 - 文件名统一 NFC 规范化（macOS 上是 NFD）。
 - 已有的 catalog.json 中的 id、中文名、介绍等手工字段不会被覆盖，只补充新歌。
+- 仓库里已有、但内容和歌词库不同的文件（整理时修过的歌词）默认保留；加 --force 才用歌词库的版本覆盖。
+- 歌名更正过的歌，catalog.json 里的 `lib_ja` 记着歌词库里的旧歌名；导入时跳过这个文件，不会把它当成新歌加回来。
 """
 import json
 import os
@@ -101,7 +103,9 @@ def load_catalog():
 
 
 def main():
-    src = Path(sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/Documents/Gemini Spark/Lyrics"))
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    force = "--force" in sys.argv[1:]
+    src = Path(args[0] if args else os.path.expanduser("~/Documents/Gemini Spark/Lyrics"))
     cat = load_catalog()
     bands = {b["id"]: b for b in cat["bands"]}
     albums = {a["id"]: a for a in cat["albums"]}
@@ -118,6 +122,14 @@ def main():
                 album_dirs.append((band["id"], year, d, ftype, ja))
     album_dirs.sort(key=lambda x: (x[0] != "yorushika", x[1]))
 
+    kept = []  # 仓库里改过（和歌词库不同）、这次没覆盖的文件
+
+    def copy(f, dst):
+        if dst.exists() and not force and dst.read_bytes() != f.read_bytes():
+            kept.append(dst.relative_to(ROOT))
+        else:
+            shutil.copyfile(f, dst)
+
     for band_id, year, d, ftype, ja in album_dirs:
         aid = ALBUM_IDS[ja]
         files = {nfc(f.name): f for f in d.iterdir()}
@@ -130,19 +142,22 @@ def main():
         out = LYRICS_OUT / band_id / aid
         out.mkdir(parents=True, exist_ok=True)
         if bg_name:
-            shutil.copyfile(files[bg_name], out / "_album.md")
+            copy(files[bg_name], out / "_album.md")
 
         for name in sorted(files):
             m = re.match(r"(\d+)\.\s*(.+)\.ja\.lrc$", name)
             if not m:
                 continue
             track, title = int(m.group(1)), m.group(2)
+            song = next((s for s in songs if s["album"] == aid and title in (s["ja"], s.get("lib_ja"))), None)
+            if song is not None and title != song["ja"]:
+                print(f"跳过 {ja}/{name}：这首歌已更正为「{song['ja']}」")
+                continue
             zh_name = name[:-len(".ja.lrc")] + ".zh.lrc"
             stem = f"{track:02d}.{title}"
-            shutil.copyfile(files[name], out / f"{stem}.ja.lrc")
+            copy(files[name], out / f"{stem}.ja.lrc")
             if zh_name in files:
-                shutil.copyfile(files[zh_name], out / f"{stem}.zh.lrc")
-            song = next((s for s in songs if s["album"] == aid and s["ja"] == title), None)
+                copy(files[zh_name], out / f"{stem}.zh.lrc")
             if song is None:
                 song = {"id": f"s{next_id}", "album": aid, "ja": title, "zh": bg["titles"].get(title, title)}
                 next_id += 1
@@ -169,6 +184,10 @@ def main():
     cat["albums"] = sorted(albums.values(), key=lambda a: order.get(a["id"], 99))
     cat["songs"] = sorted(songs, key=lambda s: int(s["id"][1:]))
     CATALOG.write_text(json.dumps(cat, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    if kept:
+        print(f"保留了 {len(kept)} 个仓库里改过的文件（和歌词库里的不同；要用歌词库的版本覆盖，加 --force）：")
+        for k in kept:
+            print(f"  {k}")
     print(f"{len(cat['albums'])} albums, {len(cat['songs'])} songs, "
           f"{sum(1 for s in cat['songs'] if 'dup_of' in s)} duplicate versions")
 
