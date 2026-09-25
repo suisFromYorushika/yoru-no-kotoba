@@ -169,8 +169,19 @@ def dump_song(song):
     return f'{h}, "lines": [\n{body}\n]}}\n'
 
 
+def fix_readings(fixes, toks):
+    """按 data/readings.json 修正 UniDic 读错的读音（只改 k，不改原形）。"""
+    for i, t in enumerate(toks):
+        for fx in fixes:
+            if _ok(t, fx["tok"]) and _ctx_ok(toks, i, fx["tok"]):
+                t["k"] = fx["k"]
+                break
+
+
 def main():
     catalog = json.loads((ROOT / "data" / "catalog.json").read_text(encoding="utf-8"))
+    fpath = ROOT / "data" / "readings.json"
+    fixes = json.loads(fpath.read_text(encoding="utf-8")) if fpath.exists() else []
     gpath = ROOT / "data" / "grammar.json"
     rules = json.loads(gpath.read_text(encoding="utf-8")) if gpath.exists() else []
     want = set(sys.argv[1:])
@@ -186,6 +197,7 @@ def main():
         lines = []
         for t, ja, zh in rows:
             toks = tokenize(ja)
+            fix_readings(fixes, toks)
             line = {"t": t, "ja": ja, "zh": zh, "tok": toks}
             gram = match_grammar(rules, ja, toks)
             if gram:

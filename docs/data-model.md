@@ -12,7 +12,7 @@ lyrics/**.lrc  +  data/catalog.json
 data/songs/sN.json                    （每首歌完整拆分，入库，便于 git diff）
         │ scripts/export.py    + lemmas.json / grammar.json，只取 done 专辑
         ▼
-data/data.json  ──scripts/build.py──▶  web/index.html
+data/data.json  ──scripts/build.py──▶  web/index.html（GitHub Pages）+ web/artifact.html（claude.ai）
         │
         └ scripts/make_db.py ──▶ local/kotoba.sqlite （查询用，不入库）
 ```
@@ -54,6 +54,23 @@ data/data.json  ──scripts/build.py──▶  web/index.html
 | p / p2 | 词性大类 / 细类 |
 | f | 活用形（只有会变形的词才有） |
 | i | 在这一行日文里的字符位置 [起, 止) |
+
+## data/readings.json（读音修正）
+
+UniDic 有些读音在歌词里不对（何も 读成 なんも、君 读成 くん、明日 读成 あす…）。网页会在汉字上显示这些读音，所以分词时按这张表修正 `k`（只改读音，不改原形，不影响计数）：
+
+```jsonc
+{"tok": {"s": "何", "next": {"s": "[もかがを]"}}, "k": "なに", "note": "何も/何か/何が/何を 读 なに"}
+```
+
+`tok` 的写法和 match 条件相同（可以用 prev/next）。整理新专辑时用 `make audit` 看到可疑读音，就往这里加一条。
+
+## data/data.json（网页用，自动生成）
+
+- `albums` / `pending`：已整理 / 待整理的专辑，含简称 `short`（例：音辞）和封面 `cover`
+- `vocab` / `grammar`：每项有 `occ`（每首歌的次数）、`loc`（每处出现的 [行号, 起, 止]）、`x`（自动挑的歌词例句 [歌曲id, 行号]）
+- `lines[歌曲id]`：每行 `[日文, 中文, 分段]`。分段按"词 + 后面粘着的助动词/后缀/て"切开，每段是词的列表；
+  词是字符串（没有汉字），或 `[写法, 读音]`（含汉字，或助词 は/へ 的读音 わ/え）。网页据此注假名、生成罗马音
 
 ## data/lemmas.json（整理过的词条）
 

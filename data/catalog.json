@@ -21,7 +21,9 @@
    "type": "1st 迷你专辑",
    "note": "《夏草が邪魔をする》是 Yorushika 于 2017 年夏推出的首张迷你专辑，也是 n-buna 与 suis 结成组合后的开山之作。",
    "done": false,
-   "dir": "yorushika/natsukusa"
+   "dir": "yorushika/natsukusa",
+   "short": "夏草",
+   "cover": "covers/natsukusa.jpg"
   },
   {
    "id": "makeinu",
@@ -32,7 +34,9 @@
    "type": "2nd 迷你专辑",
    "note": "2018 年 5 月发行的第 2 张迷你专辑，不仅诞生了播放量数亿的现象级神曲《ただ君に晴れ》，更确立了 Yorushika 对“失败者与边缘人”的深刻社会关怀。",
    "done": false,
-   "dir": "yorushika/makeinu"
+   "dir": "yorushika/makeinu",
+   "short": "败犬",
+   "cover": "covers/makeinu.jpg"
   },
   {
    "id": "dakara",
@@ -43,7 +47,9 @@
    "type": "1st 全长专辑",
    "note": "青年艾米放弃音乐后在瑞典旅行,写给艾尔玛的信与歌",
    "done": true,
-   "dir": "yorushika/dakara"
+   "dir": "yorushika/dakara",
+   "short": "音辞",
+   "cover": "covers/dakara.jpg"
   },
   {
    "id": "elma",
@@ -54,7 +60,9 @@
    "type": "2nd 全长专辑",
    "note": "前作续篇:艾尔玛循着艾米的日记踏上同一段旅程",
    "done": true,
-   "dir": "yorushika/elma"
+   "dir": "yorushika/elma",
+   "short": "エルマ",
+   "cover": "covers/elma.jpg"
   },
   {
    "id": "tousaku",
@@ -65,7 +73,9 @@
    "type": "3rd 全长专辑",
    "note": "2020 年发行的第 3 张正规概念大碟。",
    "done": false,
-   "dir": "yorushika/tousaku"
+   "dir": "yorushika/tousaku",
+   "short": "盗作",
+   "cover": "covers/tousaku.jpg"
   },
   {
    "id": "yorushika-singles",
@@ -76,7 +86,8 @@
    "type": "独立单曲与影视跨界合唱作品全集",
    "note": "本目录集中收录了未包含在 8 张录音室大碟之内的 Yorushika 独立动画单曲，以及主唱 suis 以个人名义受邀演唱的电影主题曲、跨界合唱神作。",
    "done": false,
-   "dir": "yorushika/yorushika-singles"
+   "dir": "yorushika/yorushika-singles",
+   "short": "单曲"
   },
   {
    "id": "sousaku",
@@ -87,7 +98,9 @@
    "type": "1st EP",
    "note": "探讨“何为创作”的哲学小品概念 EP。",
    "done": false,
-   "dir": "yorushika/sousaku"
+   "dir": "yorushika/sousaku",
+   "short": "創作",
+   "cover": "covers/sousaku.jpg"
   },
   {
    "id": "gentou",
@@ -98,7 +111,9 @@
    "type": "音乐画集特别大碟",
    "note": "与画家加藤隆跨界合作的实体音乐画册大碟。",
    "done": false,
-   "dir": "yorushika/gentou"
+   "dir": "yorushika/gentou",
+   "short": "幻燈",
+   "cover": "covers/gentou.jpg"
   },
   {
    "id": "nininshou",
@@ -109,7 +124,9 @@
    "type": "4th 全长专辑",
    "note": "2026 年 3 月推出的正规第 4 张概念全长专辑。",
    "done": false,
-   "dir": "yorushika/nininshou"
+   "dir": "yorushika/nininshou",
+   "short": "二人称",
+   "cover": "covers/nininshou.jpg"
   },
   {
    "id": "yoakemae",
@@ -120,7 +137,9 @@
    "type": "1st EP",
    "note": "“悲しみをたべて育つバンド。",
    "done": false,
-   "dir": "atarayo/yoakemae"
+   "dir": "atarayo/yoakemae",
+   "short": "夜明け前",
+   "cover": "covers/yoakemae.jpg"
   },
   {
    "id": "kyokuya",
@@ -131,7 +150,9 @@
    "type": "1st 全长专辑",
    "note": "首张正规全长专辑。",
    "done": false,
-   "dir": "atarayo/kyokuya"
+   "dir": "atarayo/kyokuya",
+   "short": "極夜",
+   "cover": "covers/kyokuya.jpg"
   },
   {
    "id": "acoustic",
@@ -142,7 +163,9 @@
    "type": "Acoustic Album",
    "note": "洗尽铅华的纯粹原声现场。",
    "done": false,
-   "dir": "atarayo/acoustic"
+   "dir": "atarayo/acoustic",
+   "short": "Acoustic",
+   "cover": "covers/acoustic.jpg"
   },
   {
    "id": "kioku",
@@ -153,7 +176,9 @@
    "type": "2nd Concept Album",
    "note": "あたらよ 官方明确定义的第一张“コンセプトアルバム”（Concept Album / 概念大碟）。",
    "done": false,
-   "dir": "atarayo/kioku"
+   "dir": "atarayo/kioku",
+   "short": "季億",
+   "cover": "covers/kioku.jpg"
   },
   {
    "id": "asatsuyu",
@@ -164,7 +189,9 @@
    "type": "迷你专辑",
    "note": "2024 年 9 月推出的重磅迷你专辑。",
    "done": false,
-   "dir": "atarayo/asatsuyu"
+   "dir": "atarayo/asatsuyu",
+   "short": "朝露",
+   "cover": "covers/asatsuyu.jpg"
   },
   {
    "id": "utakata",
@@ -175,7 +202,9 @@
    "type": "迷你专辑",
    "note": "2025 年秋推出的叙事迷你大碟。",
    "done": false,
-   "dir": "atarayo/utakata"
+   "dir": "atarayo/utakata",
+   "short": "泡沫",
+   "cover": "covers/utakata.jpg"
   },
   {
    "id": "watakushiame",
@@ -186,7 +215,9 @@
    "type": "3rd 全长专辑",
    "note": "2026 年 8 月发行的最新第 3 张正规全长专辑。",
    "done": false,
-   "dir": "atarayo/watakushiame"
+   "dir": "atarayo/watakushiame",
+   "short": "私雨",
+   "cover": "covers/watakushiame.jpg"
   }
  ],
  "songs": [
