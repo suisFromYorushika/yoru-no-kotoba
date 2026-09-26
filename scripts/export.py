@@ -155,7 +155,7 @@ def build():
         gram.append({"id": g["id"], "g": g["g"], "r": g["r"], "m": g["m"], "occ": occ, "loc": loc,
                      "x": pick_example(loc, by_id, order)})
 
-    album_keys = ("id", "band", "ja", "zh", "short", "year", "type", "note", "cover")
+    album_keys = ("id", "band", "ja", "zh", "short", "year", "type", "note", "cover", "badge")
     return {
         "albums": [{("artist" if k == "band" else k): a[k] for k in album_keys if k in a} for a in done],
         "pending": [{k: a[k] for k in ("id", "band", "ja", "zh", "short", "year", "cover") if k in a}

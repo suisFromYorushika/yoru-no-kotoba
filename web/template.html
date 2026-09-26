@@ -204,7 +204,9 @@ details.occ>summary{cursor:pointer;color:var(--accent);padding:6px 0;}
 .aback{border:0;background:none;color:var(--accent);font-size:.9rem;cursor:pointer;padding:6px 0;margin-bottom:6px;}
 .shelfband{font-size:.8rem;color:var(--muted);margin:14px 0 8px;}
 .shelf{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-.tile{border:0;padding:0;background:none;cursor:pointer;border-radius:10px;overflow:hidden;position:relative;display:block;box-shadow:0 1px 3px rgba(10,12,20,.12);}
+.tile{border:0;padding:0;background:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;min-width:0;color:var(--ink);}
+.tcover{position:relative;display:block;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(10,12,20,.12);}
+.tname{font-family:var(--jp);font-size:.8rem;line-height:1.3;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .tile .cover{width:100%;height:auto;aspect-ratio:1;border-radius:0;display:grid;}
 .tile:hover .cover{filter:brightness(1.06);}
 .tbar{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(0,0,0,.28);}
@@ -264,6 +266,8 @@ details.lyr>summary{cursor:pointer;color:var(--accent);padding:6px 0;font-size:.
 .authf label{font-size:.8rem;color:var(--muted);}
 .authf input{padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:.95rem;}
 .authf .srow{align-items:center;}
+#nickForm .srow{margin-top:0;flex-wrap:nowrap;}
+#nickForm input{flex:1;min-width:0;}
 #authOauth{margin-top:4px;}
 #authOut{margin-top:8px;}
 .linkbtn{border:0;background:none;color:var(--accent);cursor:pointer;padding:8px 4px;font-size:.84rem;text-decoration:underline;}
@@ -411,6 +415,10 @@ footer p{margin:0 0 6px;}
       <div class="msg" id="pwMsg" role="status"></div>
     </form>
     <div class="msg" id="authMsg" role="status"></div>
+    <form class="authf" id="nickForm" hidden novalidate>
+      <label for="nick">昵称（显示在右上角，最多 12 个字）</label>
+      <div class="srow"><input id="nick" maxlength="12" autocomplete="nickname"><button class="btn" type="submit">保存</button></div>
+    </form>
     <button class="btn" id="authOut" type="button" hidden>退出登录</button>
   </section>
   <section>
@@ -450,7 +458,9 @@ const albumColor=Object.fromEntries(DATA.albums.map((a,i)=>[a.id,"var(--c"+(i%8)
 const songById=Object.fromEntries(DATA.songs.map(s=>[s.id,s]));
 const bandById=Object.fromEntries(DATA.bands.map(b=>[b.id,b]));
 const vocabByW=Object.fromEntries(DATA.vocab.map(v=>[v.w,v]));
-const ARTISTS=[{id:"all",label:"全部"}].concat(DATA.bands.slice().sort((a,b)=>a.id==="yorushika"?-1:1).map(b=>({id:b.id,label:b.ja})));
+// 乐队按 catalog.json 里第一张专辑出现的先后排序；还没有专辑的乐队排在最后
+const bandRank=id=>{const i=DATA.albums.findIndex(a=>a.artist===id);return i<0?1e9:i;};
+const ARTISTS=[{id:"all",label:"全部"}].concat(DATA.bands.slice().sort((a,b)=>bandRank(a.id)-bandRank(b.id)).map(b=>({id:b.id,label:b.ja})));
 const TIERS=[{id:"all",label:"全部"},{id:"core",label:"核心",min:10},{id:"high",label:"高频",min:6},{id:"mid",label:"中频",min:3},{id:"base",label:"基础",min:2}];
 const TIERNAME={core:"核心",high:"高频",mid:"中频",base:"基础"};
 const POSNAME={n:"名词",v:"动词",a:"形容词",na:"形容动词",adv:"副词",pr:"代词",p:"助词",aux:"助动词",suf:"后缀",pre:"前缀",cj:"连词",adn:"连体词",int:"感叹词"};
@@ -552,7 +562,7 @@ async function onSession(session){
   if(u.id===sbUid)return;
   sbUid=u.id;
   const md=u.user_metadata||{};
-  account={name:u.email||md.user_name||md.name||"已登录",avatar:md.avatar_url||null};
+  account={nick:md.nickname||"",email:u.email||"",name:md.nickname||md.user_name||md.name||(u.email||"").split("@")[0]||"已登录",avatar:md.avatar_url||null};
   backend={save:async d=>{const {error}=await sb.from("progress").upsert({user_id:u.id,data:d,updated_at:new Date().toISOString()});if(error)throw error;}};
   setSync("connecting");
   await pullSupabase(true);
@@ -603,6 +613,11 @@ document.getElementById("authForgot").onclick=()=>{const f=authFields();if(!f)re
     authMsg("authMsg","重设密码的邮件已发到 "+f.email+"。点邮件里的链接回到这里，就能设置新密码。");});};
 ["github","google"].forEach(pv=>{const b=document.getElementById("auth"+pv[0].toUpperCase()+pv.slice(1));
   b.onclick=()=>authRun(b,async()=>{const {error}=await sb.auth.signInWithOAuth({provider:pv,options:{redirectTo:pageUrl()}});if(error)throw error;});});
+document.getElementById("nickForm").addEventListener("submit",e=>{e.preventDefault();
+  const nick=document.getElementById("nick").value.trim().slice(0,12), b=e.submitter||document.querySelector("#nickForm button");b.disabled=true;
+  sb.auth.updateUser({data:{nickname:nick}}).then(({error})=>{if(error)throw error;
+    account.nick=nick;account.name=nick||(account.email||"").split("@")[0]||"已登录";renderAccount();authMsg("authMsg",nick?"昵称已保存。":"已清除昵称。");})
+    .catch(err=>authMsg("authMsg",authErr(err),true)).finally(()=>b.disabled=false);});
 document.getElementById("authOut").onclick=()=>authRun(document.getElementById("authOut"),async()=>{
   const {error}=await sb.auth.signOut();if(error)throw error;authMsg("authMsg","已退出。进度仍然保存在这台设备上。");});
 document.getElementById("pwForm").addEventListener("submit",e=>{e.preventDefault();const pw=document.getElementById("newPw").value;
@@ -697,7 +712,7 @@ let toastT=null;
 function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2800);}
 function albumBadge(aid){const a=albumById[aid];const b=el("button","badge",albumName(a));b.type="button";b.title=a.ja+" · "+a.zh;
   b.style.color=b.style.borderColor=albumColor[aid];b.onclick=e=>{e.stopPropagation();toast("《"+a.ja+"》"+a.zh+" · "+a.year+" · "+a.type);};return b;}
-function albumBadges(hits){const box=el("div","tags");const seen=new Set();hits.forEach(([sid])=>{const a=songById[sid].album;if(!seen.has(a)){seen.add(a);box.appendChild(albumBadge(a));}});return box;}
+function albumBadges(hits){const box=el("div","tags");const seen=new Set();hits.forEach(([sid])=>{const a=songById[sid].album;if(!seen.has(a)){seen.add(a);if(albumById[a].badge!==false)box.appendChild(albumBadge(a));}});return box;}
 function kanaGrid(k){
   const box=el("div","kg");
   k.split(" / ").forEach((alt,i)=>{if(i)box.appendChild(el("span","kgsep","/"));
@@ -1160,7 +1175,7 @@ function closeAlbum(){if(history.state&&history.state.album)history.back();else{
 window.addEventListener("popstate",e=>{st.album=(e.state&&e.state.album)||null;if(ui.view==="songs")renderSongs();});
 function renderShelf(box){
   box.appendChild(el("div","h2","全部专辑"));
-  [...new Set(DATA.albums.map(a=>a.artist))].forEach(bid=>{
+  ARTISTS.slice(1).map(b=>b.id).filter(bid=>DATA.albums.some(a=>a.artist===bid)).forEach(bid=>{
     const b=bandById[bid], albums=DATA.albums.filter(a=>a.artist===bid);
     box.appendChild(el("div","shelfband",b.ja+" · "+b.zh));
     const g=el("div","shelf");
@@ -1168,7 +1183,8 @@ function renderShelf(box){
       const t=el("button","tile");t.type="button";const w=albumWords(a);
       t.title=a.ja+" · "+a.zh+" · "+a.year;t.setAttribute("aria-label",a.ja+"（"+a.zh+"），已掌握 "+w.kn+"/"+w.all+" 词");
       const m=el("span","tbar"), i=el("i");i.style.width=(w.all?w.kn/w.all*100:0)+"%";m.appendChild(i);
-      t.append(coverEl(a),m);t.onclick=()=>openAlbum(a.id);g.appendChild(t);
+      const c=el("span","tcover");c.append(coverEl(a),m);
+      t.append(c,el("span","tname",albumName(a)));t.onclick=()=>openAlbum(a.id);g.appendChild(t);
     });
     box.appendChild(g);
   });
@@ -1220,16 +1236,17 @@ const SYNC_TEXT={
 function avatarNode(cls){if(account&&account.avatar){const i=el("img");i.src=account.avatar;i.alt="";return i;}
   return el("span","ph",account?(account.name||"?").trim().charAt(0).toUpperCase():"⚙");}
 function renderAccount(){
-  const synced=syncState==="synced", shortName=account?(account.name||"").split("@")[0]:"";
+  const synced=syncState==="synced", shortName=account?[...(account.name||"")].slice(0,8).join("")+([...(account.name||"")].length>8?"…":""):"";
   const b=document.getElementById("acct");b.innerHTML="";
   b.append(avatarNode(),el("span","dot"+(synced?" on":"")),el("span","an",synced?(shortName||"已同步"):syncState==="connecting"?"连接中":"我的"));
   const who=document.getElementById("who");who.innerHTML="";
-  if(account)who.append(avatarNode(),el("b",null,account.name||"已登录"));
+  if(account){const t=el("div");t.append(el("b",null,account.name||"已登录"));if(account.email&&account.email.split("@")[0]!==account.name)t.append(el("div","am",account.email));who.append(avatarNode(),t);}
   const p=document.getElementById("syncText");p.textContent=(SYNC_TEXT[CLOUD]||{})[syncState]||SYNC_TEXT.none.local;
   const sbOn=CLOUD==="supabase"&&!!sb;
   document.getElementById("authForm").hidden=!(sbOn&&!sbUid&&!recovering);
   document.getElementById("pwForm").hidden=!(sbOn&&recovering);
   document.getElementById("authOut").hidden=!(sbOn&&sbUid);
+  const nf=document.getElementById("nickForm");nf.hidden=!(sbOn&&sbUid);if(!nf.hidden&&document.activeElement!==document.getElementById("nick"))document.getElementById("nick").value=account?account.nick:"";
   document.getElementById("authGithub").hidden=!SITE.supabase_github;
   document.getElementById("authGoogle").hidden=!SITE.supabase_google;
   document.getElementById("authOauth").hidden=!(SITE.supabase_github||SITE.supabase_google);

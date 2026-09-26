@@ -84,7 +84,8 @@
    "type": "独立单曲与影视跨界合唱作品全集",
    "note": "专辑之外的单曲、动画主题曲,以及 suis 参与演唱的合作曲与翻唱",
    "done": true,
-   "dir": "yorushika/yorushika-singles"
+   "dir": "yorushika/yorushika-singles",
+   "badge": false
   },
   {
    "id": "sousaku",
