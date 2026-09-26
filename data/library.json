@@ -1,0 +1,25 @@
+{
+ "_说明": "本地歌词库文件夹 → 乐队 / 专辑 id。加新歌手或新专辑时在这里加一行，再 make ingest。乐队的先后就是网页里的先后。",
+ "bands": [
+  {"lib": "夜鹿（ヨルシカ）", "id": "yorushika", "ja": "ヨルシカ", "zh": "夜鹿"},
+  {"lib": "可惜夜（あたらよ）", "id": "atarayo", "ja": "あたらよ", "zh": "可惜夜"}
+ ],
+ "albums": [
+  {"lib": "夏草が邪魔をする", "id": "natsukusa"},
+  {"lib": "負け犬にアンコールはいらない", "id": "makeinu"},
+  {"lib": "だから僕は音楽を辞めた", "id": "dakara"},
+  {"lib": "エルマ", "id": "elma"},
+  {"lib": "盗作", "id": "tousaku"},
+  {"lib": "創作", "id": "sousaku"},
+  {"lib": "幻燈", "id": "gentou"},
+  {"lib": "二人称", "id": "nininshou"},
+  {"lib": "单曲与合作曲", "id": "yorushika-singles"},
+  {"lib": "夜明け前", "id": "yoakemae"},
+  {"lib": "極夜において月は語らず", "id": "kyokuya"},
+  {"lib": "Acoustic Session", "id": "acoustic"},
+  {"lib": "季億の箱", "id": "kioku"},
+  {"lib": "朝露は木漏れ日に溶けて", "id": "asatsuyu"},
+  {"lib": "泡沫の夢は幻に", "id": "utakata"},
+  {"lib": "私雨に夏の灯を知る", "id": "watakushiame"}
+ ]
+}

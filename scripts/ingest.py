@@ -3,6 +3,7 @@
 用法：python scripts/ingest.py [歌词库路径] [--force]
 默认路径：~/Documents/Gemini Spark/Lyrics
 
+- 歌词库里的乐队文件夹、专辑文件夹对应哪个乐队 / 专辑 id，写在 data/library.json；遇到没写的会停下来提示。
 - 文件名统一 NFC 规范化（macOS 上是 NFD）。
 - 已有的 catalog.json 中的 id、中文名、介绍等手工字段不会被覆盖，只补充新歌。
 - 仓库里已有、但内容和歌词库不同的文件（整理时修过的歌词）默认保留；加 --force 才用歌词库的版本覆盖。
@@ -21,31 +22,7 @@ LYRICS_OUT = ROOT / "lyrics"
 CATALOG = ROOT / "data" / "catalog.json"
 V1_DATA = ROOT / "data" / "data.json"
 
-BANDS = {
-    "夜鹿（ヨルシカ）": {"id": "yorushika", "ja": "ヨルシカ", "zh": "夜鹿"},
-    "可惜夜（あたらよ）": {"id": "atarayo", "ja": "あたらよ", "zh": "可惜夜"},
-}
-
-# 专辑文件夹里的日文名 → 专辑 id
-ALBUM_IDS = {
-    "夏草が邪魔をする": "natsukusa",
-    "負け犬にアンコールはいらない": "makeinu",
-    "だから僕は音楽を辞めた": "dakara",
-    "エルマ": "elma",
-    "盗作": "tousaku",
-    "創作": "sousaku",
-    "幻燈": "gentou",
-    "二人称": "nininshou",
-    "单曲与合作曲": "yorushika-singles",
-    "夜明け前": "yoakemae",
-    "極夜において月は語らず": "kyokuya",
-    "Acoustic Session": "acoustic",
-    "季億の箱": "kioku",
-    "朝露は木漏れ日に溶けて": "asatsuyu",
-    "泡沫の夢は幻に": "utakata",
-    "私雨に夏の灯を知る": "watakushiame",
-}
-
+LIBRARY = ROOT / "data" / "library.json"
 TYPE_ZH = {"Full Album": "全长专辑", "Mini Album": "迷你专辑"}
 
 
@@ -102,7 +79,17 @@ def load_catalog():
     return cat
 
 
+def load_library():
+    """data/library.json：歌词库文件夹名 → 乐队、专辑名 → 专辑 id。"""
+    lib = json.loads(LIBRARY.read_text(encoding="utf-8"))
+    bands = {nfc(b["lib"]): {k: b[k] for k in ("id", "ja", "zh")} for b in lib["bands"]}
+    albums = {nfc(a["lib"]): a["id"] for a in lib["albums"]}
+    return bands, albums
+
+
 def main():
+    BANDS, ALBUM_IDS = load_library()
+    band_order = [b["id"] for b in BANDS.values()]
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     force = "--force" in sys.argv[1:]
     src = Path(args[0] if args else os.path.expanduser("~/Documents/Gemini Spark/Lyrics"))
@@ -114,13 +101,17 @@ def main():
 
     album_dirs = []
     for band_dir in sorted(p for p in src.iterdir() if p.is_dir()):
-        band = BANDS[nfc(band_dir.name)]
+        band = BANDS.get(nfc(band_dir.name))
+        if band is None:
+            sys.exit(f"歌词库里的「{nfc(band_dir.name)}」不认识：请在 data/library.json 的 bands 里加一行（lib 写这个文件夹名）")
         bands.setdefault(band["id"], dict(band))
         for d in band_dir.iterdir():
             if d.is_dir():
                 ftype, ja, year = parse_album_dir(nfc(d.name))
+                if ja not in ALBUM_IDS:
+                    sys.exit(f"专辑「{ja}」没有 id：请在 data/library.json 的 albums 里加一行，例如 {{\"lib\": \"{ja}\", \"id\": \"英文或罗马字\"}}")
                 album_dirs.append((band["id"], year, d, ftype, ja))
-    album_dirs.sort(key=lambda x: (x[0] != "yorushika", x[1]))
+    album_dirs.sort(key=lambda x: (band_order.index(x[0]), x[1]))
 
     kept = []  # 仓库里改过（和歌词库不同）、这次没覆盖的文件
 

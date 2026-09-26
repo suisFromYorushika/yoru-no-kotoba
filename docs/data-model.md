@@ -19,6 +19,16 @@ data/data.json  ──scripts/build.py──▶  web/index.html（GitHub Pages�
 
 **JSON 是数据的真身，SQLite 只是查询用的副本。** JSON 是文本文件，改了什么在 git 里一眼能看出来；SQLite 方便做组合查询。两者的内容完全一样，SQLite 随时可以删掉，再从 JSON 重新生成。
 
+## data/library.json（本地歌词库的对照表）
+
+```jsonc
+{"bands":  [{"lib": "夜鹿（ヨルシカ）", "id": "yorushika", "ja": "ヨルシカ", "zh": "夜鹿"}],   // 乐队文件夹名 → 乐队
+ "albums": [{"lib": "夏草が邪魔をする", "id": "natsukusa"}]}                              // 专辑文件夹里的专辑名 → 专辑 id
+```
+
+加新歌手：在 `bands` 里加一行，`albums` 里给他的每张专辑起一个 id（英文或罗马字，以后不要改），再 `make ingest`。
+`bands` 的先后决定 catalog.json 里专辑的先后，也就是网页里乐队的先后。歌词库里有没写进来的乐队或专辑时，`make ingest` 会停下来并提示怎么加。
+
 ## data/catalog.json
 
 ```jsonc
