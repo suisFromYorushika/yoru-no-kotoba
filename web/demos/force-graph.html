@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>关系图 · force-graph</title>
+<link rel="stylesheet" href="common.css">
+</head>
+<body>
+<div id="graph"></div>
+<script src="vendor/force-graph@1.51.4.min.js"></script>
+<script src="common.js"></script>
+<script>
+(async () => {
+  const d = await Demo.load();
+  const el = document.getElementById("graph");
+  const nodes = d.linked.map(n => ({ ...n, x: n.x * 700, y: n.y * 700, raw: n }));
+  const byId = new Map(nodes.map(n => [n.id, n]));
+  const links = d.links.map(e => ({ source: e.s, target: e.t, e }));
+  const radius = n => 1.5 + Math.sqrt(n.n) * 1.5;
+  let focus = null, hover = null, hlNodes = new Set(), hlLinks = new Set();
+  function highlight(n) {
+    hlNodes = new Set(); hlLinks = new Set();
+    if (!n) return;
+    hlNodes.add(n.id);
+    links.forEach(l => { if (l.e.s === n.id || l.e.t === n.id) { hlLinks.add(l); hlNodes.add(l.e.s); hlNodes.add(l.e.t); } });
+  }
+  const t0 = performance.now();
+  const G = ForceGraph()(el)
+    .backgroundColor("rgba(0,0,0,0)")
+    .graphData({ nodes, links })
+    .autoPauseRedraw(false)                 // 一直重绘：光点流动、节点呼吸
+    .nodeCanvasObject((n, ctx, scale) => {
+      const on = !(focus || hover) || hlNodes.has(n.id), center = n === focus || (!focus && n === hover);
+      const t = (performance.now() - t0) / 1000, pulse = center ? 1 + .12 * Math.sin(t * 3) : 1;
+      const r = radius(n) * pulse;
+      ctx.globalAlpha = on ? 1 : .05;
+      ctx.shadowColor = n.color; ctx.shadowBlur = on ? (center ? 30 : 14) : 0;
+      ctx.fillStyle = n.color; ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, 2 * Math.PI); ctx.fill();
+      ctx.shadowBlur = 0;
+      if (center) { ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.2 / scale; ctx.stroke(); }
+      // 文字：放大后、或高亮时、或常用词才显示
+      if ((on && (focus || hover)) || scale * radius(n) > 9 || (n.n >= 25 && scale > .55)) {
+        const fs = Math.max(11 / scale, center ? 6 : 3);
+        ctx.font = `${center ? 700 : 500} ${fs}px "Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif`;
+        ctx.textAlign = "center"; ctx.textBaseline = "top";
+        ctx.fillStyle = on ? "rgba(255,255,255,.92)" : "rgba(255,255,255,.2)";
+        ctx.fillText(n.w, n.x, n.y + r + 2 / scale);
+      }
+      ctx.globalAlpha = 1;
+    })
+    .nodePointerAreaPaint((n, color, ctx) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(n.x, n.y, radius(n) + 3, 0, 2 * Math.PI); ctx.fill(); })
+    .linkColor(l => hlLinks.has(l) ? "rgba(255,240,200,.55)" : (focus || hover) ? "rgba(255,255,255,.025)" : "rgba(140,160,255,.14)")
+    .linkWidth(l => hlLinks.has(l) ? 1 + l.e.w * 10 : .3 + l.e.w * 3)
+    .linkDirectionalParticles(l => hlLinks.has(l) ? 3 : 0)
+    .linkDirectionalParticleWidth(l => 2 + l.e.w * 6)
+    .linkDirectionalParticleSpeed(l => .004 + l.e.w * .01)
+    .linkDirectionalParticleColor(l => byId.get(l.e.t).color)
+    .linkHoverPrecision(8)
+    .onNodeHover(n => { hover = n; if (!focus) highlight(n); el.style.cursor = n ? "pointer" : null; })
+    .onLinkHover(l => { el.style.cursor = l ? "pointer" : null; })
+    .onNodeClick(n => focusNode(n))
+    .onLinkClick(l => ui.showEdge(l.e, focus && focus.raw))
+    .onBackgroundClick(() => { ui.close(); })
+    .cooldownTime(8000);
+  G.d3Force("charge").strength(-28);
+  G.d3Force("link").distance(l => 34 - l.e.w * 30).strength(l => .2 + l.e.w * .8);
+  G.onEngineStop(() => { if (!focus) G.zoomToFit(800, 30); });
+  let fitted = false;
+  G.onEngineTick(() => { if (!fitted && performance.now() - t0 > 1500) { fitted = true; G.zoomToFit(900, 30); } });
+
+  function focusNode(raw) {
+    const n = byId.get(raw.id); if (!n) return;
+    focus = n; highlight(n);
+    G.centerAt(n.x, n.y, 900); G.zoom(Math.max(G.zoom(), 2.6), 900);
+    ui.showNode(n.raw);
+  }
+  const ui = Demo.setup(d, { title: "方案一 · force-graph（2D）", focus: focusNode,
+    onClose: () => { focus = null; highlight(hover); } });
+})();
+</script>
+</body>
+</html>

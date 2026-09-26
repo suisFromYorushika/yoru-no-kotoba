@@ -63,6 +63,7 @@ make ingest    # 从 ~/Documents/Gemini Spark/Lyrics 导入新歌（可用 LYRIC
                # 仓库里改过的歌词默认不覆盖；要用歌词库的版本覆盖：make ingest FORCE=1
 make all       # 分词 → 导出 data.json → 生成 web/index.html
 make db        # 生成 local/kotoba.sqlite，用来做 SQL 组合查询
+make graph     # 关系图演示的数据 web/demos/graph.json（需要 pip install networkx）；演示页：网址后面加 demos/
 make cand ALBUM=tousaku    # 这张专辑还没收录的候选词（附原句），需先 make db
 make audit ALBUM=tousaku   # 核对词条在这张专辑里命中的读音，抽查分词
 ```

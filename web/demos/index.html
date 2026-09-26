@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>关系图方案对比</title>
+<link rel="stylesheet" href="common.css">
+<style>
+html,body{overflow:auto;}
+.wrap{max-width:760px;margin:0 auto;padding:24px 16px 40px;}
+h1{font-family:var(--jp);font-size:1.6rem;margin:0 0 6px;}
+.lead{color:var(--muted);font-size:.9rem;line-height:1.7;margin:0 0 18px;}
+.cards{display:grid;gap:12px;}
+a.card{display:block;text-decoration:none;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;transition:border-color .2s,transform .2s;}
+a.card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.card h2{margin:0 0 4px;font-size:1.05rem;}
+.card .lib{color:var(--accent);font-size:.8rem;}
+.card p{color:var(--muted);font-size:.86rem;line-height:1.65;margin:8px 0 0;}
+.card ul{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:.84rem;line-height:1.7;}
+.card b{color:var(--ink);font-weight:600;}
+.note{color:var(--muted);font-size:.8rem;line-height:1.7;margin-top:20px;}
+.home{color:var(--muted);font-size:.85rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="home" href="../">‹ 回到夜の言葉</a>
+  <h1>词语关系图 · 四个方案</h1>
+  <p class="lead">同一份数据，用四个开源库各画一遍。点和线的意思都一样：<b>点</b>是词表里的词，越大出现在越多首歌里；
+    <b>线</b>表示两个词在同一句歌词里一起出现过 2 次以上，越粗越常一起出现；<b>颜色</b>是按连线自动分出的词群。
+    每个方案里都可以搜索、点词看它的关系、点线看两个词一起出现的歌词。</p>
+  <div class="cards">
+    <a class="card" href="force-graph.html">
+      <h2>方案一 · 2D 发光网络 <span class="lib">force-graph</span></h2>
+      <ul><li>节点发光、会呼吸，点开后线上有光点流向中心，节点实时受力晃动</li>
+        <li>手机也流畅；库约 180 KB</li><li><b>推荐</b>：炫、清楚、好点</li></ul>
+    </a>
+    <a class="card" href="3d.html">
+      <h2>方案二 · 3D 星空 <span class="lib">3d-force-graph + three.js 泛光</span></h2>
+      <ul><li>整张图是一团会自动旋转的星云，泛光效果最亮最炫；点词镜头会飞过去</li>
+        <li>库约 1.3 MB，需要 WebGL；旧手机可能卡，3D 里点小词不太准</li></ul>
+    </a>
+    <a class="card" href="echarts.html">
+      <h2>方案三 · 图表风格 <span class="lib">ECharts</span></h2>
+      <ul><li>稳定、中文文档多；悬停自动只亮相邻的词，带提示框，节点可以拖</li>
+        <li>风格更像数据报表，特效少；库约 1 MB</li></ul>
+    </a>
+    <a class="card" href="sigma.html">
+      <h2>方案四 · 高性能 WebGL <span class="lib">sigma.js + graphology</span></h2>
+      <ul><li>一打开能看到词从一团乱慢慢聚成几簇（ForceAtlas2 布局）；几万个点也不卡</li>
+        <li>节点是平的圆点，没有发光；库约 430 KB</li></ul>
+    </a>
+  </div>
+  <p class="note">数据：1141 个词里，和主体网络连在一起的 778 个，1879 条线（每个词只保留最强的 6 条）。连线强度 = 一起出现的次数 ÷ √(两个词各自出现的句数)，
+    这样「君」「僕」这种到处都有的词不会连满全图。由 <code>scripts/graph.py</code> 生成 <code>graph.json</code>。</p>
+</div>
+</body>
+</html>
