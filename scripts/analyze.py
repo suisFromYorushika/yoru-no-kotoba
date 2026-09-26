@@ -7,7 +7,7 @@
 每行歌词：
   {"t": 毫秒, "ja": 日文, "zh": 中文, "tok": [词...], "gram": [[语法id, 起, 止], ...]}
 每个词（tok 的元素）：
-  s  原文写法          l  原形（UniDic lemma，归一写法：想い出→思い出）
+  s  原文写法          l  原形（UniDic lemma，归一写法：想い出→思い出）  lk 原形的读音
   k  读音（平假名）    p  词性大类（名詞/動詞/助詞…）  p2 词性细类
   f  活用形（仅活用词） i  [起, 止] 在该行日文中的字符位置
 """
@@ -26,6 +26,8 @@ CREDIT = re.compile(r"^\s*(作词|作詞|作曲|编曲|編曲|演唱|制作人|�
 TITLE = re.compile(r"^(ヨルシカ|あたらよ)\s*[-－–—]\s|\s[-－–—]\s*(ヨルシカ|あたらよ)$")  # 「ヨルシカ - 曲名」这类标题行
 RUBY = re.compile(r"([\u3400-\u9fff々〆ヶ]+)[(（]([ぁ-ゖァ-ヺー]+)[)）]")  # 歌词里用括号标的读音：噤(つぐ)んだ
 TS = re.compile(r"\[(\d+):(\d+)(?:[.:](\d+))?\]")
+KANJI_RE = re.compile(r"[\u3400-\u9fff々〆ヶ]")
+KATA_RE = re.compile(r"[ァ-ヺー・]+")
 
 tagger = fugashi.Tagger()
 
@@ -89,6 +91,11 @@ def tokenize(text):
             tok["f"] = f.cForm
         if f.lForm and f.lForm != "*":
             tok["lk"] = to_hira(f.lForm)
+        # 人名地名的原形 UniDic 写成片假名（小平 → コダイラ），弹窗里没用，改成原文写法
+        if tok.get("p2") == "固有名詞" and KATA_RE.fullmatch(tok["l"]):
+            tok["l"] = w.surface
+            if "k" in tok:
+                tok["lk"] = tok["k"]
         tok["i"] = [start, end]
         toks.append(tok)
     return toks
@@ -202,15 +209,45 @@ def dump_song(song):
     return f'{h}, "lines": [\n{body}\n]}}\n'
 
 
+def relemma_reading(t):
+    """读音改了以后，原形的读音跟着改：開い(あい) → 開く(あく)，弾ける(はじける) → 弾く(はじく)。
+    做法：写法和原形共用的汉字开头按新读音算，后面的假名词尾换成原形的词尾；对不上就不动。"""
+    s, l, k = t["s"], t["l"], t["k"]
+    if l == s:
+        return  # 没变形的词不动：修正的读音常常只在这里成立（入道雲 的 雲 读 ぐも，原形还是 くも）
+    i = 0
+    while i < min(len(s), len(l)) and s[i] == l[i]:
+        i += 1
+    stem, s_tail, l_tail = s[:i], s[i:], l[i:]
+    if not s_tail or not KANJI_RE.search(stem) or KANJI_RE.search(s_tail + l_tail):
+        return  # 只处理「汉字 + 假名词尾」的变形（開い、弾ける）；憂(ゆう) 这种单个汉字对不出原形读音
+    tail = to_hira(s_tail)
+    if not k.endswith(tail) or len(k) <= len(tail):
+        return
+    t["lk"] = k[:len(k) - len(tail)] + to_hira(l_tail)
+
+
 def fix_readings(fixes, toks, text=""):
-    """按 data/readings.json 修正 UniDic 读错的读音（只改 k，不改原形）。
+    """按 data/readings.json 修正 UniDic 的错误：k 改读音（原形的读音跟着改）；
+    l / lk / p / p2 改原形和词性（UniDic 把 そうか 当成人名 爽果、金 当成人名 キン 这类）。
     可以加 "line": 正则，只在这一行日文包含它时才改（用来区分 溜息を吐く(つく) 和 息を吐く(はく)）。"""
     fixes = [fx for fx in fixes if "line" not in fx or re.search(fx["line"], text)]
+    hits = []
     for i, t in enumerate(toks):
         for fx in fixes:
             if _ok(t, fx["tok"]) and _ctx_ok(toks, i, fx["tok"]):
-                t["k"] = fx["k"]
+                hits.append((t, fx))
                 break
+    # 先全部判断完再改，免得前一个词改了原形，后一个词的 prev 条件就对不上了
+    for t, fx in hits:
+        for key in ("l", "p", "p2"):
+            if key in fx:
+                t[key] = fx[key]
+        if "k" in fx:
+            t["k"] = fx["k"]
+            relemma_reading(t)
+        if "lk" in fx:
+            t["lk"] = fx["lk"]
 
 
 def main():

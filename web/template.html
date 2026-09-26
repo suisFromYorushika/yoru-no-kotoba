@@ -29,11 +29,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-vi
 .brand{min-width:0;}
 .tagline{color:var(--muted);font-size:.8rem;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .topr{display:flex;align-items:center;gap:8px;min-width:0;}
-.themebtn{width:36px;height:36px;flex:none;border:1px solid var(--border);background:var(--card);border-radius:50%;cursor:pointer;display:grid;place-items:center;color:var(--accent);padding:0;}
-.themebtn svg{width:18px;height:18px;}
 .acct{display:flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--card);border-radius:999px;padding:4px 12px 4px 4px;cursor:pointer;font-size:.8rem;flex:none;}
 .acct img{width:26px;height:26px;border-radius:50%;flex:none;}
 .acct .ph{width:26px;height:26px;border-radius:50%;flex:none;background:var(--soft);display:grid;place-items:center;font-size:.8rem;color:var(--accent);}
+.acct .ph svg{width:17px;height:17px;}
 .acct .an{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:28vw;}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:none;}
 .dot.on{background:var(--ok);}
@@ -107,6 +106,8 @@ rt{font-size:.55em;color:var(--rt);font-family:-apple-system,"PingFang SC",sans-
 .lf{display:flex;align-items:center;gap:8px;margin-top:4px;}
 .lt{font-size:.7rem;color:var(--muted);font-variant-numeric:tabular-nums;flex:none;}
 .lz{color:var(--muted);font-size:.8rem;line-height:1.5;flex:1;min-width:0;}
+.songhit{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.82rem;color:var(--muted);margin:4px 0 10px;}
+.formh{font-size:.72rem;color:var(--accent);border:1px solid var(--mark-line);border-radius:999px;padding:0 7px;flex:none;font-family:var(--jp);white-space:nowrap;}
 .no-rt rt{visibility:hidden;}
 .no-ro .sr{display:none;}
 .no-zh .lz{visibility:hidden;}
@@ -248,6 +249,13 @@ details.lyr>summary{cursor:pointer;color:var(--accent);padding:6px 0;font-size:.
 .gm{font-size:11px;fill:var(--muted);paint-order:stroke;stroke:var(--card);stroke-width:3px;}
 .gtrail{font-size:.78rem;color:var(--muted);align-self:center;}
 #v-graph .sub{margin-top:8px;}
+.starlink{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:var(--ink);background:linear-gradient(135deg,#1b2140,#2b2350);border-radius:14px;padding:12px 14px;margin-bottom:12px;}
+.starlink b{color:#ffd98a;font-size:.95rem;}
+.starlink span{color:#c9cbe6;font-size:.8rem;line-height:1.5;}
+.starlink:hover b{text-decoration:underline;}
+.gkindnote{margin:-2px 0 10px!important;}
+.gsticky{position:sticky;top:0;z-index:5;background:var(--bg);margin:0;padding:14px 0 8px;border-bottom:1px solid var(--border);}
+.gsongs{font-size:.74rem;color:var(--muted);margin-top:2px;font-family:var(--jp);}
 
 /* ---------- 弹出词卡 / 提示 ---------- */
 .pop{position:fixed;z-index:30;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(520px,calc(100% - 24px));max-height:70vh;overflow:auto;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 32px rgba(10,12,20,.22);padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;}
@@ -348,6 +356,8 @@ body.pb .toast{bottom:calc(var(--pbb,0px) + var(--pbh,120px) + 12px);}
 /* ---------- 页脚 ---------- */
 footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--border);color:var(--muted);font-size:.78rem;line-height:1.7;}
 footer p{margin:0 0 6px;}
+footer summary{cursor:pointer;padding:4px 0;}
+footer details[open] summary{margin-bottom:6px;}
 
 /* ---------- 手机 ---------- */
 @media (max-width:640px){
@@ -377,11 +387,10 @@ footer p{margin:0 0 6px;}
   <header class="top">
     <div class="brand">
       <div class="logo">夜の言葉</div>
-      <div class="tagline">ヨルシカ × あたらよ · 听歌学日语</div>
+      <div class="tagline">ヨルシカ × あたらよ</div>
     </div>
     <div class="topr">
-      <button class="themebtn" id="themeBtn" type="button"></button>
-      <button class="acct" id="acct" type="button" aria-label="我的：账号、记录与设置"><span class="ph">⚙</span><span class="an">我的</span></button>
+      <button class="acct" id="acct" type="button" aria-label="我的：账号、记录与设置"><span class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20.5c1.2-4 4.2-6 7.5-6s6.3 2 7.5 6"/></svg></span><span class="an">我的</span></button>
     </div>
   </header>
 
@@ -400,6 +409,7 @@ footer p{margin:0 0 6px;}
     <div class="fbody" id="fbody" hidden>
       <div class="frow"><span class="flabel">乐队</span><div id="fArtist" class="tags"></div></div>
       <div class="frow"><span class="flabel">专辑（可多选）</span><div id="fAlbum" class="tags"></div></div>
+      <div class="frow" id="fSongRow" hidden><span class="flabel">歌曲（可多选，不选就是整张专辑）</span><div id="fSong" class="tags"></div></div>
       <div class="frow" id="fTierRow"><span class="flabel">频率</span><div id="fTier" class="tags"></div></div>
       <div class="frow" id="fStateRow"><span class="flabel">状态</span><div id="fState" class="tags"></div></div>
     </div>
@@ -443,7 +453,7 @@ footer p{margin:0 0 6px;}
     <div id="v-songs" hidden></div>
   </main>
 
-  <footer id="foot"></footer>
+  <footer><details id="footd"><summary>关于这个网站：收录范围、词表排序、复习规则</summary><div id="foot"></div></details></footer>
 </div>
 
 <div class="pop" id="pop" role="dialog" aria-label="词卡" hidden></div>
@@ -549,6 +559,7 @@ footer p{margin:0 0 6px;}
   </section>
   <section>
     <h3>显示与朗读</h3>
+    <div class="optrow">外观 <div class="tags" id="optTheme"></div></div>
     <label class="toggle">汉字上注假名 <input type="checkbox" id="optRt"></label>
     <label class="toggle">歌词下标罗马音 <input type="checkbox" id="optRo"></label>
     <div class="optrow">罗马音对齐 <div class="tags" id="optRoMode"></div></div>
@@ -587,6 +598,7 @@ const TIERS=[{id:"all",label:"全部"},{id:"core",label:"核心",min:10},{id:"hi
 const TIERNAME={core:"核心",high:"高频",mid:"中频",base:"基础"};
 const POSNAME={n:"名词",v:"动词",a:"形容词",na:"形容动词",adv:"副词",pr:"代词",p:"助词",aux:"助动词",suf:"后缀",pre:"前缀",cj:"连词",adn:"连体词",int:"感叹词"};
 const albumName=a=>a.short||a.ja;
+const NAMES=DATA.names||{};   // 人名、地名的注释（data/names.json）
 
 // 助词、助动词等虚词的简短说明（词表不收虚词，点歌词时显示这里的解释）
 const GLOSS={
@@ -617,7 +629,7 @@ function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 const ui=Object.assign({theme:"system",view:"flash",fmode:"browse",qtype:"zh2ja",filtersOpen:false,rt:true,ro:true,zh:true,rate:0.85,newPerDay:15,graphW:null,graphKind:"line",roMode:"word",roDots:false},lsGet(LS_UI,{}));
 function saveUI(){lsSet(LS_UI,ui);}
-const st={album:null,artist:"all",albums:new Set(),tier:"all",state:"all",idx:0,order:null,q:"",rq:null,extraNew:0,qz:null,qs:{n:0,ok:0}};
+const st={album:null,artist:"all",albums:new Set(),songs:new Set(),tier:"all",state:"all",idx:0,order:null,q:"",rq:null,extraNew:0,qz:null,qs:{n:0,ok:0}};
 let learned=lsGet(LS,{});           // {词: true}
 let srs=lsGet(LS_SRS,{});            // {词: [盒子, 到期日]}
 let log=lsGet(LS_LOG,{});            // {日: {r:复习, n:新掌握, i:新词, q:测验}}
@@ -894,6 +906,7 @@ function lyricLine(sid,li,opts={}){
     b.onclick=e=>{e.stopPropagation();plPlayAt(sid,t);};foot.appendChild(b);}
   else if(opts.time!==false&&t!=null)foot.appendChild(el("span","lt",fmtTime(t)));
   foot.appendChild(el("div","lz",zh||""));
+  const fh=opts.base&&opts.spans&&formHint(opts.base,ja,opts.spans);if(fh)foot.appendChild(fh);
   if(!opts.blank)foot.appendChild(spkBtn(()=>lineReading(sid,li),"朗读这句"));
   box.appendChild(foot);
   return box;
@@ -917,12 +930,20 @@ function charSeg(sid,li,seg,pos,opts){
     if(!ro.textContent)ro.textContent=" ";});
   return sg;
 }
+// 例句里高亮的是这个词的变形（した 里的 し、泣いて 里的 泣い）时，标出原形：「し → する」
+function formHint(v,ja,spans){
+  if(!v.w)return null;
+  const ws=v.w.split(" / ").map(x=>x.replace(/^〜/,"")), ks=v.k.split(" / ").map(x=>toHira(x.replace(/^〜/,"")));
+  const forms=[...new Set(spans.map(([a,b])=>ja.slice(a,b)))].filter(f=>!ws.includes(f)&&!ks.includes(toHira(f)));
+  if(!forms.length)return null;
+  const h=el("span","formh",forms.join("、")+" → "+ws[0]);h.title="这里是「"+ws[0]+"」的变形，原形是 "+ws[0];return h;
+}
 function spansAt(item,sid,li){return ((item.loc||{})[sid]||[]).filter(h=>h[0]===li).map(h=>[h[1],h[2]]);}
 function exampleBox(item,label){
   if(!item.x)return null;
   const [sid,li]=item.x, s=songById[sid];
   const b=el("div","exbox");b.appendChild(el("div","exlabel",label||"歌词例句"));
-  b.appendChild(lyricLine(sid,li,{spans:spansAt(item,sid,li)}));
+  b.appendChild(lyricLine(sid,li,{spans:spansAt(item,sid,li),base:item}));
   const src=el("div","src");src.append("出自 ",el("b",null,"《"+songTitle(s)+"》")," · "+albumName(albumById[s.album]));
   b.appendChild(src);return b;
 }
@@ -939,7 +960,7 @@ function occDetails(item,hits,label){
     head.append(left,el("div","gcount",c+" 次"));box.appendChild(head);
     const byLine=new Map();
     ((item.loc||{})[sid]||[]).forEach(([li,x,y])=>{if(!byLine.has(li))byLine.set(li,[]);byLine.get(li).push([x,y]);});
-    const lis=[...byLine.keys()].sort((p,q)=>p-q), line=li=>lyricLine(sid,li,{spans:byLine.get(li)});
+    const lis=[...byLine.keys()].sort((p,q)=>p-q), line=li=>lyricLine(sid,li,{spans:byLine.get(li),base:item});
     lis.slice(0,OCC_LINES).forEach(li=>box.appendChild(line(li)));
     if(lis.length>OCC_LINES)box.appendChild(moreBtn("这首还有 "+(lis.length-OCC_LINES)+" 句",b=>b.replaceWith(...lis.slice(OCC_LINES).map(line))));
     return box;
@@ -967,6 +988,7 @@ function popHead(node,readingText){
 function vocabBox(v){
   const b=el("div","popbox");
   b.append(el("div","popm",v.m),el("div","popmeta",`${v.w}（${v.k}）· ${sylRoma(v.k)} · 出现在 ${Object.keys(v.occ).length} 首歌`));
+  if(NAMES[v.w])b.appendChild(el("div","gl",NAMES[v.w]));
   const acts=el("div","popacts");
   const lb=el("button","btn"+(learned[v.w]?" primary":""),learned[v.w]?"✓ 已掌握":"标记为已掌握");lb.type="button";
   lb.onclick=()=>{toggleLearned(v.w);lb.className="btn"+(learned[v.w]?" primary":"");lb.textContent=learned[v.w]?"✓ 已掌握":"标记为已掌握";};
@@ -991,7 +1013,8 @@ function openTokPop(sid,li,a,b,x){
   const cov=covering(sid,li,a,b);
   const vs=[...new Set(cov.filter(c=>c[2]==="v").map(c=>c[3]))];
   vs.forEach(v=>pop.appendChild(vocabBox(v)));
-  if(!vs.length){
+  const nm=NAMES[x.l||x.s];if(nm&&!vs.some(v=>NAMES[v.w]))pop.appendChild(el("div","gl nm",nm));   // 人名、地名：是谁 / 在哪
+  if(!vs.length&&!nm){
     const g=GLOSS[x.p+":"+x.l]||GLOSS[x.p+":"+x.s]||(x.s==="ん"&&x.p==="p"?"口语的「の」，〜んだ 表示解释、强调":null);
     if(g)pop.appendChild(el("div","gl",g));
     else if(/^(n|v|a|na|adv|pr)$/.test(x.p))pop.appendChild(el("div","gl","这个词还没有收进词表（词表只收在 2 首以上的歌里出现的词）。"));
@@ -1004,17 +1027,19 @@ document.addEventListener("click",e=>{if(!pop.hidden&&!pop.contains(e.target))cl
 
 // ================= 筛选 / 搜索 =================
 function activeSongIds(){return DATA.songs.filter(s=>{const a=albumById[s.album];
-  if(st.artist!=="all"&&a.artist!==st.artist)return false;if(st.albums.size&&!st.albums.has(s.album))return false;return true;}).map(s=>s.id);}
+  if(st.artist!=="all"&&a.artist!==st.artist)return false;if(st.albums.size&&!st.albums.has(s.album))return false;
+  if(st.songs.size&&!st.songs.has(s.id))return false;return true;}).map(s=>s.id);}
 function scoped(item,ids){const set=new Set(ids);let songs=0,total=0;const hits=[];
   for(const [sid,c] of Object.entries(item.occ)){if(set.has(sid)){songs++;total+=c;hits.push([sid,c]);}}return {songs,total,hits};}
 function tierOf(n){return n>=10?"core":n>=6?"high":n>=3?"mid":"base";}
 const norm=s=>toHira((s||"").toLowerCase()).replace(/[\s·・'’\-〜~（）()「」、，,。/]/g,"");
 function matchVocab(v,q){if(!q)return true;const n=norm(q);
   return norm(v.w).includes(n)||norm(v.k).includes(n)||norm(v.r).includes(n)||v.m.includes(q.trim())||v.k.split(" / ").some(k=>romaji(toHira(k)).includes(n));}
-function scopeVocab(){const ids=activeSongIds();
-  let list=DATA.vocab.map(v=>{const s=scoped(v,ids);return {...v,...s,tier:tierOf(s.songs)};}).filter(v=>v.songs>=2);
+function scopeVocab(){const ids=activeSongIds(), bySong=st.songs.size>0;
+  // 平时：在当前范围里出现在 ≥2 首歌的词，按首数排；选了具体的歌：这几首里出现的词都算，按在这几首里的次数排，档位按全部歌算
+  let list=DATA.vocab.map(v=>{const s=scoped(v,ids);return {...v,...s,tier:tierOf(bySong?Object.keys(v.occ).length:s.songs)};}).filter(v=>v.songs>=(bySong?1:2));
   if(st.tier!=="all")list=list.filter(v=>v.tier===st.tier);
-  return list.sort((a,b)=>b.songs-a.songs||b.total-a.total);}
+  return list.sort(bySong?(a,b)=>b.total-a.total||Object.keys(b.occ).length-Object.keys(a.occ).length:(a,b)=>b.songs-a.songs||b.total-a.total);}
 function filteredVocab(){let list=scopeVocab();
   if(st.state==="todo")list=list.filter(v=>!learned[v.w]);
   if(st.state==="done")list=list.filter(v=>learned[v.w]);
@@ -1029,12 +1054,19 @@ function renderFilters(){
   const gram=ui.view==="gram"||ui.view==="graph";
   document.getElementById("fTierRow").hidden=gram;document.getElementById("fStateRow").hidden=gram;
   chipRow(document.getElementById("fArtist"),ARTISTS.map(a=>{const has=a.id==="all"||DATA.albums.some(x=>x.artist===a.id);return {...a,label:has?a.label:a.label+"（待收录）",disabled:!has};}),
-    a=>st.artist===a.id,a=>{st.artist=a.id;st.albums.clear();reset();});
+    a=>st.artist===a.id,a=>{st.artist=a.id;st.albums.clear();st.songs.clear();reset();});
   chipRow(document.getElementById("fAlbum"),[{id:"",label:"全部"}].concat(DATA.albums.filter(a=>st.artist==="all"||a.artist===st.artist).map(a=>({id:a.id,label:albumName(a),title:a.ja+" · "+a.zh}))),
-    a=>a.id?st.albums.has(a.id):st.albums.size===0,a=>{if(!a.id)st.albums.clear();else st.albums.has(a.id)?st.albums.delete(a.id):st.albums.add(a.id);reset();});
+    a=>a.id?st.albums.has(a.id):st.albums.size===0,a=>{if(!a.id)st.albums.clear();else st.albums.has(a.id)?st.albums.delete(a.id):st.albums.add(a.id);
+      [...st.songs].forEach(id=>{if(!st.albums.has(songById[id].album))st.songs.delete(id);});reset();});
+  // 选了专辑以后才出现「歌曲」一行（同一首歌的其他版本不计数，不列出来）
+  document.getElementById("fSongRow").hidden=!st.albums.size;
+  if(st.albums.size)chipRow(document.getElementById("fSong"),[{id:"",label:"全部"}].concat(DATA.songs.filter(s=>st.albums.has(s.album)&&!s.dup_of).map(s=>({id:s.id,label:s.ja,title:s.zh}))),
+    x=>x.id?st.songs.has(x.id):st.songs.size===0,x=>{if(!x.id)st.songs.clear();else st.songs.has(x.id)?st.songs.delete(x.id):st.songs.add(x.id);reset();});
   chipRow(document.getElementById("fTier"),TIERS.map(t=>({...t,label:t.label+(t.min?" ≥"+t.min+"首":"")})),t=>st.tier===t.id,t=>{st.tier=t.id;reset();});
   chipRow(document.getElementById("fState"),[{id:"all",label:"全部"},{id:"todo",label:"未掌握"},{id:"done",label:"已掌握"}],x=>st.state===x.id,x=>{st.state=x.id;reset();});
+  const songNames=[...st.songs].map(id=>"《"+songById[id].ja+"》");
   const parts=[st.artist==="all"?"全部乐队":bandById[st.artist].ja,st.albums.size?[...st.albums].map(id=>albumName(albumById[id])).join("、"):"全部专辑"];
+  if(songNames.length)parts.push(songNames.length>2?songNames.slice(0,2).join("")+" 等 "+songNames.length+" 首":songNames.join(""));
   if(!gram){if(st.tier!=="all")parts.push(TIERNAME[st.tier]);if(st.state!=="all")parts.push(st.state==="todo"?"未掌握":"已掌握");}
   document.getElementById("fsum").textContent=parts.join(" · ");
   const ids=activeSongIds(), inScope=scopeVocab();
@@ -1046,6 +1078,9 @@ function renderFilters(){
   document.getElementById("qclear").hidden=!st.q;
 }
 function reset(){st.idx=0;st.order=null;st.rq=null;st.qz=null;render();}
+// 只看一首歌里的词：筛选设成这首歌所在的专辑 + 这首歌，并展开筛选框让人看到
+function filterSong(sid){const s=songById[sid];st.artist="all";st.albums=new Set([s.album]);st.songs=new Set([sid]);st.tier="all";
+  st.q="";document.getElementById("q").value="";ui.filtersOpen=true;saveUI();reset();window.scrollTo(0,0);}
 function goSearch(view,q){ui.view=view;saveUI();st.q=q;document.getElementById("q").value=q;render();window.scrollTo(0,0);}
 let qT=null;
 document.getElementById("q").addEventListener("input",e=>{clearTimeout(qT);qT=setTimeout(()=>{st.q=e.target.value.trim();renderFilters();renderView();},150);});
@@ -1063,6 +1098,7 @@ function fillCard(v){
   front.appendChild(el("div","hint","点击卡片看意思和例句 · 左右滑动换词"));
   back.appendChild(el("div","meaning",v.m));
   back.appendChild(el("div","wordline",v.w+(v.k!==v.w?"（"+v.k+"）":"")));
+  if(NAMES[v.w])back.appendChild(el("div","gl",NAMES[v.w]));
   const ex=exampleBox(v);if(ex)back.appendChild(ex);
   back.appendChild(el("div","hint",`出现在 ${v.songs} 首歌 · 共 ${v.total} 次 · 点歌词里的词可以查意思`));
   back.appendChild(occDetails(v,v.hits,"展开：出现在哪些歌（全部原句）"));
@@ -1195,6 +1231,7 @@ function vocabRow(v){
   const body=el("div","rowbody");let built=false;
   const open=()=>{row.classList.toggle("open");if(built)return;built=true;
     const top=el("div","wordrow");top.append(el("div","wordline","读音："+v.k),spkBtn(()=>wordReading(v)));body.appendChild(top);
+    if(NAMES[v.w])body.appendChild(el("div","gl",NAMES[v.w]));
     body.appendChild(albumBadges(v.hits));
     const ex=exampleBox(v);if(ex)body.appendChild(ex);
     body.appendChild(occDetails(v,v.hits,"出现在哪些歌"));};
@@ -1212,11 +1249,17 @@ function renderList(){
   const box=document.getElementById("v-list");box.innerHTML="";
   const list=filteredVocab().filter(v=>matchVocab(v,st.q));
   const exact=st.q&&list.findIndex(v=>v.w===st.q);
+  if(st.q){   // 搜的是歌名：给一个按钮，只看这首歌里的词
+    const n=norm(st.q), hit=DATA.songs.filter(s=>!s.dup_of&&(norm(s.ja).includes(n)||s.zh.includes(st.q))).slice(0,6);
+    if(hit.length){const d=el("div","songhit");d.appendChild(el("span",null,"歌名里有「"+st.q+"」："));
+      hit.forEach(s=>{const b=el("button","badge bw","只看《"+s.ja+"》的词（"+DATA.vocab.filter(v=>v.occ[s.id]).length+"）");b.type="button";
+        b.onclick=()=>filterSong(s.id);d.appendChild(b);});box.appendChild(d);}
+  }
   if(exact>0)list.unshift(list.splice(exact,1)[0]);
   if(!list.length)box.appendChild(el("div","empty",st.q?"词表里没有找到「"+st.q+"」":"没有符合条件的词"));
   // 词很多（上千个），先画前 150 行，其余分批接着画，切到词表时不卡
   const items=[];let cur=null;
-  list.forEach(v=>{if(!st.q&&v.tier!==cur){cur=v.tier;const t=cur;items.push(()=>el("div","group",TIERNAME[t]+"词"));}items.push(()=>vocabRow(v));});
+  list.forEach(v=>{if(!st.q&&!st.songs.size&&v.tier!==cur){cur=v.tier;const t=cur;items.push(()=>el("div","group",TIERNAME[t]+"词"));}items.push(()=>vocabRow(v));});
   let i=0;
   const draw=n=>{const f=document.createDocumentFragment(), end=Math.min(items.length,i+n);for(;i<end;i++)f.appendChild(items[i]());box.appendChild(f);};
   draw(st.q?items.length:150);
@@ -1252,7 +1295,10 @@ function renderGram(){
 
 // ================= 关系图 =================
 // 以一个词为中心，画出和它关系最近的词。关系有三种：同一句歌词里一起出现、同一首歌里一起出现、写法里有同一个汉字
-const GRAPH_N=14, GKINDS=[{id:"line",label:"同一句里"},{id:"song",label:"同一首歌里"},{id:"kanji",label:"同一个汉字"}];
+const GRAPH_N=14, GKINDS=[
+  {id:"line",label:"同一句里",note:"同一句里：两个词在同一句歌词里一起出现。最能看出词和词怎么搭配，展开下面的词能看到这几句。"},
+  {id:"song",label:"同一首歌里",note:"同一首歌里：两个词出现在同一首歌里（不一定在同一句），能看出同一个主题常用哪些词。每个词后面列出是哪几首歌，点歌名打开歌词。"},
+  {id:"kanji",label:"同一个汉字",note:"同一个汉字：两个词的写法里有同一个汉字，比如 夜 和 夜明け、月夜。顺着汉字一串一串地记词。"}];
 let LINEW=null, SONGW=null, gTrail=[];
 function buildGraphIdx(){LINEW=new Map();SONGW=new Map();
   DATA.vocab.forEach((v,i)=>{
@@ -1289,8 +1335,13 @@ function crossLinks(nb,kind,set){
 const shortW=v=>v.w.split(" / ")[0];
 let gResize=null, gWidth=0;
 window.addEventListener("resize",()=>{clearTimeout(gResize);gResize=setTimeout(()=>{const w=document.getElementById("v-graph").clientWidth;if(ui.view==="graph"&&w!==gWidth){gWidth=w;renderGraph();}},200);});
-function openGraph(w){if(ui.graphW&&ui.graphW!==w){gTrail=[ui.graphW,...gTrail.filter(x=>x!==ui.graphW&&x!==w)].slice(0,8);}
-  ui.graphW=w;ui.view="graph";saveUI();st.q="";document.getElementById("q").value="";render();window.scrollTo(0,0);}
+// o.keep：在关系图里点别的词，只换图，页面不动；o.toGraph：从下面的列表换中心，滚到图上；其他地方打开时回到顶部
+function openGraph(w,o={}){if(ui.graphW&&ui.graphW!==w){gTrail=[ui.graphW,...gTrail.filter(x=>x!==ui.graphW&&x!==w)].slice(0,8);}
+  const y=window.scrollY;
+  ui.graphW=w;ui.view="graph";saveUI();st.q="";document.getElementById("q").value="";render();
+  if(o.keep)window.scrollTo(0,y);
+  else if(o.toGraph){const g=document.querySelector("#v-graph .gkinds");if(g)g.scrollIntoView({block:"start",behavior:"smooth"});}
+  else window.scrollTo(0,0);}
 const SVGNS="http://www.w3.org/2000/svg";
 function svg(tag,attrs,text){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;return e;}
 function renderGraph(){
@@ -1304,9 +1355,14 @@ function renderGraph(){
   }
   let c=vocabByW[ui.graphW];
   if(!c||!vSongs(c,set).length){const f=scopeVocab()[0];if(!f){box.appendChild(el("div","empty","这个范围里没有词"));return;}c=vocabByW[f.w];ui.graphW=c.w;saveUI();}
+  // 星空图：全部词的发光关系网（演示页）
+  const star=el("a","starlink");star.href="demos/force-graph.html";
+  star.append(el("b",null,"✦ 星空图"),el("span",null,"全部词连成一张会发光的网：乐队对比、我的星图、一首歌的星座、按专辑的时间轴"));
+  box.appendChild(star);
   const kinds=el("div","tags gkinds");
-  chipRow(kinds,GKINDS,k=>ui.graphKind===k.id,k=>{ui.graphKind=k.id;saveUI();renderGraph();});
+  chipRow(kinds,GKINDS,k=>ui.graphKind===k.id,k=>{const y=window.scrollY;ui.graphKind=k.id;saveUI();renderGraph();window.scrollTo(0,y);});
   box.appendChild(kinds);
+  box.appendChild(el("p","sub gkindnote",GKINDS.find(k=>k.id===ui.graphKind).note));
   const nb=relations(c,ui.graphKind,set);
   // ---- 图 ----
   const wrap=el("div","gwrap");box.appendChild(wrap);
@@ -1325,7 +1381,7 @@ function renderGraph(){
     n.appendChild(svg("title",{},tip));n.appendChild(svg("circle",{r}));
     n.appendChild(svg("text",{y:r+15,"text-anchor":"middle",class:"gt"},shortW(v)));
     if(center)n.appendChild(svg("text",{y:r+31,"text-anchor":"middle",class:"gm"},v.m.length>14?v.m.slice(0,14)+"…":v.m));
-    const go=()=>center?openVocabPop(v):openGraph(v.w);
+    const go=()=>center?openVocabPop(v):openGraph(v.w,{keep:true});
     n.addEventListener("click",e=>{e.stopPropagation();go();});n.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}});
     return n;};
   const unit={line:"句",song:"首歌",kanji:"个汉字"}[ui.graphKind];
@@ -1334,17 +1390,19 @@ function renderGraph(){
   wrap.appendChild(g);
   box.appendChild(el("p","sub","圆圈越大，这个词出现在越多首歌里；连线越粗、离中心越近，关系越紧密；绿色是已掌握的词。点周围的词，它就变成中心；点中心的词看词卡。"));
   if(gTrail.length){const t=el("div","tags");t.appendChild(el("span","gtrail","刚才看过："));
-    gTrail.forEach(w=>{const v=vocabByW[w];if(!v)return;const b=el("button","badge bw",shortW(v));b.type="button";b.onclick=()=>openGraph(w);t.appendChild(b);});box.appendChild(t);}
+    gTrail.forEach(w=>{const v=vocabByW[w];if(!v)return;const b=el("button","badge bw",shortW(v));b.type="button";b.onclick=()=>openGraph(w,{keep:true});t.appendChild(b);});box.appendChild(t);}
   // ---- 列表：每个词一起出现的句子 ----
-  box.appendChild(el("div","h2","和「"+shortW(c)+"」关系最近的词"));
+  box.appendChild(el("div","h2 gsticky","和「"+shortW(c)+"」关系最近的词（"+GKINDS.find(k=>k.id===ui.graphKind).label+"）"));
   if(!nb.length)box.appendChild(el("div","empty","没有找到"));
   nb.forEach(r=>{
     const row=el("div","row"), head=el("div","rowhead");
     const w=el("div","rw",shortW(r.v));w.appendChild(el("span","syl",sylRoma(r.v.k)));
-    head.append(w,el("div","rm",r.v.m),el("div","rc",ui.graphKind==="kanji"?"共用「"+[...new Set(r.keys)].join("")+"」":"一起 "+r.n+" "+unit));
+    const rm=el("div","rm",r.v.m);
+    if(ui.graphKind==="song"){const ss=r.keys.map(sid=>"《"+songById[sid].ja+"》");rm.appendChild(el("div","gsongs",ss.slice(0,3).join("")+(ss.length>3?" 等 "+ss.length+" 首":"")));}
+    head.append(w,rm,el("div","rc",ui.graphKind==="kanji"?"共用「"+[...new Set(r.keys)].join("")+"」":"一起 "+r.n+" "+unit));
     const body=el("div","rowbody");let built=false;
     head.onclick=()=>{row.classList.toggle("open");if(built)return;built=true;
-      const acts=el("div","popacts");const cb=el("button","btn","以它为中心");cb.type="button";cb.onclick=()=>openGraph(r.v.w);
+      const acts=el("div","popacts");const cb=el("button","btn","以它为中心");cb.type="button";cb.onclick=()=>openGraph(r.v.w,{toGraph:true});
       const vb=el("button","btn","词卡");vb.type="button";vb.onclick=e=>{e.stopPropagation();openVocabPop(r.v);};acts.append(cb,vb);body.appendChild(acts);
       if(ui.graphKind==="line"){
         const keys=r.keys.slice(0,4);
@@ -1353,7 +1411,8 @@ function renderGraph(){
           d.appendChild(lyricLine(sid,l,{spans:spansAt(c,sid,l).concat(spansAt(r.v,sid,l))}));body.appendChild(d);});
         if(r.keys.length>keys.length)body.appendChild(el("div","sub","还有 "+(r.keys.length-keys.length)+" 句"));
       }else if(ui.graphKind==="song"){
-        const t=el("div","tags");r.keys.forEach(sid=>{const s=songById[sid];t.appendChild(el("span","badge bw",s.ja));});body.appendChild(t);
+        body.appendChild(el("div","sub","「"+shortW(c)+"」和「"+shortW(r.v)+"」都出现在这几首歌里，点歌名打开歌词："));
+        const t=el("div","tags");r.keys.forEach(sid=>{const s=songById[sid], b=el("button","badge bw","《"+s.ja+"》"+s.zh);b.type="button";b.onclick=e=>{e.stopPropagation();openSong(sid);};t.appendChild(b);});body.appendChild(t);
       }else body.appendChild(el("div","sub",r.v.k+" · 出现在 "+vSongs(r.v,set).length+" 首歌"));
     };
     row.append(head,body);box.appendChild(row);
@@ -1412,6 +1471,8 @@ function songRow(s){
     const tg=el("div","tags");
     sw.sort((x,y)=>y.occ[s.id]-x.occ[s.id]).forEach(v=>{const b=el("button","badge bw"+(learned[v.w]?" learned":""),v.w+" "+v.m);b.type="button";b.onclick=e=>{e.stopPropagation();openVocabPop(v);};tg.appendChild(b);});
     rb.appendChild(tg);
+    if(!s.dup_of&&sw.length){const fb=el("button","btn plbtn","用这首歌的 "+sw.length+" 个词做闪卡");fb.type="button";
+      fb.onclick=e=>{e.stopPropagation();ui.view="flash";filterSong(s.id);};const d=el("div","listen");d.appendChild(fb);rb.appendChild(d);}
     lyr=el("details","lyr");lyr.appendChild(el("summary",null,"歌词对照（注音 + 罗马音 + 中文，点词查意思）"));
     const lb=el("div","lyrics");lyr.appendChild(lb);let lbuilt=false;
     buildLyrics=()=>{if(lbuilt)return;lbuilt=true;(DATA.lines[s.id]||[]).forEach((_,li)=>lb.appendChild(lyricLine(s.id,li,{seek:true})));plMarkLyrics(false);};
@@ -1489,8 +1550,10 @@ const SYNC_TEXT={
     synced:"已登录，进度自动保存到云端。在别的设备上登录同一个账号就能接着学。",
     error:"暂时连不上云端，进度先保存在本机，恢复后会自动同步。"},
   none:{local:"当前是本机模式：进度只保存在这个浏览器里，换设备或清除浏览器数据就没有了。"}};
+const PERSON_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20.5c1.2-4 4.2-6 7.5-6s6.3 2 7.5 6"/></svg>';
 function avatarNode(cls){if(account&&account.avatar){const i=el("img");i.src=account.avatar;i.alt="";return i;}
-  return el("span","ph",account?(account.name||"?").trim().charAt(0).toUpperCase():"⚙");}
+  if(!account){const p=el("span","ph");p.innerHTML=PERSON_ICON;return p;}
+  return el("span","ph",(account.name||"?").trim().charAt(0).toUpperCase());}
 function renderAccount(){
   const synced=syncState==="synced", shortName=account?[...(account.name||"")].slice(0,8).join("")+([...(account.name||"")].length>8?"…":""):"";
   const b=document.getElementById("acct");b.innerHTML="";
@@ -1533,6 +1596,7 @@ function openSheet(o){document.getElementById("sheet").hidden=!o;document.getEle
   if(o){renderStats();renderSettings();renderPlayerSettings();document.getElementById("ioMsg").textContent="";document.getElementById("sheetClose").focus();}
   else qrStop();}
 function renderSettings(){
+  chipRow(document.getElementById("optTheme"),THEMES,x=>ui.theme===x.id,x=>{ui.theme=x.id;saveUI();applyTheme();renderSettings();});
   chipRow(document.getElementById("optRate"),[{v:0.7,label:"慢"},{v:0.85,label:"中"},{v:1,label:"正常"}],x=>ui.rate===x.v,x=>{ui.rate=x.v;saveUI();renderSettings();speak("ことば");});
   chipRow(document.getElementById("optRoMode"),[{v:"word",label:"按词"},{v:"char",label:"按字"}],x=>ui.roMode===x.v,x=>{ui.roMode=x.v;saveUI();renderSettings();renderView();});
   const dots=document.getElementById("optDots");dots.checked=ui.roDots;dots.disabled=ui.roMode==="char";
@@ -1931,18 +1995,19 @@ function plMarkLyrics(scroll){
   if(scroll&&pl.follow&&n.offsetParent&&Date.now()-plUserScroll>4000&&document.getElementById("sheet").hidden&&pop.hidden)
     n.scrollIntoView({block:"center",behavior:"smooth"});
 }
-// 点播放条上的歌名：打开这首歌的歌词对照，滚到正在唱的那句
-function plOpenLyrics(){
-  const s=songById[P.sid];if(!s)return;
+// 打开一首歌的歌词对照（有 li 就滚到那一句）：关系图里的歌名、播放条上的歌名都用它
+function openSong(sid,li){
+  const s=songById[sid];if(!s)return;
   closePop();if(!document.getElementById("sheet").hidden)openSheet(false);
   ui.view="songs";saveUI();st.q="";document.getElementById("q").value="";
   if(st.album!==s.album){st.album=s.album;try{history.pushState({album:s.album},"");}catch(e){}}
   render();
   const row=document.querySelector(`.row.song[data-sid="${s.id}"]`);if(!row)return;
-  row._openLyrics();plMarkLyrics(false);plUserScroll=0;
-  const n=P.li>=0&&row.querySelector(`.ll[data-li="${P.li}"]`);
+  row._openLyrics();plMarkLyrics(false);
+  const n=li!=null&&li>=0&&row.querySelector(`.ll[data-li="${li}"]`);
   (n||row).scrollIntoView({block:n?"center":"start"});
 }
+function plOpenLyrics(){if(!P.sid)return;plUserScroll=0;openSong(P.sid,P.li);}
 document.getElementById("pbPlay").onclick=plToggle;
 document.getElementById("pbTitle").onclick=plOpenLyrics;
 document.getElementById("pbCover").onclick=plOpenLyrics;
@@ -1983,18 +2048,13 @@ function mediaState(){if("mediaSession" in navigator)navigator.mediaSession.play
 if("mediaSession" in navigator)[["play",()=>{if(audio.paused)plToggle();}],["pause",()=>audio.pause()],["nexttrack",plNextSong],["previoustrack",plPrevSong],
   ["seekto",d=>{if(P.real&&d.seekTime!=null)audio.currentTime=d.seekTime;}]].forEach(([k,f])=>{try{navigator.mediaSession.setActionHandler(k,f);}catch(e){}});
 
-// ================= 深色 / 浅色 =================
-const THEMES=[{id:"system",label:"跟随系统",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>'},
-  {id:"light",label:"浅色",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'},
-  {id:"dark",label:"深色",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>'}];
+// ================= 深色 / 浅色（在「我的 → 显示与朗读」里切换） =================
+const THEMES=[{id:"system",label:"跟随系统"},{id:"light",label:"浅色"},{id:"dark",label:"深色"}];
 function applyTheme(){
   const t=THEMES.find(x=>x.id===ui.theme)||THEMES[0], root=document.documentElement;
   if(t.id==="system")root.removeAttribute("data-theme");
   else root.setAttribute("data-theme",t.id);
-  const b=document.getElementById("themeBtn");b.innerHTML=t.icon;
-  b.title=b.ariaLabel="外观："+t.label+"（点击切换）";b.setAttribute("aria-label",b.title);
 }
-document.getElementById("themeBtn").onclick=()=>{const i=THEMES.findIndex(x=>x.id===ui.theme);ui.theme=THEMES[(i+1)%THEMES.length].id;saveUI();applyTheme();toast("外观："+THEMES.find(x=>x.id===ui.theme).label);};
 
 // ================= 页脚 =================
 function renderFooter(){
@@ -2022,7 +2082,11 @@ let swiped=false,tx=0,ty=0;
 card.addEventListener("touchstart",e=>{const t=e.changedTouches[0];tx=t.clientX;ty=t.clientY;swiped=false;},{passive:true});
 card.addEventListener("touchend",e=>{const t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;
   if(ui.fmode==="browse"&&Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5){swiped=true;step(dx<0?1:-1);}},{passive:true});
-function flip(){card.classList.toggle("flipped");const c=document.getElementById("reviewCtl");if(c._sync)c._sync();}
+function flip(){card.classList.toggle("flipped");
+  // 翻回正面：收起背面展开的原句列表。卡片两面共用一个高度，列表不收起的话正面会被撑得很长，内容居中在很下面，看起来是空白
+  if(!card.classList.contains("flipped")){card.querySelectorAll("#back details[open]").forEach(d=>d.open=false);
+    if(card.getBoundingClientRect().top<0)card.scrollIntoView({block:"start",behavior:"smooth"});}
+  const c=document.getElementById("reviewCtl");if(c._sync)c._sync();}
 card.onclick=()=>{if(swiped){swiped=false;return;}flip();};
 card.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();flip();}};
 document.getElementById("prev").onclick=()=>step(-1);

@@ -1,10 +1,11 @@
-"""catalog + lemmas + grammar + songs/*.json → data/data.json（网页用的汇总数据）。
+"""catalog + lemmas + grammar + names + songs/*.json → data/data.json（网页用的汇总数据）。
 
 - 只导出 catalog 里 done=true 的专辑。
 - 重复版本（dup_of）不参与计数，避免同一首歌被算成两首。
 - 词表只收出现在 ≥2 首歌里的词；语法点全部导出。
 - 每个词/语法点附带出现位置 loc：{歌曲id: [[行号, 起, 止], ...]}，网页据此显示原句并高亮；
   x = [歌曲id, 行号] 是从歌词里自动挑的例句（优先有中文翻译、长度适中的句子）。
+- names：人名、地名的注释（点歌词里的名字时显示「是谁 / 在哪」），键是原形。
 - 每行歌词：[日文, 中文, 分段, 时间戳毫秒]。分段是按"词+后面粘着的助动词/后缀"切开的列表，
   每段由若干词组成；词见 encode_tok（标点是字符串）。网页据此注假名、标罗马音、点词查看原形和词性。
 """
@@ -165,6 +166,7 @@ def build():
         "lines": {s["id"]: [[l["ja"], l["zh"], segments(l), l["t"]] for l in s["lines"]] for s in songs},
         "vocab": vocab,
         "grammar": gram,
+        "names": load("names.json") if (ROOT / "data" / "names.json").exists() else {},
     }
 
 
