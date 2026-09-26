@@ -2,7 +2,9 @@
 
 - 只导出 catalog 里 done=true 的专辑。
 - 重复版本（dup_of）不参与计数，避免同一首歌被算成两首。
-- 词表只收出现在 ≥2 首歌里的词；语法点全部导出。
+- 词表 vocab 是出现在 ≥2 首歌里的词；只出现在 1 首歌里的词放在 rare（结构相同，按歌曲顺序排），
+  网页里点词查意思、搜索、按歌曲筛选时用，闪卡默认不出；以后新专辑让它出现到第 2 首，就自动进 vocab。
+  语法点全部导出。
 - 每个词/语法点附带出现位置 loc：{歌曲id: [[行号, 起, 止], ...]}，网页据此显示原句并高亮；
   x = [歌曲id, 行号] 是从歌词里自动挑的例句（优先有中文翻译、长度适中的句子）。
 - names：人名、地名的注释（点歌词里的名字时显示「是谁 / 在哪」），键是原形。
@@ -140,13 +142,15 @@ def build():
     by_id = {s["id"]: s for s in songs}
     order = {m["id"]: i for i, m in enumerate(song_meta)}
 
-    vocab = []
+    vocab, rare = [], []
     for lm in lemmas:
         occ, loc = collect(counted, lambda line: find_lemma(lm["match"], line))
-        if len(occ) >= 2:
-            vocab.append({"w": lm["w"], "k": lm["k"], "r": lm["r"], "m": lm["m"],
-                          "occ": occ, "loc": loc, "x": pick_example(loc, by_id, order)})
+        if occ:
+            (vocab if len(occ) >= 2 else rare).append(
+                {"w": lm["w"], "k": lm["k"], "r": lm["r"], "m": lm["m"], "occ": occ, "loc": loc,
+                 "x": pick_example(loc, by_id, order)})
     vocab.sort(key=lambda v: (-len(v["occ"]), -sum(v["occ"].values())))
+    rare.sort(key=lambda v: (order[next(iter(v["occ"]))], -sum(v["occ"].values())))
 
     gram = []
     for g in grammar:
@@ -165,6 +169,7 @@ def build():
         "songs": [{k: m[k] for k in ("id", "album", "track", "ja", "zh", "dup_of", "links") if k in m} for m in song_meta],
         "lines": {s["id"]: [[l["ja"], l["zh"], segments(l), l["t"]] for l in s["lines"]] for s in songs},
         "vocab": vocab,
+        "rare": rare,
         "grammar": gram,
         "names": load("names.json") if (ROOT / "data" / "names.json").exists() else {},
     }
@@ -175,7 +180,7 @@ def main():
     (ROOT / "data" / "data.json").write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n",
                                              encoding="utf-8")
     print(f"{len(data['albums'])} albums, {len(data['songs'])} songs, "
-          f"{len(data['vocab'])} vocab, {len(data['grammar'])} grammar")
+          f"{len(data['vocab'])} vocab (+{len(data['rare'])} in 1 song), {len(data['grammar'])} grammar")
 
 
 if __name__ == "__main__":

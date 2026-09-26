@@ -68,13 +68,14 @@ make ingest    # 从 ~/Documents/Gemini Spark/Lyrics 导入新歌（可用 LYRIC
 make all       # 分词 → 导出 data.json → 生成 web/index.html
 make db        # 生成 local/kotoba.sqlite，用来做 SQL 组合查询
 make graph     # 关系图演示的数据 web/demos/graph.json（需要 pip install networkx）；演示页：网址后面加 demos/
-make cand ALBUM=tousaku    # 这张专辑还没收录的候选词（附原句），需先 make db
+make cand ALBUM=tousaku    # 这张专辑还没收录的候选词（附原句），需先 make db；scripts/candidates.py 加 --min 1 连只出现在 1 首歌里的也列出
 make audit ALBUM=tousaku   # 核对词条在这张专辑里命中的读音，抽查分词
 ```
 
 ## 词表规则
 
-- 按「出现在几首歌里」排序，再按总次数排序；只收出现在 2 首及以上歌里的词。同一首歌的不同版本（`dup_of`）只算一次。
+- 按「出现在几首歌里」排序，再按总次数排序；闪卡和词表默认只用出现在 2 首及以上歌里的词。同一首歌的不同版本（`dup_of`）只算一次。
+- 只出现在 1 首歌里的词也写了意思（`data.json` 的 `rare`，正在按专辑补全）：点歌词里的词、搜索、按歌曲筛选时能看到，筛选「频率」选「只在 1 首」可以专门看；以后收录新歌，出现到第 2 首就自动进入词表。它们不进关系图、星空图和「已掌握」统计。
 - 分档：核心 ≥10 首 / 高频 6–9 / 中频 3–5 / 基础 2。
 - 每个词包含：写法、假名、罗马音、中文意思、每首歌的出现次数和位置。例句直接取自歌词（导出时自动挑一句有中文翻译、长度适中的），不再自编；lemmas.json 里旧的自编例句 `ex` 保留但网页不显示。
 - 收词范围：出现在 ≥2 首歌里的实词（名词/动词/形容词/形容动词/副词/代词）都收，人名、地名也收；「こと」「もの」「よう」这类放进语法。

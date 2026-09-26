@@ -4,6 +4,7 @@
                                                       # 在「已整理的专辑 + 这张」里出现 ≥2 首，附原句
       python scripts/candidates.py tousaku --audit    # 核对：已有词条在这张专辑里命中的读音和首数
 可以写多张专辑：python scripts/candidates.py dakara,elma
+      python scripts/candidates.py tousaku --min 1   # 连只出现在 1 首歌里的词也列出来
 """
 import collections
 import json
@@ -18,7 +19,7 @@ GRAMMAR_WORDS = ("mama", "you", "mitai", "hoshii", "teiru", "teiku", "teshimau",
                  "sou", "kuseni", "tame", "teoku", "nitotte", "tabi", "sugiru", "teyaru", "tekudasai", "hazu", "toori", "teageru", "uchini", "temorau")
 
 
-def candidates(con, albums, ph):
+def candidates(con, albums, ph, min_songs=2):
     # 统计范围 = 已整理（done）的专辑 + 这次要整理的专辑；候选词必须在这次的专辑里出现
     scope = sorted({r[0] for r in con.execute("SELECT id FROM albums WHERE done = 1")} | set(albums))
     sp = ",".join("?" * len(scope))
@@ -36,8 +37,8 @@ def candidates(con, albums, ph):
       FROM tokens t JOIN counted_songs s ON s.id = t.song_id
       WHERE s.album IN ({sp}) AND t.pos1 IN ({','.join('?' * len(POS))}) AND t.lemma GLOB '*[^ -~]*'
         AND NOT EXISTS (SELECT 1 FROM covered c WHERE c.song_id = t.song_id AND c.line_idx = t.line_idx AND c.pos = t.pos)
-      GROUP BY t.lemma, t.pos1 HAVING songs >= 2 AND here >= 1 ORDER BY songs DESC, total DESC""",
-                       albums + scope + list(POS)).fetchall()
+      GROUP BY t.lemma, t.pos1 HAVING songs >= ? AND here >= 1 ORDER BY songs DESC, total DESC""",
+                       albums + scope + list(POS) + [min_songs]).fetchall()
     print(f"{len(rows)} 个候选（统计范围：{', '.join(scope)}）")
     for lemma, kana, pos, songs, here, total in rows:
         print(f"\n## {lemma}  {kana}  {pos}  {songs} 首（本次 {here} 首）/ {total} 次")
@@ -73,7 +74,10 @@ def main():
     albums = sys.argv[1].split(",")
     con = sqlite3.connect(ROOT / "local" / "kotoba.sqlite")
     ph = ",".join("?" * len(albums))
-    (audit if "--audit" in sys.argv else candidates)(con, albums, ph)
+    if "--audit" in sys.argv:
+        audit(con, albums, ph)
+    else:
+        candidates(con, albums, ph, int(sys.argv[sys.argv.index("--min") + 1]) if "--min" in sys.argv else 2)
 
 
 if __name__ == "__main__":
