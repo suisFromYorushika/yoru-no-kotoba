@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>关系图 · force-graph</title>
+<title>星空图 · 夜の言葉</title>
 <link rel="stylesheet" href="common.css">
 <style>
 /* 模式切换 + 左侧列表 */
@@ -416,7 +416,7 @@
     if (k !== "song") G.zoomToFit(800, 30, visible);
   }
 
-  const ui = Demo.setup(d, { title: "方案一 · force-graph（2D）", focus: focusNode,
+  const ui = Demo.setup(d, { title: "星空图", back: ["../", "‹ 夜の言葉"], focus: focusNode,
     hint: canHover ? "点一个词，左边按次数列出和它一起出现的词。鼠标放在列表或线上，图里对应的词和线会高亮；点一下看这两个词一起出现的歌词。上面可以切换：词群、乐队对比、我的星图、一首歌、时间轴。"
       : "点一个词，和它一起出现的词会亮起来，线中间标着一起出现了几句。点这个「N 句」标签，或点面板里的词，看这两个词一起出现的歌词。上面可以切换：词群、乐队对比、我的星图、一首歌、时间轴。",
     onEdge: e => { const l = linkOf.get(e); if (l) sel = l; markRows(); },

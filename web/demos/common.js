@@ -59,7 +59,7 @@ const Demo = (() => {
 
   function setup(d, opt) {
     const top = $("div", "top");
-    const back = $("a", "back", "‹ 方案列表"); back.href = "./";
+    const back = $("a", "back", opt.back ? opt.back[1] : "‹ 方案列表"); back.href = opt.back ? opt.back[0] : "./";
     const title = $("div", "title", opt.title);
     const sw = $("div", "search"), inp = $("input"); inp.placeholder = "找一个词：汉字、假名或中文"; inp.type = "search";
     const sugg = $("div", "sugg"); sugg.hidden = true; sw.append(inp, sugg);
