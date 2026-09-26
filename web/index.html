@@ -304,6 +304,47 @@ details.lyr>summary{cursor:pointer;color:var(--accent);padding:6px 0;font-size:.
 .xax{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums;}
 .readout{font-size:.8rem;margin-top:6px;min-height:1.2em;}
 
+/* ---------- 播放器：「我的」里的设置 + 底部播放条 ---------- */
+.plsum{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.84rem;margin-bottom:4px;}
+.plsum b{font-weight:500;word-break:break-all;}
+.plsum .okd{color:var(--ok);}
+.plsum .bad{color:var(--bad);}
+.vip{font-size:.72rem;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:0 6px;margin-left:4px;}
+.qrbox{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--bg);border-radius:12px;padding:12px;margin-top:8px;text-align:center;}
+.qrbox img{width:180px;height:180px;background:#fff;border-radius:8px;padding:6px;}
+.qrbox p{margin:0;}
+#plSms .srow{margin-top:0;flex-wrap:nowrap;}
+#plSms input{flex:1;min-width:0;}
+.pbar{position:fixed;z-index:18;left:50%;transform:translateX(-50%);bottom:var(--pbb,0px);width:min(760px,100%);background:var(--card);border:1px solid var(--border);border-bottom:0;border-radius:16px 16px 0 0;box-shadow:0 -6px 24px rgba(10,12,20,.12);padding:10px 14px calc(8px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:4px;}
+.pb1,.pb2{display:flex;align-items:center;gap:8px;min-width:0;}
+.pcov{width:44px;height:44px;border-radius:8px;flex:none;object-fit:cover;background:var(--soft);cursor:pointer;}
+.pinfo{flex:1;min-width:0;}
+.ptitle{border:0;background:none;padding:0;color:var(--muted);font-size:.76rem;cursor:pointer;display:flex;gap:8px;width:100%;text-align:left;}
+.ptitle span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.ptitle span+span{margin-left:auto;flex:none;font-variant-numeric:tabular-nums;}
+.pline{font-family:var(--jp);font-size:1rem;line-height:1.7;max-height:3.4em;overflow:hidden;}
+.pline .tk{padding:0 1px;}
+.pzh{font-size:.78rem;color:var(--muted);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.no-zh .pzh{display:none;}
+.pbtn{border:0;background:none;color:var(--ink);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;flex:none;padding:0;}
+.pbtn svg{width:20px;height:20px;}
+.pbtn:disabled{opacity:.35;cursor:default;}
+.pbtn[aria-pressed="true"]{color:var(--accent);background:var(--soft);}
+.pbtn.pplay{width:44px;height:44px;background:var(--accent);color:var(--card);}
+.pbtn.pplay svg{width:22px;height:22px;}
+.pseek{flex:1;min-width:0;accent-color:var(--accent);margin:0;}
+.pmsg{font-size:.76rem;color:var(--muted);line-height:1.4;}
+.pmsg.err{color:var(--bad);}
+body.pb .wrap{padding-bottom:calc(var(--pbb,0px) + var(--pbh,120px) + 28px);}
+body.pb .pop{bottom:calc(var(--pbb,0px) + var(--pbh,120px) + 10px);max-height:calc(100vh - var(--pbb,0px) - var(--pbh,120px) - 40px);}
+body.pb .toast{bottom:calc(var(--pbb,0px) + var(--pbh,120px) + 12px);}
+.ll.cur{border-left-color:var(--accent);background:var(--mark);border-radius:0 8px 8px 0;}
+.lplay{border:0;background:var(--soft);color:var(--accent);border-radius:999px;padding:2px 8px;cursor:pointer;font-size:.7rem;font-variant-numeric:tabular-nums;flex:none;}
+.lplay:hover{background:var(--mark);}
+.plbtn{padding:6px 12px;font-size:.84rem;}
+.ainfo .plbtn{margin-top:8px;}
+.row.song.playing .rw::before{content:"♪ ";color:var(--accent);}
+
 /* ---------- 页脚 ---------- */
 footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--border);color:var(--muted);font-size:.78rem;line-height:1.7;}
 footer p{margin:0 0 6px;}
@@ -326,6 +367,7 @@ footer p{margin:0 0 6px;}
   .opts{grid-template-columns:1fr;}
   .kpis{grid-template-columns:repeat(2,1fr);}
   .pop,.toast{bottom:calc(var(--nav-h) + 12px + env(safe-area-inset-bottom,0px));}
+  .pbar{padding-bottom:8px;border-radius:14px 14px 0 0;box-shadow:0 -4px 16px rgba(10,12,20,.1);}
 }
 @media (prefers-reduced-motion:reduce){.card,.chev{transition:none;}}
 </style>
@@ -406,6 +448,26 @@ footer p{margin:0 0 6px;}
 
 <div class="pop" id="pop" role="dialog" aria-label="词卡" hidden></div>
 <div class="toast" id="toast" role="status" hidden></div>
+<div class="pbar" id="pbar" role="region" aria-label="播放器" hidden>
+  <div class="pb1">
+    <img class="pcov" id="pbCover" alt="">
+    <div class="pinfo">
+      <button class="ptitle" id="pbTitle" type="button" title="打开这首歌的歌词"><span id="pbName"></span><span id="pbTime"></span></button>
+      <div class="pline" id="pbLine"></div>
+      <div class="pzh" id="pbZh"></div>
+    </div>
+    <button class="pbtn pplay" id="pbPlay" type="button" aria-label="播放"></button>
+  </div>
+  <div class="pb2">
+    <button class="pbtn" id="pbPrevL" type="button" aria-label="从这句开头再听一遍；刚开始时回到上一句" title="再听这句 / 上一句"></button>
+    <button class="pbtn" id="pbNextL" type="button" aria-label="下一句" title="下一句"></button>
+    <button class="pbtn" id="pbLoop" type="button" aria-pressed="false" aria-label="单句循环" title="单句循环"></button>
+    <input class="pseek" id="pbSeek" type="range" min="0" max="0" step="0.1" value="0" aria-label="播放进度">
+    <button class="pbtn" id="pbNext" type="button" aria-label="下一首" title="下一首"></button>
+    <button class="pbtn" id="pbClose" type="button" aria-label="关闭播放器" title="关闭播放器"></button>
+  </div>
+  <div class="pmsg" id="pbMsg" role="status" hidden></div>
+</div>
 <div class="scrim" id="scrim" hidden></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
   <button class="close" id="sheetClose" type="button" aria-label="关闭">×</button>
@@ -440,6 +502,45 @@ footer p{margin:0 0 6px;}
       <div class="srow"><input id="nick" maxlength="12" autocomplete="nickname"><button class="btn" type="submit">保存</button></div>
     </form>
     <button class="btn" id="authOut" type="button" hidden>退出登录</button>
+  </section>
+  <section id="plSec">
+    <h3>播放器（网易云音乐）</h3>
+    <p id="plText"></p>
+    <div class="plsum" id="plSum" hidden></div>
+    <form class="authf" id="plForm" hidden novalidate>
+      <label for="plUrl">播放服务器地址</label>
+      <input id="plUrl" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://music.example.com:8443">
+      <label for="plKey">访问密码</label>
+      <input id="plKey" type="password" autocomplete="off">
+      <div class="srow">
+        <button class="btn primary" type="submit">保存并测试</button>
+        <button class="btn" id="plCancel" type="button" hidden>取消</button>
+        <button class="linkbtn" id="plForget" type="button" hidden>清除这台设备上的播放器设置</button>
+      </div>
+    </form>
+    <div class="msg" id="plMsg" role="status"></div>
+    <div id="plAcct" hidden>
+      <div class="who" id="plWho"></div>
+      <div class="srow" id="plLoginBtns">
+        <button class="btn primary" id="plQrBtn" type="button">扫码登录网易云</button>
+        <button class="btn" id="plSmsBtn" type="button">手机验证码登录</button>
+      </div>
+      <div class="qrbox" id="plQr" hidden>
+        <img id="plQrImg" alt="网易云音乐登录二维码">
+        <p id="plQrText" role="status"></p>
+        <button class="btn" id="plQrCancel" type="button">取消</button>
+      </div>
+      <form class="authf" id="plSms" hidden novalidate>
+        <label for="plPhone">手机号（中国大陆）</label>
+        <div class="srow"><input id="plPhone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="11"><button class="btn" id="plSend" type="button">发送验证码</button></div>
+        <label for="plCode">验证码</label>
+        <div class="srow"><input id="plCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6"><button class="btn primary" type="submit">登录</button></div>
+      </form>
+      <div class="msg" id="plLoginMsg" role="status"></div>
+      <button class="btn" id="plOut" type="button" hidden>退出网易云</button>
+      <div class="optrow">音质 <div class="tags" id="plLevel"></div></div>
+      <label class="toggle">播放时歌词自动滚到正在唱的那句 <input type="checkbox" id="plFollow"></label>
+    </div>
   </section>
   <section>
     <h3>学习记录</h3>
@@ -788,7 +889,10 @@ function lyricLine(sid,li,opts={}){
   });
   box.appendChild(row);
   const foot=el("div","lf");
-  if(opts.time!==false&&t!=null)foot.appendChild(el("span","lt",fmtTime(t)));
+  if(opts.seek){box.dataset.sid=sid;box.dataset.li=li;}
+  if(opts.seek&&t!=null&&plOn()){const b=el("button","lplay","▶ "+fmtTime(t));b.type="button";b.setAttribute("aria-label","从这句开始播放（"+fmtTime(t)+"）");
+    b.onclick=e=>{e.stopPropagation();plPlayAt(sid,t);};foot.appendChild(b);}
+  else if(opts.time!==false&&t!=null)foot.appendChild(el("span","lt",fmtTime(t)));
   foot.appendChild(el("div","lz",zh||""));
   if(!opts.blank)foot.appendChild(spkBtn(()=>lineReading(sid,li),"朗读这句"));
   box.appendChild(foot);
@@ -1296,20 +1400,26 @@ function renderRecommend(box){
 // 一首歌：点开是试听链接、词表词、歌词对照
 function songRow(s){
   const sw=DATA.vocab.filter(v=>v.occ[s.id]), cv=coverage(s.id);
-  const row=el("div","row song"), h=el("div","rowhead");
+  const row=el("div","row song"+(P.sid===s.id?" playing":"")), h=el("div","rowhead");row.dataset.sid=s.id;
   const w=el("div","rw",s.ja);w.appendChild(el("span","sz",s.zh));
   h.append(w,el("div","rc",s.dup_of?"其他版本":`${sw.length} 词 · 认识 ${Math.round(cv.pct*100)}%`));
-  const rb=el("div","rowbody");let built=false;
-  h.onclick=()=>{row.classList.toggle("open");if(built)return;built=true;
+  const rb=el("div","rowbody");let built=false,lyr=null,buildLyrics=null;
+  const build=()=>{if(built)return;built=true;
     if(s.dup_of){const o=songById[s.dup_of];rb.appendChild(el("div","dupnote","与《"+(o?songTitle(o):s.dup_of)+"》是同一首歌的不同版本，不重复计数"));}
+    if(plOn()){const pb=el("button","btn primary plbtn","▶ 播放这首");pb.type="button";pb.onclick=e=>{e.stopPropagation();plPlay(s.id,{queue:albumQueue(s.album)});};
+      const d=el("div","listen");d.appendChild(pb);rb.appendChild(d);}
     rb.appendChild(listenLinks(s));
     const tg=el("div","tags");
     sw.sort((x,y)=>y.occ[s.id]-x.occ[s.id]).forEach(v=>{const b=el("button","badge bw"+(learned[v.w]?" learned":""),v.w+" "+v.m);b.type="button";b.onclick=e=>{e.stopPropagation();openVocabPop(v);};tg.appendChild(b);});
     rb.appendChild(tg);
-    const lyr=el("details","lyr");lyr.appendChild(el("summary",null,"歌词对照（注音 + 罗马音 + 中文，点词查意思）"));
+    lyr=el("details","lyr");lyr.appendChild(el("summary",null,"歌词对照（注音 + 罗马音 + 中文，点词查意思）"));
     const lb=el("div","lyrics");lyr.appendChild(lb);let lbuilt=false;
-    lyr.addEventListener("toggle",()=>{if(!lyr.open||lbuilt)return;lbuilt=true;(DATA.lines[s.id]||[]).forEach((_,li)=>lb.appendChild(lyricLine(s.id,li)));});
+    buildLyrics=()=>{if(lbuilt)return;lbuilt=true;(DATA.lines[s.id]||[]).forEach((_,li)=>lb.appendChild(lyricLine(s.id,li,{seek:true})));plMarkLyrics(false);};
+    lyr.addEventListener("toggle",()=>{if(lyr.open)buildLyrics();});
     rb.appendChild(lyr);};
+  h.onclick=()=>{row.classList.toggle("open");build();};
+  // 从播放条跳过来：展开这首歌和歌词对照
+  row._openLyrics=()=>{row.classList.add("open");build();buildLyrics();lyr.open=true;};
   row.append(h,rb);return row;
 }
 function albumWords(a){const ids=DATA.songs.filter(s=>s.album===a.id).map(s=>s.id);
@@ -1346,6 +1456,7 @@ function renderAlbum(box,a){
   const head=el("div","ahead"), info=el("div","ainfo");
   info.append(el("div","at",a.ja),el("div","az",a.zh+" · "+bandById[a.artist].ja),
     el("div","am",`${a.year} · ${a.type} · ${songs.length} 首 · 已掌握 ${w.kn}/${w.all} 词`));
+  if(plOn()){const pb=el("button","btn plbtn","▶ 播放整张专辑");pb.type="button";const q=albumQueue(a.id);pb.onclick=()=>plPlay(q[0],{queue:q});info.appendChild(pb);}
   head.append(coverEl(a),info);
   const sec=el("section","album");sec.append(head);
   if(a.note)sec.appendChild(el("p","anote",a.note));
@@ -1419,7 +1530,8 @@ function renderStats(){
   if(!max)c.appendChild(el("p",null,"在闪卡的「复习」或「测验」里学习后，这里会显示每天的记录。"));
 }
 function openSheet(o){document.getElementById("sheet").hidden=!o;document.getElementById("scrim").hidden=!o;
-  if(o){renderStats();renderSettings();document.getElementById("ioMsg").textContent="";document.getElementById("sheetClose").focus();}}
+  if(o){renderStats();renderSettings();renderPlayerSettings();document.getElementById("ioMsg").textContent="";document.getElementById("sheetClose").focus();}
+  else qrStop();}
 function renderSettings(){
   chipRow(document.getElementById("optRate"),[{v:0.7,label:"慢"},{v:0.85,label:"中"},{v:1,label:"正常"}],x=>ui.rate===x.v,x=>{ui.rate=x.v;saveUI();renderSettings();speak("ことば");});
   chipRow(document.getElementById("optRoMode"),[{v:"word",label:"按词"},{v:"char",label:"按字"}],x=>ui.roMode===x.v,x=>{ui.roMode=x.v;saveUI();renderSettings();renderView();});
@@ -1449,6 +1561,427 @@ document.getElementById("importBtn").onclick=()=>{
   const before=learnedWords().length;unpackCloud(o,true);persist();render();
   msg.textContent="导入完成，已掌握的词增加了 "+(learnedWords().length-before)+" 个。";
 };
+
+// ================= 播放器：接自己部署的网易云 API（api-enhanced） =================
+// 服务器地址、访问密码、网易云登录凭证只存在这个浏览器里（LS_PLAYER），不进云端同步，也不进「复制我的进度」。
+// 请求都用 POST 表单（跨域「简单请求」，不触发预检）；访问密码放在查询参数 k 里，由反向代理检查；
+// 登录凭证、手机号、验证码放在请求体里，不会出现在服务器的访问日志里。
+// api-enhanced 按「地址 + Cookie 头」缓存 2 分钟，不看请求体，所以跟登录状态有关的请求都在地址里带 timestamp。
+const LS_PLAYER="yoru_player_v1";
+const pl=Object.assign({url:"",k:"",cookie:"",user:null,level:"exhigh",follow:true,ne:{}},lsGet(LS_PLAYER,{}));
+function savePl(){lsSet(LS_PLAYER,pl);}
+function plOn(){return !!pl.url;}
+function plErr(code,msg){const e=new Error(msg||code);e.code=code;return e;}
+async function ncm(path,query={},body={},o={}){
+  const u=new URL(pl.url.replace(/\/+$/,"")+path);
+  if(pl.k)u.searchParams.set("k",pl.k);
+  for(const [a,b] of Object.entries(query))u.searchParams.set(a,b);
+  if(!o.cache)u.searchParams.set("timestamp",Date.now());
+  const fd=new URLSearchParams();for(const [a,b] of Object.entries(body))if(b)fd.set(a,b);
+  const ctl=new AbortController(), timer=setTimeout(()=>ctl.abort(),o.timeout||15000);
+  let r;
+  try{r=await fetch(u,{method:"POST",body:fd,signal:ctl.signal,cache:"no-store"});}
+  catch(e){throw plErr(ctl.signal.aborted?"timeout":"net");}
+  finally{clearTimeout(timer);}
+  let j=null;try{j=await r.json();}catch(e){}
+  if(!j)throw plErr("http","播放服务器返回了 "+r.status+"，内容不是 JSON。");
+  return j;
+}
+const withCookie=b=>Object.assign({cookie:pl.cookie},b);
+function plErrText(e){
+  if(e&&e.code==="net")return "连不上播放服务器。请检查地址（包括 https:// 和端口）、访问密码，以及 NAS 上的容器有没有在运行。";
+  if(e&&e.code==="timeout")return "播放服务器太久没有响应，稍后再试。";
+  return (e&&e.message)||"出错了";
+}
+function normUrl(s){s=(s||"").trim();if(!s)return null;if(!/^https?:\/\//i.test(s))s="https://"+s;
+  try{const u=new URL(s);return u.origin+u.pathname.replace(/\/+$/,"");}catch(e){return null;}}
+
+// ---------- 设置和网易云登录（在「我的」里） ----------
+let plEditing=false, plStatus=null, plChecking=false, qr=null, smsOpen=false, smsT=null;
+function plSetUser(p,a){
+  if(p){const av=(p.avatarUrl||"").replace(/^http:/,"https:");
+    pl.user={name:p.nickname||"",avatar:av?av+"?param=80y80":"",vip:((a&&a.vipType)||p.vipType||0)>0};}
+  else pl.user=null;
+  savePl();
+}
+// 测试服务器，顺便读网易云登录状态
+async function plCheck(){
+  try{const j=await ncm("/login/status",{},withCookie()), d=j.data;
+    if(!d||d.code!==200){plStatus="播放服务器连上了，但它访问网易云时出错（"+(j.msg||j.message||j.code)+"）。";return false;}
+    plSetUser(d.profile,d.account);plStatus="ok";return true;}
+  catch(e){plStatus=plErrText(e);return false;}
+}
+function plRefresh(){if(ui.view==="songs")renderSongs();}
+function renderPlayerSettings(){
+  const on=plOn(), editing=plEditing||!on;
+  document.getElementById("plText").textContent=on
+    ?"登录网易云会员后可以听完整版；不登录的话，会员歌只能试听 30 秒。登录凭证只存在这个浏览器里，只发给你自己的播放服务器。"
+    :"填上自己部署的网易云 API 服务器（比如家里 NAS 上的 api-enhanced）的地址和访问密码，就能在歌曲页直接播放，歌词跟着高亮。地址和密码只存在这个浏览器里，不会同步到云端。部署方法见仓库里的 docs/player.md。";
+  const sum=document.getElementById("plSum");sum.hidden=editing;sum.innerHTML="";
+  if(!editing){
+    sum.append(el("span",null,"服务器："),el("b",null,pl.url.replace(/^https:\/\//,"")),
+      el("span",plStatus==="ok"?"okd":plStatus?"bad":null,plStatus==="ok"?"✓ 已连上":plStatus?"✗ 连不上":plChecking?"检查中…":""));
+    const ed=el("button","linkbtn","修改");ed.type="button";ed.onclick=()=>{plEditing=true;renderPlayerSettings();document.getElementById("plUrl").focus();};
+    sum.appendChild(ed);
+  }
+  const f=document.getElementById("plForm");f.hidden=!editing;
+  if(editing&&!f.contains(document.activeElement)){document.getElementById("plUrl").value=pl.url;document.getElementById("plKey").value=pl.k;}
+  document.getElementById("plCancel").hidden=!on;
+  document.getElementById("plForget").hidden=!on;
+  const acct=document.getElementById("plAcct");acct.hidden=editing;
+  if(editing)return;
+  if(plStatus===null&&!plChecking){plChecking=true;plCheck().then(()=>{plChecking=false;renderPlayerSettings();});}
+  const who=document.getElementById("plWho");who.innerHTML="";
+  if(pl.user){
+    let av;if(pl.user.avatar){av=el("img");av.src=pl.user.avatar;av.alt="";}else av=el("span","ph",(pl.user.name||"?").charAt(0));
+    const t=el("div"), nm=el("b",null,pl.user.name||"网易云用户");t.appendChild(nm);
+    if(pl.user.vip)t.appendChild(el("span","vip","会员"));
+    t.appendChild(el("div","am","已登录网易云音乐"));who.append(av,t);
+  }else who.appendChild(el("div","am",pl.cookie?"网易云的登录已经过期，请重新登录。":"还没有登录网易云音乐。"));
+  const logged=!!pl.user;
+  document.getElementById("plLoginBtns").hidden=logged||!!qr;
+  document.getElementById("plSms").hidden=logged||!smsOpen;
+  document.getElementById("plOut").hidden=!logged;
+  chipRow(document.getElementById("plLevel"),[{v:"standard",label:"标准"},{v:"exhigh",label:"极高"},{v:"lossless",label:"无损"}],
+    x=>pl.level===x.v,x=>{pl.level=x.v;savePl();renderPlayerSettings();});
+  document.getElementById("plFollow").checked=pl.follow;
+}
+document.getElementById("plForm").onsubmit=async e=>{
+  e.preventDefault();
+  const msg=document.getElementById("plMsg"), bad=t=>{msg.className="msg err";msg.textContent=t;};
+  const url=normUrl(document.getElementById("plUrl").value), k=document.getElementById("plKey").value.trim();
+  if(!url)return bad("请填写服务器地址，例如 https://music.example.com:8443");
+  if(location.protocol==="https:"&&/^http:/.test(url)&&!/^http:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(url))
+    return bad("这个网页是 https 的，服务器地址也要用 https://，不然浏览器会拦下来。");
+  if(url!==pl.url)pl.ne={};
+  pl.url=url;pl.k=k;savePl();plEditing=true;
+  msg.className="msg";msg.textContent="正在测试…";
+  plChecking=true;const ok=await plCheck();plChecking=false;
+  if(ok){msg.textContent="已连上播放服务器。";plEditing=false;}else bad(plStatus);
+  renderPlayerSettings();plRefresh();
+};
+document.getElementById("plCancel").onclick=()=>{plEditing=false;document.getElementById("plMsg").textContent="";renderPlayerSettings();};
+document.getElementById("plForget").onclick=()=>{
+  if(!confirm("清除这台设备上的播放服务器地址、访问密码和网易云登录？"))return;
+  if(pl.cookie)ncm("/logout",{},{cookie:pl.cookie}).catch(()=>{});
+  plStop();qrStop();smsOpen=false;
+  Object.assign(pl,{url:"",k:"",cookie:"",user:null,ne:{}});savePl();
+  plStatus=null;plEditing=false;
+  document.getElementById("plMsg").textContent="已清除。";
+  renderPlayerSettings();plRefresh();
+};
+document.getElementById("plFollow").onchange=e=>{pl.follow=e.target.checked;savePl();};
+function loginMsg(t,err){const m=document.getElementById("plLoginMsg");m.className="msg"+(err?" err":"");m.textContent=t||"";}
+async function plLoggedIn(cookie){
+  pl.cookie=cookie||"";savePl();smsOpen=false;
+  loginMsg("登录成功，正在读取账号信息…");
+  await plCheck();
+  if(pl.user)loginMsg("已登录网易云："+pl.user.name);else loginMsg("登录好像没有成功，请再试一次。",true);
+  renderPlayerSettings();
+}
+// 扫码登录：/login/qr/key → /login/qr/create → 每 2.5 秒查一次 /login/qr/check（800 过期、801 等待、802 待确认、803 成功）
+function qrStop(){if(qr){clearInterval(qr.timer);qr=null;}const b=document.getElementById("plQr");if(b)b.hidden=true;}
+async function qrStart(){
+  qrStop();smsOpen=false;loginMsg("");
+  const me=qr={timer:0,busy:false,key:""}, img=document.getElementById("plQrImg"), txt=document.getElementById("plQrText");
+  document.getElementById("plQr").hidden=false;img.removeAttribute("src");img.hidden=true;txt.textContent="正在生成二维码…";renderPlayerSettings();
+  try{
+    const k=await ncm("/login/qr/key"), key=k.data&&k.data.unikey;
+    if(!key)throw plErr("x","没拿到二维码（"+(k.msg||k.message||k.code)+"）。");
+    const c=await ncm("/login/qr/create",{key,qrimg:"true",platform:"web"});
+    if(qr!==me)return;
+    img.src=c.data.qrimg;img.hidden=false;me.key=key;
+    txt.textContent=matchMedia("(pointer:coarse)").matches
+      ?"用网易云音乐 App 的「扫一扫」扫这个二维码，再在手机上点确认。如果只有这一台手机，改用验证码登录更方便。"
+      :"打开手机上的网易云音乐 App，用「扫一扫」扫这个二维码，再在手机上点确认。";
+    me.timer=setInterval(qrPoll,2500);
+  }catch(e){if(qr===me)txt.textContent=plErrText(e);}
+}
+async function qrPoll(){
+  const me=qr;if(!me||me.busy||!me.key)return;me.busy=true;
+  const txt=document.getElementById("plQrText");
+  try{
+    const r=await ncm("/login/qr/check",{key:me.key,noCookie:"true"});
+    if(qr!==me)return;
+    if(r.code===800){qrStop();loginMsg("二维码过期了，请重新点「扫码登录网易云」。",true);renderPlayerSettings();}
+    else if(r.code===802)txt.textContent="已扫码，请在手机上点「确认登录」。";
+    else if(r.code===803){qrStop();await plLoggedIn(r.cookie);}
+    else txt.textContent="网易云返回："+(r.message||r.msg||r.code);
+  }catch(e){if(qr===me)txt.textContent=plErrText(e);}
+  finally{me.busy=false;}
+}
+document.getElementById("plQrBtn").onclick=qrStart;
+document.getElementById("plQrCancel").onclick=()=>{qrStop();renderPlayerSettings();};
+// 手机验证码登录
+const phoneVal=()=>document.getElementById("plPhone").value.replace(/\D/g,"");
+document.getElementById("plSmsBtn").onclick=()=>{qrStop();smsOpen=true;loginMsg("");renderPlayerSettings();document.getElementById("plPhone").focus();};
+document.getElementById("plSend").onclick=async()=>{
+  const phone=phoneVal(), b=document.getElementById("plSend");
+  if(!/^1\d{10}$/.test(phone))return loginMsg("请填 11 位手机号。",true);
+  b.disabled=true;loginMsg("正在发送…");
+  try{
+    const j=await ncm("/captcha/sent",{},{phone});
+    if(j.code===200){
+      loginMsg("验证码已发送。");let n=60;b.textContent=n+" 秒后重发";clearInterval(smsT);
+      smsT=setInterval(()=>{n--;if(n<=0){clearInterval(smsT);b.disabled=false;b.textContent="发送验证码";}else b.textContent=n+" 秒后重发";},1000);
+      document.getElementById("plCode").focus();return;
+    }
+    loginMsg("发送失败："+(j.message||j.msg||j.code),true);
+  }catch(e){loginMsg(plErrText(e),true);}
+  b.disabled=false;
+};
+document.getElementById("plSms").onsubmit=async e=>{
+  e.preventDefault();
+  const phone=phoneVal(), captcha=document.getElementById("plCode").value.trim();
+  if(!/^1\d{10}$/.test(phone)||!/^\d{4,6}$/.test(captcha))return loginMsg("请填手机号和收到的验证码。",true);
+  loginMsg("正在登录…");
+  try{
+    const j=await ncm("/login/cellphone",{},{phone,captcha});
+    if(j.code===200&&j.cookie){document.getElementById("plCode").value="";await plLoggedIn(j.cookie);return;}
+    loginMsg(j.code===503?"验证码不对，或者已经过期。"
+      :[8821,-462,10004].includes(j.code)?"网易云要求额外的安全验证，这次请改用扫码登录。"
+      :"登录失败："+(j.message||j.msg||j.code),true);
+  }catch(e){loginMsg(plErrText(e),true);}
+};
+document.getElementById("plOut").onclick=()=>{
+  const c=pl.cookie;pl.cookie="";pl.user=null;savePl();
+  if(c)ncm("/logout",{},{cookie:c}).catch(()=>{});
+  loginMsg("已退出网易云。");renderPlayerSettings();
+};
+
+// ---------- 播放 ----------
+const audio=new Audio();audio.preload="auto";
+// sid 当前歌；q/qi 播放队列（整张专辑）；li 正在唱的歌词行；off/end 试听片段在整首歌里的起止（毫秒）；loop 单句循环
+const P={sid:null,q:[],qi:0,li:-1,off:0,end:0,loop:false,tok:0,real:false,src:"",urlAt:0,seekTo:null,retried:false,ended:false,msgKind:null};
+// iPhone 要求第一次播放发生在点击里；拿播放地址要等网络，所以先在点击时播一小段静音，之后同一个 audio 就能直接播
+const SILENT="data:audio/wav;base64,UklGRnQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==";
+let unlocked=false;
+function unlockAudio(){if(unlocked)return;unlocked=true;if(P.real)return;try{audio.src=SILENT;const p=audio.play();if(p)p.catch(()=>{});}catch(e){}}
+const PICON={play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>',
+  replay:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/></svg>',
+  nextl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h12M12 6l6 6-6 6"/></svg>',
+  loop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3l3 3-3 3"/><path d="M4 11V9a3 3 0 0 1 3-3h13"/><path d="M7 21l-3-3 3-3"/><path d="M20 13v2a3 3 0 0 1-3 3H4"/><path d="M11 10.5l1.5-1v5"/></svg>',
+  next:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6l9 6-9 6z" fill="currentColor"/><path d="M17.5 6v12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>'};
+[["pbPrevL","replay"],["pbNextL","nextl"],["pbLoop","loop"],["pbNext","next"],["pbClose","close"]].forEach(([id,ic])=>document.getElementById(id).innerHTML=PICON[ic]);
+const pbar=document.getElementById("pbar");
+function albumQueue(aid){return DATA.songs.filter(s=>s.album===aid).map(s=>s.id);}
+// 网易云的歌曲 id：catalog.json 里有就用；没有就按「歌名 乐队名」搜一次，结果记在本机
+async function neId(s){
+  const L=s.links||{};if(L.ne)return L.ne;if(pl.ne[s.id])return pl.ne[s.id];
+  const band=bandById[albumById[s.album].artist].ja, title=s.ja.replace(/\s*\([^)]*\)\s*$/,"");
+  const j=await ncm("/cloudsearch",{keywords:title+" "+band,limit:"10"},{},{cache:true});
+  const list=(j.result&&j.result.songs)||[], n=x=>(x||"").toLowerCase().replace(/\s/g,""), byBand=x=>(x.ar||[]).some(a=>a.name===band);
+  const hit=list.find(x=>n(x.name).startsWith(n(title))&&byBand(x))||list.find(byBand);
+  if(!hit)return null;
+  pl.ne[s.id]=hit.id;savePl();return hit.id;
+}
+function plMsg(t,kind){const m=document.getElementById("pbMsg");m.textContent=t||"";m.hidden=!t;m.className="pmsg"+(kind==="err"?" err":"");P.msgKind=t?kind||"info":null;}
+function plShowBar(){pbar.hidden=false;document.body.classList.add("pb");}
+// --pbh 播放条高度；--pbb 播放条离底边的距离（手机上底部导航是固定的，播放条放在它上面）
+const tabsEl=document.getElementById("tabs");
+function plLayout(){const r=document.documentElement.style;r.setProperty("--pbh",pbar.offsetHeight+"px");
+  r.setProperty("--pbb",(getComputedStyle(tabsEl).position==="fixed"?tabsEl.offsetHeight:0)+"px");}
+const plRO=new ResizeObserver(plLayout);plRO.observe(pbar);plRO.observe(tabsEl);
+async function plPlay(sid,o={}){
+  const s=songById[sid];if(!s)return;
+  if(!plOn()){openSheet(true);return;}
+  const fresh=!unlocked;unlockAudio();
+  if(o.queue)P.q=o.queue;else if(!P.q.includes(sid))P.q=[sid];
+  P.qi=Math.max(0,P.q.indexOf(sid));
+  const tok=++P.tok, changed=P.sid!==sid;
+  P.sid=sid;P.li=-1;P.ended=false;P.real=false;if(!o.keepLoop)P.loop=false;
+  if(!fresh)audio.pause();
+  plShowBar();plMsg("正在获取播放地址…");plRenderBar();plMarkRows();plMarkLyrics(false);
+  if(changed)mediaMeta();
+  try{
+    const id=await neId(s);if(tok!==P.tok)return;
+    if(!id)throw plErr("x","网易云上没找到这首歌。");
+    const j=await ncm("/song/url/v1",{id,level:pl.level},withCookie());if(tok!==P.tok)return;
+    const d=(j.data||[])[0];
+    if(!d||!d.url)throw plErr("x","这首歌暂时拿不到播放地址（可能网易云没有版权"+(pl.user?"":"，或者要登录会员")+"）。");
+    const ft=d.freeTrialInfo&&typeof d.freeTrialInfo==="object"?d.freeTrialInfo:null;
+    P.off=ft?(ft.start||0)*1000:0;P.end=ft?(ft.end||0)*1000:0;
+    P.src=location.protocol==="https:"?d.url.replace(/^http:/,"https:"):d.url;P.urlAt=Date.now();P.retried=!!o.retry;   // 网页是 https 时音频也要 https
+    P.seekTo=o.at!=null?o.at:null;
+    P.real=true;audio.src=P.src;plMsg("正在缓冲…");
+    if(ft)plMsg(pl.user?"只拿到 30 秒试听：这个网易云账号可能不是会员，或者登录过期了。":"只能试听 30 秒：在「我的」里登录网易云会员后可以听完整版。","warn");
+    try{await audio.play();}
+    catch(e){if(tok===P.tok&&e.name==="NotAllowedError")plMsg("点 ▶ 开始播放");}
+  }catch(e){if(tok===P.tok){plMsg(plErrText(e),"err");plRenderBar();}}
+}
+const plExpired=()=>Date.now()-P.urlAt>18*60*1000;   // 网易云的播放地址 20 分钟后失效
+function curMs(){return audio.currentTime*1000+P.off;}
+function lineAt(sid,ms){const L=DATA.lines[sid]||[];let i=-1;for(let j=0;j<L.length;j++){const t=L[j][3];if(t==null)continue;if(t<=ms+150)i=j;else break;}return i;}
+function lineSpan(sid,li){   // 这句的起止：到下一句开始为止，最长 12 秒（避免把间奏也循环进去）
+  const L=DATA.lines[sid]||[], a=L[li][3];let b=null;
+  for(let j=li+1;j<L.length;j++)if(L[j][3]!=null&&L[j][3]>a){b=L[j][3];break;}
+  if(b==null)b=isFinite(audio.duration)?audio.duration*1000+P.off:a+8000;
+  return [a,Math.min(b,a+12000)];
+}
+function timedNeighbor(sid,li,dir){const L=DATA.lines[sid]||[];for(let j=li+dir;j>=0&&j<L.length;j+=dir)if(L[j][3]!=null)return j;return -1;}
+function seekMs(ms){
+  if(P.end&&ms>=P.end){plMsg("试听片段里没有这一句（只有 30 秒）。","warn");return false;}
+  audio.currentTime=Math.max(0,(ms-P.off)/1000);return true;
+}
+function plGoLine(li){
+  if(!P.real||li<0)return;
+  if(!seekMs(DATA.lines[P.sid][li][3]))return;
+  P.li=li;plRenderLine();plMarkLyrics(true);
+  if(audio.paused)audio.play().catch(()=>{});
+}
+function plPlayAt(sid,t){
+  if(P.sid===sid&&P.real){
+    if(plExpired()){plPlay(sid,{at:t,keepLoop:true});return;}
+    const li=lineAt(sid,t);if(li>=0)plGoLine(li);else{seekMs(t);if(audio.paused)audio.play().catch(()=>{});}
+    return;
+  }
+  plPlay(sid,{at:t,queue:albumQueue(songById[sid].album)});
+}
+function plToggle(){
+  if(!P.sid)return;
+  if(!P.real){plPlay(P.sid,{keepLoop:true});return;}   // 上次没拿到地址：重试
+  if(!audio.paused){audio.pause();return;}
+  if(plExpired()){plPlay(P.sid,{at:P.ended?0:curMs(),keepLoop:true});return;}
+  if(P.ended){P.ended=false;audio.currentTime=0;}
+  audio.play().catch(e=>plMsg("播放不了："+e.message,"err"));
+}
+function plNextSong(){if(P.qi+1<P.q.length)plPlay(P.q[P.qi+1],{queue:P.q});}
+function plPrevSong(){if(P.real&&audio.currentTime>3){audio.currentTime=0;return;}if(P.qi>0)plPlay(P.q[P.qi-1],{queue:P.q});}
+function plStop(){
+  P.tok++;P.sid=null;P.real=false;P.loop=false;P.li=-1;
+  audio.pause();audio.removeAttribute("src");audio.load();
+  pbar.hidden=true;document.body.classList.remove("pb");plMarkRows();plMarkLyrics(false);mediaMeta();
+}
+// 同步：播放时每帧检查一次（后台标签页里靠 timeupdate）
+function plTick(){
+  if(!P.sid||!P.real)return;
+  const ms=curMs();
+  if(P.loop&&P.li>=0){const [a,b]=lineSpan(P.sid,P.li);if(!audio.paused&&(ms>=b-60||ms<a-800))seekMs(a);}
+  else{const li=lineAt(P.sid,ms);if(li!==P.li){P.li=li;plRenderLine();plMarkLyrics(true);}}
+  plRenderTime();
+}
+let plRaf=0;
+function plFrame(){plTick();plRaf=audio.paused?0:requestAnimationFrame(plFrame);}
+audio.addEventListener("play",()=>{if(!P.real)return;if(!plRaf)plRaf=requestAnimationFrame(plFrame);plRenderBar();mediaState();});
+audio.addEventListener("playing",()=>{if(!P.real)return;P.retried=false;if(P.msgKind==="info")plMsg("");});
+audio.addEventListener("pause",()=>{if(!P.real)return;plRenderBar();mediaState();});
+audio.addEventListener("timeupdate",plTick);
+audio.addEventListener("loadedmetadata",()=>{
+  if(!P.real)return;
+  if(P.seekTo!=null){const ms=P.seekTo;P.seekTo=null;seekMs(ms);P.li=lineAt(P.sid,ms);plRenderLine();plMarkLyrics(true);}
+  plRenderTime(true);
+});
+audio.addEventListener("ended",()=>{
+  if(!P.real)return;
+  if(P.loop&&P.li>=0){seekMs(lineSpan(P.sid,P.li)[0]);audio.play().catch(()=>{});return;}
+  if(P.qi+1<P.q.length)plNextSong();else{P.ended=true;plRenderBar();}
+});
+audio.addEventListener("error",()=>{
+  if(!P.real||!P.sid)return;
+  if(!P.retried){plPlay(P.sid,{at:curMs(),retry:true,keepLoop:true,queue:P.q});return;}   // 地址过期之类：重新拿一次
+  P.real=false;plMsg("播放出错了，可能是网络问题。点 ▶ 重试。","err");plRenderBar();
+});
+
+// ---------- 播放条 ----------
+function plRenderBar(){
+  const s=songById[P.sid];if(!s)return;
+  const a=albumById[s.album];
+  document.getElementById("pbName").textContent=songTitle(s)+" · "+bandById[a.artist].ja+(P.q.length>1?" · "+(P.qi+1)+"/"+P.q.length:"");
+  const cv=document.getElementById("pbCover");cv.hidden=!a.cover;if(a.cover&&cv.getAttribute("src")!==a.cover)cv.src=a.cover;
+  const playing=P.real&&!audio.paused, pb=document.getElementById("pbPlay");
+  pb.innerHTML=playing?PICON.pause:PICON.play;pb.setAttribute("aria-label",playing?"暂停":"播放");
+  document.getElementById("pbNext").disabled=P.qi+1>=P.q.length;
+  document.getElementById("pbLoop").setAttribute("aria-pressed",String(P.loop));
+  plRenderLine();plRenderTime(true);
+}
+function plRenderLine(){
+  const box=document.getElementById("pbLine"), zh=document.getElementById("pbZh"), s=songById[P.sid];
+  box.innerHTML="";zh.textContent="";
+  if(!s)return;
+  const L=DATA.lines[P.sid]||[], li=P.li;
+  if(li<0||!L[li]){box.textContent="♪";zh.textContent=s.zh;return;}
+  const [,z,segs]=L[li];let pos=0;
+  segs.forEach(seg=>seg.forEach(tok=>{
+    const x=tokParts(tok), a=pos, b=pos+x.s.length;pos=b;
+    let node=rubyNodes(x.s,KANJI.test(x.s)?x.k:null);
+    if(x.p){const w=el("span","tk");w.appendChild(node);w.onclick=e=>{e.stopPropagation();openTokPop(P.sid,li,a,b,x);};node=w;}
+    box.appendChild(node);
+  }));
+  zh.textContent=z||"";
+}
+let plLastQ=-1;
+function plRenderTime(force){
+  const d=audio.duration, c=audio.currentTime, q=Math.floor(c*4);
+  if(!force&&q===plLastQ)return;plLastQ=q;
+  const sk=document.getElementById("pbSeek");
+  if(!sk._drag){sk.max=isFinite(d)?d:0;sk.value=c;}
+  const f=x=>{x=Math.max(0,Math.floor(x));return Math.floor(x/60)+":"+String(x%60).padStart(2,"0");};
+  document.getElementById("pbTime").textContent=P.real&&isFinite(d)&&d>0?f(sk._drag?+sk.value:c)+" / "+f(d):"";
+}
+function plMarkRows(){document.querySelectorAll(".row.song").forEach(r=>r.classList.toggle("playing",r.dataset.sid===P.sid));}
+let plUserScroll=0;
+["wheel","touchmove"].forEach(ev=>addEventListener(ev,()=>plUserScroll=Date.now(),{passive:true}));
+function plMarkLyrics(scroll){
+  document.querySelectorAll(".ll.cur").forEach(n=>n.classList.remove("cur"));
+  if(!P.sid||P.li<0)return;
+  const n=document.querySelector(`.ll[data-sid="${P.sid}"][data-li="${P.li}"]`);if(!n)return;
+  n.classList.add("cur");
+  if(scroll&&pl.follow&&n.offsetParent&&Date.now()-plUserScroll>4000&&document.getElementById("sheet").hidden&&pop.hidden)
+    n.scrollIntoView({block:"center",behavior:"smooth"});
+}
+// 点播放条上的歌名：打开这首歌的歌词对照，滚到正在唱的那句
+function plOpenLyrics(){
+  const s=songById[P.sid];if(!s)return;
+  closePop();if(!document.getElementById("sheet").hidden)openSheet(false);
+  ui.view="songs";saveUI();st.q="";document.getElementById("q").value="";
+  if(st.album!==s.album){st.album=s.album;try{history.pushState({album:s.album},"");}catch(e){}}
+  render();
+  const row=document.querySelector(`.row.song[data-sid="${s.id}"]`);if(!row)return;
+  row._openLyrics();plMarkLyrics(false);plUserScroll=0;
+  const n=P.li>=0&&row.querySelector(`.ll[data-li="${P.li}"]`);
+  (n||row).scrollIntoView({block:n?"center":"start"});
+}
+document.getElementById("pbPlay").onclick=plToggle;
+document.getElementById("pbTitle").onclick=plOpenLyrics;
+document.getElementById("pbCover").onclick=plOpenLyrics;
+document.getElementById("pbCover").onerror=e=>{e.target.hidden=true;};
+document.getElementById("pbNext").onclick=plNextSong;
+document.getElementById("pbClose").onclick=plStop;
+// 再听这句：回到这句开头；这句刚开始（1.2 秒内）时回到上一句
+document.getElementById("pbPrevL").onclick=()=>{
+  if(!P.real)return;
+  const ms=curMs();let li=P.li>=0?P.li:lineAt(P.sid,ms);
+  if(li<0){audio.currentTime=0;if(audio.paused)audio.play().catch(()=>{});return;}
+  if(!P.loop&&ms-DATA.lines[P.sid][li][3]<1200){const p=timedNeighbor(P.sid,li,-1);if(p>=0)li=p;}
+  plGoLine(li);
+};
+document.getElementById("pbNextL").onclick=()=>{if(!P.real)return;const li=timedNeighbor(P.sid,P.li>=0?P.li:lineAt(P.sid,curMs()),1);if(li>=0)plGoLine(li);};
+document.getElementById("pbLoop").onclick=()=>{
+  P.loop=!P.loop;if(P.loop&&P.li<0&&P.real)P.li=lineAt(P.sid,curMs());
+  plRenderBar();toast(P.loop?"单句循环：一直重复正在唱的这句":"已关闭单句循环");
+};
+const pbSeek=document.getElementById("pbSeek");
+let seekT=0;
+pbSeek.addEventListener("pointerdown",()=>{pbSeek._drag=true;});
+pbSeek.addEventListener("pointerup",()=>{clearTimeout(seekT);seekT=setTimeout(()=>{pbSeek._drag=false;},400);});
+pbSeek.addEventListener("input",()=>{pbSeek._drag=true;plRenderTime(true);});
+pbSeek.addEventListener("change",()=>{
+  pbSeek._drag=false;if(!P.real)return;
+  audio.currentTime=+pbSeek.value;P.li=lineAt(P.sid,curMs());plRenderLine();plMarkLyrics(false);
+});
+// 锁屏 / 耳机上的播放控制
+function mediaMeta(){
+  if(!("mediaSession" in navigator))return;
+  const s=songById[P.sid];if(!s){navigator.mediaSession.metadata=null;return;}
+  const a=albumById[s.album];
+  try{navigator.mediaSession.metadata=new MediaMetadata({title:s.ja,artist:bandById[a.artist].ja,album:a.ja,
+    artwork:a.cover?[{src:new URL(a.cover,location.href).href}]:[]});}catch(e){}
+}
+function mediaState(){if("mediaSession" in navigator)navigator.mediaSession.playbackState=P.real&&!audio.paused?"playing":"paused";}
+if("mediaSession" in navigator)[["play",()=>{if(audio.paused)plToggle();}],["pause",()=>audio.pause()],["nexttrack",plNextSong],["previoustrack",plPrevSong],
+  ["seekto",d=>{if(P.real&&d.seekTime!=null)audio.currentTime=d.seekTime;}]].forEach(([k,f])=>{try{navigator.mediaSession.setActionHandler(k,f);}catch(e){}});
 
 // ================= 深色 / 浅色 =================
 const THEMES=[{id:"system",label:"跟随系统",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>'},
@@ -1499,7 +2032,7 @@ document.getElementById("shuffle").onclick=()=>{st.order=shuffle(filteredVocab()
 document.getElementById("resetorder").onclick=()=>{st.order=null;st.idx=0;renderBrowse();};
 document.addEventListener("keydown",e=>{
   if(e.key==="Escape"){if(!pop.hidden){closePop();return;}if(!document.getElementById("sheet").hidden){openSheet(false);return;}}
-  if(ui.view!=="flash"||/INPUT|TEXTAREA/.test(document.activeElement.tagName)||!document.getElementById("sheet").hidden)return;
+  if(ui.view!=="flash"||/INPUT|TEXTAREA/.test(document.activeElement.tagName)||!document.getElementById("sheet").hidden||pbar.contains(document.activeElement))return;
   if(ui.fmode==="quiz"){if(/^[1-4]$/.test(e.key))answer(+e.key-1);if(e.key==="Enter"&&st.qz&&st.qz.pick!==null){e.preventDefault();st.qz=null;renderQuiz();}return;}
   if(e.key===" "){e.preventDefault();flip();}
   if(ui.fmode==="browse"){if(e.key==="ArrowRight")step(1);if(e.key==="ArrowLeft")step(-1);}
