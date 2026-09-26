@@ -63,7 +63,8 @@ const Demo = (() => {
     const title = $("div", "title", opt.title);
     const sw = $("div", "search"), inp = $("input"); inp.placeholder = "找一个词：汉字、假名或中文"; inp.type = "search";
     const sugg = $("div", "sugg"); sugg.hidden = true; sw.append(inp, sugg);
-    top.append(back, title, sw); document.body.appendChild(top);
+    const ib = $("button", "infob", "i"); ib.type = "button"; ib.setAttribute("aria-label", "说明和图例");
+    top.append(back, title, sw, ib); document.body.appendChild(top);
     inp.addEventListener("input", () => {
       const q = inp.value.trim(); sugg.innerHTML = ""; sugg.hidden = !q; if (!q) return;
       d.linked.filter(n => n.full.includes(q) || n.k.includes(q) || n.m.includes(q)).sort((a, b) => b.n - a.n).slice(0, 6).forEach(n => {
@@ -72,15 +73,19 @@ const Demo = (() => {
       if (!sugg.children.length) sugg.appendChild($("button", null, "没有找到（只有和别的词有连线的词才在图里）"));
     });
 
-    const lg = $("details", "legend"); lg.open = innerWidth > 700;
-    lg.appendChild($("summary", null, "图例：颜色是自动分出的词群"));
-    d.groups.forEach((g, i) => { const r = $("div", "gi"); const c = $("i"); c.style.background = c.style.color = COLORS[i]; r.append(c, g); lg.appendChild(r); });
-    const r = $("div", "gi"); const c = $("i"); c.style.background = c.style.color = OTHER; r.append(c, "其他"); lg.appendChild(r);
-    lg.appendChild($("p", null, "点越大，出现在越多首歌里。两个词在同一句歌词里一起出现 2 次以上才连线，线越粗越常一起出现。" + (opt.legendExtra || "")));
-    document.body.appendChild(lg);
-
-    const hint = $("div", "hint", opt.hint || "点一个词看它的关系；点一条线看两个词一起出现的歌词");
-    document.body.appendChild(hint);
+    // 说明和图例：点右上角的 i 才出现，平时不挡图
+    const info = $("div", "infobox"); info.hidden = true;
+    info.appendChild($("h3", null, "怎么看这张图"));
+    const hint = $("p", "howto", opt.hint || "点一个词看它的关系；点一条线看两个词一起出现的歌词。");
+    info.appendChild(hint);
+    info.appendChild($("p", null, "每个点是一个词，点越大，出现在越多首歌里。两个词在同一句歌词里一起出现过 2 次以上，就连一条线；线越粗，一起出现得越多。"));
+    info.appendChild($("h3", null, "颜色：经常一起出现的词分成一组"));
+    info.appendChild($("p", null, "程序按连线把「经常在同一句里出现」的词自动分成 10 组，同一组用同一种颜色，往往是同一类场景或情绪。每组用组里最常见的 3 个词命名；没分进这 10 组的是灰色。"));
+    d.groups.forEach((g, i) => { const r = $("div", "gi"); const c = $("i"); c.style.background = c.style.color = COLORS[i]; r.append(c, g); info.appendChild(r); });
+    const r = $("div", "gi"); const c = $("i"); c.style.background = c.style.color = OTHER; r.append(c, "其他"); info.appendChild(r);
+    document.body.appendChild(info);
+    ib.onclick = e => { e.stopPropagation(); info.hidden = !info.hidden; ib.classList.toggle("on", !info.hidden); };
+    document.addEventListener("pointerdown", e => { if (!info.hidden && !info.contains(e.target) && e.target !== ib) { info.hidden = true; ib.classList.remove("on"); } });
 
     const panel = $("div", "panel"); panel.hidden = true; document.body.appendChild(panel);
     const close = () => { panel.hidden = true; opt.onClose && opt.onClose(); };
@@ -98,7 +103,8 @@ const Demo = (() => {
       if (n.ex && d.lines[n.ex[0]]) { panel.appendChild($("div", "ph", "歌词例句")); panel.appendChild(lyric(d, n.ex[0], n.ex[1], [], n.color)); }
       panel.appendChild($("div", "ph", "常和它在同一句歌词里出现的词（数字是一起出现了几句，点一个看这些歌词）"));
       const ch = $("div", "chips");
-      n.edges.forEach(e => { const o = d.other(e, n); const b = $("button", "chip"); b.append(o.w, $("small", null, e.n + " 句")); b.onclick = () => showEdge(e, n); ch.appendChild(b); });
+      n.edges.forEach(e => { const o = d.other(e, n); const b = $("button", "chip"); b.append(o.w, $("small", null, e.n + " 句")); b.onclick = () => showEdge(e, n);
+        b.onmouseenter = () => opt.onPreview && opt.onPreview(e); b.onmouseleave = () => opt.onPreview && opt.onPreview(null); ch.appendChild(b); });
       panel.appendChild(ch);
     }
     function showEdge(e, from) {
@@ -111,7 +117,8 @@ const Demo = (() => {
       panel.appendChild($("div", "ph", "这两个词在 " + e.n + " 句歌词里一起出现过" + (shown < e.n ? "（下面是前 " + shown + " 句）" : "") + "，重复的句子只列一次："));
       e.refs.forEach(([key, sa, sb, times]) => panel.appendChild(lyric(d, key, flip ? sb : sa, flip ? sa : sb, a.color, b.color, times)));
       const ch = $("div", "chips"); ch.style.marginTop = "12px";
-      [a, b].forEach(n => { const x = $("button", "chip", "看「" + n.w + "」的关系"); x.onclick = () => opt.focus(n); ch.appendChild(x); });
+      [a, b].forEach(n => { const x = $("button", "chip", "看「" + n.w + "」的关系"); x.onclick = () => opt.focus(n);
+        x.onmouseenter = () => opt.onPreviewNode && opt.onPreviewNode(n); x.onmouseleave = () => opt.onPreviewNode && opt.onPreviewNode(null); ch.appendChild(x); });
       panel.appendChild(ch);
       opt.onEdge && opt.onEdge(e);
     }
