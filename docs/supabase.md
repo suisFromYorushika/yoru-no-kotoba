@@ -4,8 +4,6 @@ GitHub Pages 是纯静态网站，自己存不了数据。这里用 [Supabase](h
 
 网页这边的代码已经写好（`web/template.html` 的「Supabase 账号」一节）。只要在 `data/site.json` 里填上项目地址和公开密钥，Pages 版的「我的」面板里就会出现登录框；不填就还是本机模式。
 
-claude.ai 版不受影响，继续用 claude.ai 账号同步（claude.ai 不允许页面连外部服务器，所以那边用不了 Supabase）。两个版本的进度是分开存的，可以用「我的 → 备份进度」互相搬。
-
 ## 两种做法
 
 **A. 让 Claude 帮你建（推荐）**：在 claude.ai 的「设置 → 连接器」里连上 **Supabase** 连接器，然后告诉 Claude。Claude 可以直接建项目、运行下面的建表 SQL、取回项目地址和公开密钥，并填好 `data/site.json`。下面第 4、5 步（登录方式和网址设置）连接器可能改不了，需要你在控制台里点几下。
@@ -74,7 +72,7 @@ claude.ai 版不受影响，继续用 claude.ai 账号同步（claude.ai 不允�
 
 ## 数据格式
 
-`progress` 表每个账号一行：`user_id`（账号 id）、`data`（进度 JSON）、`updated_at`。`data` 的格式和 claude.ai 版相同，见 [data-model.md](data-model.md#云端进度claudeai-版)。
+`progress` 表每个账号一行：`user_id`（账号 id）、`data`（进度 JSON）、`updated_at`。`data` 的格式见 [data-model.md](data-model.md#云端进度)。
 
 同步规则：
 

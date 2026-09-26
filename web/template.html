@@ -96,6 +96,9 @@ mark{background:var(--mark);color:inherit;border-radius:2px;padding:0 1px;box-sh
 .sr{font-size:.72rem;color:var(--muted);line-height:1.3;white-space:nowrap;}
 .sr.hit{color:var(--accent);font-weight:600;}
 .seg.gap{width:.6em;}
+.seg.cs,.tkc{flex-direction:row;align-items:flex-end;gap:.12em;}
+.tkc{display:inline-flex;}
+.cu{display:inline-flex;flex-direction:column;align-items:center;}
 .tk{cursor:pointer;border-radius:3px;}
 .tk:hover{background:var(--soft);}
 .blank{display:inline-block;min-width:2.6em;border-bottom:2px solid var(--accent);color:var(--accent);text-align:center;}
@@ -114,6 +117,8 @@ rt{font-size:.55em;color:var(--rt);font-family:-apple-system,"PingFang SC",sans-
 /* 展开的"出现在哪些歌" */
 details.occ{width:100%;text-align:left;font-size:.85rem;margin-top:4px;}
 details.occ>summary{cursor:pointer;color:var(--accent);padding:6px 0;}
+.more{border:1px solid var(--border);background:var(--card);color:var(--accent);border-radius:999px;padding:5px 12px;font-size:.8rem;cursor:pointer;margin-top:8px;}
+.occfoot{display:flex;gap:8px;flex-wrap:wrap;padding-top:4px;border-top:1px dashed var(--border);}
 .ctxsong{padding:10px 0 12px;border-top:1px dashed var(--border);}
 .ctxhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px;}
 .ctxt{font-family:var(--jp);font-size:1.05rem;font-weight:700;}
@@ -193,15 +198,24 @@ details.occ>summary{cursor:pointer;color:var(--accent);padding:6px 0;}
 .meter i+i{background:var(--mark-line);opacity:.6;border-left:2px solid var(--card);}
 .recnote{font-size:.8rem;color:var(--muted);}
 .album{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden;}
-.ahead{display:flex;gap:14px;align-items:center;width:100%;padding:12px;background:none;border:0;cursor:pointer;text-align:left;}
+.ahead{display:flex;gap:14px;align-items:center;width:100%;padding:12px;}
+.ahead .cover{width:112px;height:112px;}
+.anote{font-size:.82rem;color:var(--muted);line-height:1.6;margin:0;padding:0 12px 12px;}
+.aback{border:0;background:none;color:var(--accent);font-size:.9rem;cursor:pointer;padding:6px 0;margin-bottom:6px;}
+.shelfband{font-size:.8rem;color:var(--muted);margin:14px 0 8px;}
+.shelf{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.tile{border:0;padding:0;background:none;cursor:pointer;border-radius:10px;overflow:hidden;position:relative;display:block;box-shadow:0 1px 3px rgba(10,12,20,.12);}
+.tile .cover{width:100%;height:auto;aspect-ratio:1;border-radius:0;display:grid;}
+.tile:hover .cover{filter:brightness(1.06);}
+.tbar{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(0,0,0,.28);}
+.tbar i{display:block;height:100%;background:var(--accent);}
 .cover{width:76px;height:76px;border-radius:8px;flex:none;object-fit:cover;background:var(--soft);display:grid;place-items:center;font-family:var(--jp);font-weight:700;color:var(--accent);font-size:.9rem;text-align:center;padding:4px;}
+img.cover{padding:0;}
 .ainfo{flex:1;min-width:0;}
 .at{font-family:var(--jp);font-size:1.12rem;font-weight:700;line-height:1.35;}
 .az{font-size:.82rem;color:var(--muted);}
 .am{font-size:.76rem;color:var(--muted);margin-top:4px;line-height:1.5;}
 .abody{padding:0 12px 6px;border-top:1px dashed var(--border);}
-.album:not(.open) .abody{display:none;}
-.album.open .chev{transform:rotate(-135deg);margin-top:4px;}
 .song .rw{min-width:0;max-width:none;flex:1;}
 .song .rw .sz{display:block;font-family:-apple-system,"PingFang SC",sans-serif;font-weight:400;font-size:.8rem;color:var(--muted);}
 .song .rowbody{padding-left:2px;}
@@ -285,6 +299,8 @@ footer p{margin:0 0 6px;}
   .rowbody{padding-left:4px;}
   .rw{min-width:5em;}
   .cover{width:64px;height:64px;}
+  .ahead .cover{width:96px;height:96px;}
+  .shelf{gap:8px;}
   .opts{grid-template-columns:1fr;}
   .kpis{grid-template-columns:repeat(2,1fr);}
   .pop,.toast{bottom:calc(var(--nav-h) + 12px + env(safe-area-inset-bottom,0px));}
@@ -406,6 +422,7 @@ footer p{margin:0 0 6px;}
     <h3>显示与朗读</h3>
     <label class="toggle">汉字上注假名 <input type="checkbox" id="optRt"></label>
     <label class="toggle">歌词下标罗马音 <input type="checkbox" id="optRo"></label>
+    <div class="optrow">罗马音对齐 <div class="tags" id="optRoMode"></div></div>
     <label class="toggle">显示中文翻译 <input type="checkbox" id="optZh"></label>
     <div class="optrow">朗读速度 <div class="tags" id="optRate"></div></div>
     <div class="optrow">复习时每天的新词 <div class="tags" id="optNew"></div></div>
@@ -413,7 +430,7 @@ footer p{margin:0 0 6px;}
   </section>
   <section>
     <h3>备份进度</h3>
-    <p>把已掌握的词和复习记录复制出来，粘贴到另一台设备或另一个网址（GitHub 版和 claude.ai 版之间）导入。导入是合并，不会删掉已有的记录。</p>
+    <p>把已掌握的词和复习记录复制出来，粘贴到另一台设备或另一个浏览器里导入。导入是合并，不会删掉已有的记录。</p>
     <textarea id="io" spellcheck="false" aria-label="进度数据"></textarea>
     <div class="srow">
       <button class="btn" id="exportBtn" type="button">复制我的进度</button>
@@ -466,9 +483,9 @@ const GLOSS={
 const LS="yorushika_learned_v1", LS_SRS="yoru_srs_v1", LS_LOG="yoru_log_v1", LS_UI="yoru_ui_v1", LS_SYNC="yoru_synced_v1";
 function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-const ui=Object.assign({theme:"system",view:"flash",fmode:"browse",qtype:"zh2ja",filtersOpen:false,rt:true,ro:true,zh:true,rate:0.85,newPerDay:15,openAlbums:null},lsGet(LS_UI,{}));
+const ui=Object.assign({theme:"system",view:"flash",fmode:"browse",qtype:"zh2ja",filtersOpen:false,rt:true,ro:true,zh:true,rate:0.85,newPerDay:15,roMode:"word"},lsGet(LS_UI,{}));
 function saveUI(){lsSet(LS_UI,ui);}
-const st={artist:"all",albums:new Set(),tier:"all",state:"all",idx:0,order:null,q:"",rq:null,extraNew:0,qz:null,qs:{n:0,ok:0}};
+const st={album:null,artist:"all",albums:new Set(),tier:"all",state:"all",idx:0,order:null,q:"",rq:null,extraNew:0,qz:null,qs:{n:0,ok:0}};
 let learned=lsGet(LS,{});           // {词: true}
 let srs=lsGet(LS_SRS,{});            // {词: [盒子, 到期日]}
 let log=lsGet(LS_LOG,{});            // {日: {r:复习, n:新掌握, i:新词, q:测验}}
@@ -477,10 +494,8 @@ function bump(k,d=1){const t=today();const e=log[t]||(log[t]={r:0,n:0,i:0,q:0});
 function learnedWords(){return Object.keys(learned).filter(w=>learned[w]).sort();}
 
 // ================= 云端同步 =================
-// claude.ai 版：用 claude.ai 账号（window.claude 的 user + db 能力）
-// GitHub Pages 版：用 Supabase 账号（data/site.json 里填了 supabase_url 和 supabase_key 才启用）
-// 两边存的是同一种 JSON（packCloud），合并规则也一样。
-const CLOUD=SITE.host==="claude"?"claude":(SITE.supabase_url&&SITE.supabase_key?"supabase":"none");
+// 用 Supabase 账号同步（data/site.json 里填了 supabase_url 和 supabase_key 才启用）；存的是 packCloud() 的 JSON
+const CLOUD=SITE.supabase_url&&SITE.supabase_key?"supabase":"none";
 let backend=null, account=null, syncState="local", writing=Promise.resolve(), pendingWrite=null, dirty=false;
 function packCloud(){const since=today()-180;
   return {v:2,learned:learnedWords(),srs:Object.entries(srs).map(([w,[b,d]])=>[w,b,d]),
@@ -505,36 +520,13 @@ async function adoptRemote(remote,flagKey){
   if(JSON.stringify(packCloud())!==before) render();
 }
 function queueCloudWrite(){
-  if(!backend||syncState==="readonly")return;
+  if(!backend)return;
   dirty=true;clearTimeout(pendingWrite);
   pendingWrite=setTimeout(()=>{
     writing=writing.then(()=>backend.save(packCloud()))
       .then(()=>{dirty=false;if(syncState!=="synced")setSync("synced");})
-      .catch(e=>setSync(e&&(e.code==="not_granted"||e.code==="invalid_argument")?"readonly":"error"));
+      .catch(()=>setSync("error"));
   },800);
-}
-
-// ---------- claude.ai 账号 ----------
-async function initClaude(){
-  const c=window.claude;
-  if(!c||typeof c.use!=="function"){if(!initClaude.retried){initClaude.retried=true;setTimeout(initClaude,1500);}setSync("local");return;}
-  setSync("connecting");
-  try{
-    const [user,db]=await Promise.all([c.use("user"),c.use("db")]);
-    if(!user||!db){setSync("local");return;}
-    const me=await user.me();
-    if(!me||!me.id){setSync("signedout");return;}
-    account={name:me.name,avatar:me.avatarUrl};
-    const doc=db.doc("data/users/"+me.id+"/progress");
-    backend={save:d=>doc.set(d)};
-    const snap=await doc.get();
-    await adoptRemote(snap.exists?(snap.data()||{}):null,LS_SYNC);
-    setSync("synced");
-    doc.onSnapshot(sn=>{
-      if(!sn.exists||sn.metadata.hasPendingWrites||dirty||sameAsLocal(sn.data()))return;
-      unpackCloud(sn.data()||{},false);render();
-    },()=>setSync("error"));
-  }catch(e){setSync(e&&e.code==="not_granted"?"readonly":"error");}
 }
 
 // ---------- Supabase 账号（GitHub Pages 版） ----------
@@ -670,15 +662,33 @@ function spkBtn(getText,label){const b=el("button","spk");b.type="button";b.inne
 function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;}
 function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");}
 function rubyEl(base,rt){const r=el("ruby");r.appendChild(document.createTextNode(base));r.appendChild(el("rt",null,rt));return r;}
+// 把词切成汉字段和假名段，给每个汉字段分配读音：思い出(おもいで) → [思,おも][い][出,で]；对不上时返回 null
+function rubySplit(s,k){
+  const runs=s.match(/[㐀-鿿々〆ヶ]+|[^㐀-鿿々〆ヶ]+/g);
+  const m=toHira(k).match(new RegExp("^"+runs.map(r=>KANJI.test(r)?"(.+?)":esc(toHira(r))).join("")+"$"));
+  if(!m)return null;
+  let g=1;return runs.map(r=>[r,KANJI.test(r)?m[g++]:null]);
+}
 // 汉字部分注假名，送假名不注：思い出(おもいで) → 思[おも]い出[で]
 function rubyNodes(s,k){
   const f=document.createDocumentFragment();
   if(!k||!KANJI.test(s)){f.appendChild(document.createTextNode(s));return f;}
-  const runs=s.match(/[㐀-鿿々〆ヶ]+|[^㐀-鿿々〆ヶ]+/g);
-  const m=toHira(k).match(new RegExp("^"+runs.map(r=>KANJI.test(r)?"(.+?)":esc(toHira(r))).join("")+"$"));
-  if(!m){f.appendChild(rubyEl(s,toHira(k)));return f;}
-  let g=1;runs.forEach(r=>f.appendChild(KANJI.test(r)?rubyEl(r,m[g++]):document.createTextNode(r)));
+  const parts=rubySplit(s,k);
+  if(!parts){f.appendChild(rubyEl(s,toHira(k)));return f;}
+  parts.forEach(([r,rd])=>f.appendChild(rd?rubyEl(r,rd):document.createTextNode(r)));
   return f;
+}
+// 「按字」显示罗马音时，一个词拆成的小格：每段汉字一格（罗马音是它的读音），假名每个音节一格
+function tokUnits(x){
+  const k=x.k?toHira(x.k):"", cell=(n,r)=>({node:n,r});
+  const kana=t=>morae(t).map(u=>cell(document.createTextNode(u),unitRoma(u)));
+  if(KANJI.test(x.s)&&k){
+    const parts=rubySplit(x.s,k);
+    if(!parts)return [cell(rubyEl(x.s,k),romaji(k))];
+    return parts.flatMap(([r,rd])=>rd?[cell(rubyEl(r,rd),romaji(rd))]:kana(r));
+  }
+  if(k&&k!==toHira(x.s))return [cell(document.createTextNode(x.s),romaji(k))];   // 助词 は/へ 读 wa/e
+  return kana(x.s);
 }
 const KATA_ONLY=/^[゠-ヿ・\s]+$/;
 function songTitle(s){return KATA_ONLY.test(s.ja)?s.ja+"（"+s.zh+"）":s.ja;}
@@ -714,6 +724,7 @@ function lyricLine(sid,li,opts={}){
   segs.forEach(seg=>{
     const text=seg.map(x=>tokParts(x).s).join("");
     if(/^[\s　]+$/.test(text)){row.appendChild(el("span","seg gap"));pos+=text.length;return;}
+    if(ui.roMode==="char"){row.appendChild(charSeg(sid,li,seg,pos,opts));pos+=text.length;return;}
     const sg=el("span","seg"), top=el("span","sj"); let reading="", hit=false, blanked=false;
     seg.forEach(tok=>{
       const x=tokParts(tok), a=pos, b=pos+x.s.length; pos=b;
@@ -734,6 +745,25 @@ function lyricLine(sid,li,opts={}){
   box.appendChild(foot);
   return box;
 }
+// 按字模式的一段：每格上面是字（汉字带注音），下面是这格的罗马音
+function charSeg(sid,li,seg,pos,opts){
+  const sg=el("span","seg cs"), cells=[];let blanked=false;
+  const addCell=(parent,node,r,hit)=>{const c=el("span","cu"), top=el("span","sj"), ro=el("span","sr"+(hit?" hit":""),r);
+    if(hit){const m=el("mark");m.appendChild(node);node=m;}
+    top.appendChild(node);c.append(top,ro);parent.appendChild(c);return ro;};
+  seg.forEach(tok=>{
+    const x=tokParts(tok), a=pos, b=pos+x.s.length; pos=b;
+    if(opts.blank&&opts.blank[0]<b&&a<opts.blank[1]){if(!blanked){blanked=true;addCell(sg,el("span","blank","？"),"?");}return;}
+    const hit=!!(opts.spans&&opts.spans.some(([p,q])=>p<b&&a<q));
+    const box=x.p?el("span","tk tkc"):sg;
+    tokUnits(x).forEach(u=>cells.push([u,addCell(box,u.node,u.r,hit)]));
+    if(x.p){box.onclick=e=>{e.stopPropagation();openTokPop(sid,li,a,b,x);};sg.appendChild(box);}
+  });
+  // 词尾的促音「っ」单独一格时没有读音，用下一格的辅音表示（言っ|て → t|te）
+  cells.forEach(([u,ro],i)=>{if(!u.r&&/[っッ]$/.test(u.node.textContent)){const nx=cells[i+1];ro.textContent=nx&&nx[0].r?(nx[0].r.startsWith("ch")?"t":nx[0].r[0]):"";}
+    if(!ro.textContent)ro.textContent=" ";});
+  return sg;
+}
 function spansAt(item,sid,li){return ((item.loc||{})[sid]||[]).filter(h=>h[0]===li).map(h=>[h[1],h[2]]);}
 function exampleBox(item,label){
   if(!item.x)return null;
@@ -743,20 +773,31 @@ function exampleBox(item,label){
   const src=el("div","src");src.append("出自 ",el("b",null,"《"+songTitle(s)+"》")," · "+albumName(albumById[s.album]));
   b.appendChild(src);return b;
 }
+// 出现在很多歌里的词，原句会很长：先显示前几首、每首前几句，其余点按钮展开；底部可以收起
+const OCC_SONGS=4, OCC_LINES=3;
+function moreBtn(text,onClick){const b=el("button","more",text);b.type="button";b.onclick=e=>{e.stopPropagation();onClick(b);};return b;}
 function occDetails(item,hits,label){
-  const d=el("details","occ");d.appendChild(el("summary",null,label));
+  const d=el("details","occ");const sum=el("summary",null,label+"（"+hits.length+" 首）");d.appendChild(sum);
   let built=false;
+  const songBox=([sid,c])=>{
+    const s=songById[sid], a=albumById[s.album], box=el("div","ctxsong");
+    const head=el("div","ctxhead"), left=el("div");
+    left.append(el("div","ctxt",songTitle(s)),el("div","ctxa",s.zh+" · 《"+a.ja+"》"));
+    head.append(left,el("div","gcount",c+" 次"));box.appendChild(head);
+    const byLine=new Map();
+    ((item.loc||{})[sid]||[]).forEach(([li,x,y])=>{if(!byLine.has(li))byLine.set(li,[]);byLine.get(li).push([x,y]);});
+    const lis=[...byLine.keys()].sort((p,q)=>p-q), line=li=>lyricLine(sid,li,{spans:byLine.get(li)});
+    lis.slice(0,OCC_LINES).forEach(li=>box.appendChild(line(li)));
+    if(lis.length>OCC_LINES)box.appendChild(moreBtn("这首还有 "+(lis.length-OCC_LINES)+" 句",b=>b.replaceWith(...lis.slice(OCC_LINES).map(line))));
+    return box;
+  };
   d.addEventListener("toggle",()=>{if(!d.open||built)return;built=true;
-    hits.slice().sort((x,y)=>y[1]-x[1]).forEach(([sid,c])=>{
-      const s=songById[sid], a=albumById[s.album], box=el("div","ctxsong");
-      const head=el("div","ctxhead"), left=el("div");
-      left.append(el("div","ctxt",songTitle(s)),el("div","ctxa",s.zh+" · 《"+a.ja+"》"));
-      head.append(left,el("div","gcount",c+" 次"));box.appendChild(head);
-      const byLine=new Map();
-      ((item.loc||{})[sid]||[]).forEach(([li,x,y])=>{if(!byLine.has(li))byLine.set(li,[]);byLine.get(li).push([x,y]);});
-      [...byLine.keys()].sort((p,q)=>p-q).forEach(li=>box.appendChild(lyricLine(sid,li,{spans:byLine.get(li)})));
-      d.appendChild(box);
-    });
+    const list=hits.slice().sort((x,y)=>y[1]-x[1]);
+    list.slice(0,OCC_SONGS).forEach(h=>d.appendChild(songBox(h)));
+    const foot=el("div","occfoot");
+    if(list.length>OCC_SONGS)foot.appendChild(moreBtn("展开其余 "+(list.length-OCC_SONGS)+" 首",b=>{b.remove();foot.before(...list.slice(OCC_SONGS).map(songBox));}));
+    foot.appendChild(moreBtn("收起",()=>{d.open=false;if(sum.getBoundingClientRect().top<0)sum.scrollIntoView({block:"center"});}));
+    d.appendChild(foot);
   });
   d.addEventListener("click",e=>e.stopPropagation());
   return d;
@@ -1002,7 +1043,7 @@ function vocabRow(v){
     const top=el("div","wordrow");top.append(el("div","wordline","读音："+v.k),spkBtn(()=>wordReading(v)));body.appendChild(top);
     body.appendChild(albumBadges(v.hits));
     const ex=exampleBox(v);if(ex)body.appendChild(ex);
-    body.appendChild(occDetails(v,v.hits,"出现在哪些歌（全部原句）"));};
+    body.appendChild(occDetails(v,v.hits,"出现在哪些歌"));};
   head.onclick=open;row.append(head,body);row._open=open;return row;
 }
 function lyricMatches(q,ids,limit){
@@ -1050,7 +1091,7 @@ function renderGram(){
     const body=el("div","rowbody");let built=false;
     head.onclick=()=>{row.classList.toggle("open");if(built)return;built=true;
       const ex=exampleBox(g);if(ex)body.appendChild(ex);
-      body.appendChild(occDetails(g,g.hits,"出现在哪些歌（全部原句）"));};
+      body.appendChild(occDetails(g,g.hits,"出现在哪些歌"));};
     row.append(head,body);box.appendChild(row);
   });
 }
@@ -1092,65 +1133,85 @@ function renderRecommend(box){
   });
   box.appendChild(rec);
 }
-function renderSongs(){
-  const box=document.getElementById("v-songs");box.innerHTML="";
-  const n=norm(st.q);
-  if(!st.q)renderRecommend(box);
-  if(!ui.openAlbums)ui.openAlbums=[DATA.albums[0]&&DATA.albums[0].id];
-  const open=new Set(ui.openAlbums);
-  if(!st.q)box.appendChild(el("div","h2","全部专辑"));
-  let shown=0;
-  DATA.albums.forEach(a=>{
-    const songs=DATA.songs.filter(s=>s.album===a.id&&(!st.q||norm(s.ja).includes(n)||s.zh.includes(st.q)));
-    if(st.q&&!songs.length)return;shown++;
-    const isOpen=st.q?true:open.has(a.id);
-    const sec=el("section","album"+(isOpen?" open":""));
-    const words=DATA.vocab.filter(v=>songs.some(s=>v.occ[s.id]));
-    const head=el("button","ahead");head.type="button";head.setAttribute("aria-expanded",String(isOpen));
-    const info=el("div","ainfo");
-    info.append(el("div","at",a.ja),el("div","az",a.zh+" · "+bandById[a.artist].ja),
-      el("div","am",`${a.year} · ${a.type} · ${songs.length} 首 · 已掌握 ${words.filter(v=>learned[v.w]).length}/${words.length} 词`),el("div","am",a.note));
-    head.append(coverEl(a),info,el("span","chev"));
-    const body=el("div","abody");
-    head.onclick=()=>{const o=sec.classList.toggle("open");head.setAttribute("aria-expanded",String(o));
-      const s=new Set(ui.openAlbums||[]);o?s.add(a.id):s.delete(a.id);ui.openAlbums=[...s];saveUI();};
-    songs.forEach(s=>{
-      const sw=DATA.vocab.filter(v=>v.occ[s.id]), cv=coverage(s.id);
-      const row=el("div","row song"), h=el("div","rowhead");
-      const w=el("div","rw",s.ja);w.appendChild(el("span","sz",s.zh));
-      h.append(w,el("div","rc",s.dup_of?"其他版本":`${sw.length} 词 · 认识 ${Math.round(cv.pct*100)}%`));
-      const rb=el("div","rowbody");let built=false;
-      h.onclick=()=>{row.classList.toggle("open");if(built)return;built=true;
-        if(s.dup_of){const o=songById[s.dup_of];rb.appendChild(el("div","dupnote","与《"+(o?songTitle(o):s.dup_of)+"》是同一首歌的不同版本，不重复计数"));}
-        rb.appendChild(listenLinks(s));
-        const tg=el("div","tags");
-        sw.sort((x,y)=>y.occ[s.id]-x.occ[s.id]).forEach(v=>{const b=el("button","badge bw"+(learned[v.w]?" learned":""),v.w+" "+v.m);b.type="button";b.onclick=e=>{e.stopPropagation();openVocabPop(v);};tg.appendChild(b);});
-        rb.appendChild(tg);
-        const lyr=el("details","lyr");lyr.appendChild(el("summary",null,"歌词对照（注音 + 罗马音 + 中文，点词查意思）"));
-        const lb=el("div","lyrics");lyr.appendChild(lb);let lbuilt=false;
-        lyr.addEventListener("toggle",()=>{if(!lyr.open||lbuilt)return;lbuilt=true;(DATA.lines[s.id]||[]).forEach((_,li)=>lb.appendChild(lyricLine(s.id,li)));});
-        rb.appendChild(lyr);};
-      row.append(h,rb);body.appendChild(row);
+// 一首歌：点开是试听链接、词表词、歌词对照
+function songRow(s){
+  const sw=DATA.vocab.filter(v=>v.occ[s.id]), cv=coverage(s.id);
+  const row=el("div","row song"), h=el("div","rowhead");
+  const w=el("div","rw",s.ja);w.appendChild(el("span","sz",s.zh));
+  h.append(w,el("div","rc",s.dup_of?"其他版本":`${sw.length} 词 · 认识 ${Math.round(cv.pct*100)}%`));
+  const rb=el("div","rowbody");let built=false;
+  h.onclick=()=>{row.classList.toggle("open");if(built)return;built=true;
+    if(s.dup_of){const o=songById[s.dup_of];rb.appendChild(el("div","dupnote","与《"+(o?songTitle(o):s.dup_of)+"》是同一首歌的不同版本，不重复计数"));}
+    rb.appendChild(listenLinks(s));
+    const tg=el("div","tags");
+    sw.sort((x,y)=>y.occ[s.id]-x.occ[s.id]).forEach(v=>{const b=el("button","badge bw"+(learned[v.w]?" learned":""),v.w+" "+v.m);b.type="button";b.onclick=e=>{e.stopPropagation();openVocabPop(v);};tg.appendChild(b);});
+    rb.appendChild(tg);
+    const lyr=el("details","lyr");lyr.appendChild(el("summary",null,"歌词对照（注音 + 罗马音 + 中文，点词查意思）"));
+    const lb=el("div","lyrics");lyr.appendChild(lb);let lbuilt=false;
+    lyr.addEventListener("toggle",()=>{if(!lyr.open||lbuilt)return;lbuilt=true;(DATA.lines[s.id]||[]).forEach((_,li)=>lb.appendChild(lyricLine(s.id,li)));});
+    rb.appendChild(lyr);};
+  row.append(h,rb);return row;
+}
+function albumWords(a){const ids=DATA.songs.filter(s=>s.album===a.id).map(s=>s.id);
+  const ws=DATA.vocab.filter(v=>ids.some(id=>v.occ[id]));return {all:ws.length,kn:ws.filter(v=>learned[v.w]).length};}
+// 专辑架：只放封面，按乐队分组，一行三张；点封面进专辑
+function openAlbum(id){st.album=id;try{history.pushState({album:id},"");}catch(e){}renderSongs();window.scrollTo(0,0);}
+function closeAlbum(){if(history.state&&history.state.album)history.back();else{st.album=null;renderSongs();}}
+window.addEventListener("popstate",e=>{st.album=(e.state&&e.state.album)||null;if(ui.view==="songs")renderSongs();});
+function renderShelf(box){
+  box.appendChild(el("div","h2","全部专辑"));
+  [...new Set(DATA.albums.map(a=>a.artist))].forEach(bid=>{
+    const b=bandById[bid], albums=DATA.albums.filter(a=>a.artist===bid);
+    box.appendChild(el("div","shelfband",b.ja+" · "+b.zh));
+    const g=el("div","shelf");
+    albums.forEach(a=>{
+      const t=el("button","tile");t.type="button";const w=albumWords(a);
+      t.title=a.ja+" · "+a.zh+" · "+a.year;t.setAttribute("aria-label",a.ja+"（"+a.zh+"），已掌握 "+w.kn+"/"+w.all+" 词");
+      const m=el("span","tbar"), i=el("i");i.style.width=(w.all?w.kn/w.all*100:0)+"%";m.appendChild(i);
+      t.append(coverEl(a),m);t.onclick=()=>openAlbum(a.id);g.appendChild(t);
     });
-    sec.append(head,body);box.appendChild(sec);
+    box.appendChild(g);
   });
-  if(st.q&&!shown)box.appendChild(el("div","empty","没有找到歌名里带「"+st.q+"」的歌"));
-  if(!st.q&&DATA.pending&&DATA.pending.length){
+  if(DATA.pending&&DATA.pending.length){
     box.appendChild(el("div","h2","待收录（"+DATA.pending.length+" 张）"));
     const g=el("div","pending");
     DATA.pending.forEach(a=>{const p=el("div","pend");p.append(coverEl(a),el("span",null,a.ja));p.title=a.ja+" · "+a.zh+" · "+a.year;g.appendChild(p);});
     box.appendChild(g);
   }
 }
+function renderAlbum(box,a){
+  const back=el("button","aback","‹ 全部专辑");back.type="button";back.onclick=closeAlbum;box.appendChild(back);
+  const songs=DATA.songs.filter(s=>s.album===a.id), w=albumWords(a);
+  const head=el("div","ahead"), info=el("div","ainfo");
+  info.append(el("div","at",a.ja),el("div","az",a.zh+" · "+bandById[a.artist].ja),
+    el("div","am",`${a.year} · ${a.type} · ${songs.length} 首 · 已掌握 ${w.kn}/${w.all} 词`));
+  head.append(coverEl(a),info);
+  const sec=el("section","album");sec.append(head);
+  if(a.note)sec.appendChild(el("p","anote",a.note));
+  const body=el("div","abody");songs.forEach(s=>body.appendChild(songRow(s)));sec.appendChild(body);
+  box.appendChild(sec);
+}
+function renderSongs(){
+  const box=document.getElementById("v-songs");box.innerHTML="";
+  if(st.q){   // 搜索：按专辑列出歌名匹配的歌
+    const n=norm(st.q);let shown=0;
+    DATA.albums.forEach(a=>{
+      const songs=DATA.songs.filter(s=>s.album===a.id&&(norm(s.ja).includes(n)||s.zh.includes(st.q)));
+      if(!songs.length)return;shown++;
+      box.appendChild(el("div","h2","《"+a.ja+"》"+a.zh));
+      const sec=el("section","album"), body=el("div","abody");songs.forEach(s=>body.appendChild(songRow(s)));sec.appendChild(body);box.appendChild(sec);
+    });
+    if(!shown)box.appendChild(el("div","empty","没有找到歌名里带「"+st.q+"」的歌"));
+    return;
+  }
+  const a=st.album&&albumById[st.album];
+  if(a){renderAlbum(box,a);return;}
+  renderRecommend(box);
+  renderShelf(box);
+}
 
 // ================= 我的：账号 / 记录 / 设置 =================
 const SYNC_TEXT={
-  claude:{local:"当前是本机模式：进度只保存在这个浏览器里，换设备或清除浏览器数据就没有了。",
-    connecting:"正在连接 claude.ai 账号…",
-    signedout:"没有检测到 claude.ai 登录。登录后再打开这个页面，进度会自动保存到你的账号。现在进度只保存在本机。",
-    synced:"已登录，进度（已掌握的词、复习记录）自动保存到你的 claude.ai 账号，在任何设备上打开这个页面都能接着学。",
-    readonly:"你对这个页面只有查看权限，进度不能保存到云端，只保存在本机。",
-    error:"暂时连不上云端，进度先保存在本机，恢复连接后会继续同步。"},
   supabase:{local:"正在准备登录…",connecting:"正在连接云端…",
     signedout:"登录后，已掌握的词、复习记录和每天的学习记录会保存到云端，在别的设备上登录同一个账号就能接着学。第一次用请先注册。",
     synced:"已登录，进度自动保存到云端。在别的设备上登录同一个账号就能接着学。",
@@ -1164,8 +1225,7 @@ function renderAccount(){
   b.append(avatarNode(),el("span","dot"+(synced?" on":"")),el("span","an",synced?(shortName||"已同步"):syncState==="connecting"?"连接中":"我的"));
   const who=document.getElementById("who");who.innerHTML="";
   if(account)who.append(avatarNode(),el("b",null,account.name||"已登录"));
-  const p=document.getElementById("syncText");p.textContent=(SYNC_TEXT[CLOUD]||{})[syncState]||SYNC_TEXT.claude[syncState]||"";
-  if(CLOUD==="none"&&SITE.cloud_url){p.append(" 想登录并云端同步，请打开 ");const a=el("a",null,"claude.ai 版");a.href=SITE.cloud_url;a.target="_blank";a.rel="noopener";p.append(a,"。");}
+  const p=document.getElementById("syncText");p.textContent=(SYNC_TEXT[CLOUD]||{})[syncState]||SYNC_TEXT.none.local;
   const sbOn=CLOUD==="supabase"&&!!sb;
   document.getElementById("authForm").hidden=!(sbOn&&!sbUid&&!recovering);
   document.getElementById("pwForm").hidden=!(sbOn&&recovering);
@@ -1200,6 +1260,7 @@ function openSheet(o){document.getElementById("sheet").hidden=!o;document.getEle
   if(o){renderStats();renderSettings();document.getElementById("ioMsg").textContent="";document.getElementById("sheetClose").focus();}}
 function renderSettings(){
   chipRow(document.getElementById("optRate"),[{v:0.7,label:"慢"},{v:0.85,label:"中"},{v:1,label:"正常"}],x=>ui.rate===x.v,x=>{ui.rate=x.v;saveUI();renderSettings();speak("ことば");});
+  chipRow(document.getElementById("optRoMode"),[{v:"word",label:"按词"},{v:"char",label:"按字"}],x=>ui.roMode===x.v,x=>{ui.roMode=x.v;saveUI();renderSettings();renderView();});
   chipRow(document.getElementById("optNew"),[5,10,15,20,30].map(n=>({v:n,label:String(n)})),x=>ui.newPerDay===x.v,x=>{ui.newPerDay=x.v;saveUI();st.rq=null;renderSettings();});
   document.getElementById("ttsNote").textContent=!TTS.ok?"这个浏览器不支持朗读。":TTS.voice?"朗读用的是这台设备自带的日语语音（"+TTS.voice.name+"）。":"朗读用的是这台设备自带的语音。如果听起来不像日语，可以在系统设置里添加日语语音。";
 }
@@ -1225,14 +1286,12 @@ document.getElementById("importBtn").onclick=()=>{
 };
 
 // ================= 深色 / 浅色 =================
-// 跟随系统时不改动页面原有的 data-theme（claude.ai 会按它自己的主题设置这个属性）
 const THEMES=[{id:"system",label:"跟随系统",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>'},
   {id:"light",label:"浅色",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'},
   {id:"dark",label:"深色",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>'}];
-const hostTheme=document.documentElement.getAttribute("data-theme");
 function applyTheme(){
   const t=THEMES.find(x=>x.id===ui.theme)||THEMES[0], root=document.documentElement;
-  if(t.id==="system"){if(hostTheme)root.setAttribute("data-theme",hostTheme);else root.removeAttribute("data-theme");}
+  if(t.id==="system")root.removeAttribute("data-theme");
   else root.setAttribute("data-theme",t.id);
   const b=document.getElementById("themeBtn");b.innerHTML=t.icon;
   b.title=b.ariaLabel="外观："+t.label+"（点击切换）";b.setAttribute("aria-label",b.title);
@@ -1282,7 +1341,7 @@ document.addEventListener("keydown",e=>{
   if(ui.fmode==="review"&&card.classList.contains("flipped")&&/^[123]$/.test(e.key))grade(+e.key-1);
 });
 applyTheme();applyDisplay();renderAccount();renderFooter();render();
-if(CLOUD==="claude")initClaude();else if(CLOUD==="supabase")initSupabase();
+if(CLOUD==="supabase")initSupabase();
 </script>
 </body>
 </html>

@@ -12,7 +12,7 @@ lyrics/**.lrc  +  data/catalog.json
 data/songs/sN.json                    （每首歌完整拆分，入库，便于 git diff）
         │ scripts/export.py    + lemmas.json / grammar.json，只取 done 专辑
         ▼
-data/data.json  ──scripts/build.py──▶  web/index.html（GitHub Pages）+ web/artifact.html（claude.ai）
+data/data.json  ──scripts/build.py──▶  web/index.html（GitHub Pages）
         │
         └ scripts/make_db.py ──▶ local/kotoba.sqlite （查询用，不入库）
 ```
@@ -35,7 +35,7 @@ data/data.json  ──scripts/build.py──▶  web/index.html（GitHub Pages�
 - 歌曲 id：s0–s19 沿用 v1，其余按乐队 → 发行时间顺序编号（s20–s156）。
 - 新专辑的 `note` 是从 `_album.md` 自动截取的第一句，整理这张专辑时再改写。
 - `zh`（歌名、专辑名的中文）优先用 QQ 音乐上的译名，没有再用网易云音乐的；平台上只有英文或版本说明的保留自译。
-- 专辑的 `short` 只给很长的名字（例：音辞）；`cover` 是 `web/covers/` 里的封面。
+- 专辑的 `short` 是简称，只给很长的名字（例：音辞、夏草）；网页的标签、例句出处等地方显示简称，专辑页和提示里显示全名。`cover` 是 `web/covers/` 里的封面（专辑架上显示它；没有封面就显示名字）。
 - 歌曲的 `links`：`{"qq": QQ 音乐 songmid, "ne": 网易云歌曲 id}`，网页据此直接跳到那首歌；没有的就用搜索链接。
 - 歌曲的 `lib_ja`：本地歌词库里的旧歌名，只有歌名更正过的歌才有（例：紙ひこうき 在歌词库里叫 Paper Airplane）。`make ingest` 会跳过歌词库里这个旧文件，不会把它当成新歌加回来。
 - 整理时修过的歌词（错字、整首换成正确版本）只改仓库里的 `lyrics/`。`make ingest` 发现仓库里的文件和歌词库不同时会保留仓库的版本并列出来；`make ingest FORCE=1` 才会用歌词库的版本覆盖。
@@ -81,16 +81,15 @@ UniDic 有些读音在歌词里不对（何も 读成 なんも、君 读成 く
 ## 云端进度
 
 进度 JSON：`{"v": 2, "learned": [词…], "srs": [[词, 盒子, 到期日]…], "log": [[日, 复习, 新掌握, 新词, 测验]…]}`。
-日期是本地时间的"自 1970 年起第几天"。两个版本存的格式相同，只有账号本人能读写：
+日期是本地时间的"自 1970 年起第几天"。只有账号本人能读写：
 
-- claude.ai 版：claude.ai 的数据库，文档 `data/users/<账号>/progress`
-- GitHub Pages 版：Supabase 的 `progress` 表（`user_id`、`data`、`updated_at`），建表和权限见 [`db/supabase.sql`](../db/supabase.sql)，开启步骤见 [supabase.md](supabase.md)
+- Supabase 的 `progress` 表（`user_id`、`data`、`updated_at`），建表和权限见 [`db/supabase.sql`](../db/supabase.sql)，开启步骤见 [supabase.md](supabase.md)
 
 ## data/site.json
 
 | 键 | 含义 |
 |---|---|
-| repo_url / pages_url / cloud_url | GitHub 仓库、Pages 网址、claude.ai 版网址 |
+| repo_url / pages_url | GitHub 仓库、Pages 网址 |
 | supabase_url / supabase_key | Supabase 项目地址和 publishable key（公开的）；都填了 Pages 版才会显示登录 |
 | supabase_github | `true` 时显示「用 GitHub 账号登录」（需要先在 Supabase 里配置 GitHub 登录） |
 | supabase_google | `true` 时显示「用 Google 账号登录」（需要先在 Supabase 里配置 Google 登录） |
