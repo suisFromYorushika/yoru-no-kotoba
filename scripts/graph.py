@@ -22,6 +22,16 @@ TOP_K = 6
 REFS = 20   # 每条线最多带几句一起出现的歌词
 
 
+def reading(segs):
+    """一行歌词的读音：每段（词 + 粘着的词尾）连在一起，段之间用空格隔开；标点原样保留。"""
+    out = []
+    for seg in segs:
+        r = "".join(t if isinstance(t, str) else (t[1] if len(t) > 1 and t[1] else t[0]) for t in seg)
+        if r.strip():
+            out.append(r.strip())
+    return " ".join(out)
+
+
 def main():
     data = json.loads((ROOT / "data" / "data.json").read_text(encoding="utf-8"))
     songs = {s["id"]: s for s in data["songs"]}
@@ -77,7 +87,8 @@ def main():
             if k not in lines_out:
                 ja, zh = data["lines"][sid][int(li)][:2]
                 s = songs[sid]
-                lines_out[k] = [ja, zh, s["ja"], albums[s["album"]].get("short") or albums[s["album"]]["ja"]]
+                lines_out[k] = [ja, zh, s["ja"], albums[s["album"]].get("short") or albums[s["album"]]["ja"],
+                                reading(data["lines"][sid][int(li)][2])]
             refs.append([k, line_words[k][a], line_words[k][b], len(ks)])
         edges.append({"s": a, "t": b, "n": len(pair[a, b]), "w": round(scored[a, b], 4), "refs": refs})
 
@@ -108,9 +119,10 @@ def main():
             if k not in lines_out:
                 ja, zh = data["lines"][sid][li][:2]
                 s = songs[sid]
-                lines_out[k] = [ja, zh, s["ja"], albums[s["album"]].get("short") or albums[s["album"]]["ja"]]
+                lines_out[k] = [ja, zh, s["ja"], albums[s["album"]].get("short") or albums[s["album"]]["ja"],
+                                reading(data["lines"][sid][int(li)][2])]
             x = [k, line_words[k].get(i, [])]
-        nodes.append({"id": i, "w": v["w"].split(" / ")[0], "full": v["w"], "k": v["k"], "m": v["m"],
+        nodes.append({"id": i, "w": v["w"].split(" / ")[0], "full": v["w"], "k": v["k"], "r": v["r"], "m": v["m"],
                       "n": len(v["occ"]), "band": bands.pop() if len(bands) == 1 else "both",
                       "g": group.get(i, -1), "x": round(float(pos[i][0]), 4), "y": round(float(pos[i][1]), 4), "ex": x})
 

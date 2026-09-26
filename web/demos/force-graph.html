@@ -19,6 +19,21 @@
   const links = d.links.map(e => ({ source: e.s, target: e.t, e }));
   const radius = n => 1.5 + Math.sqrt(n.n) * 1.5;
   let focus = null, hover = null, sel = null, hlNodes = new Set(), hlLinks = new Set();
+  // 电脑（有鼠标）：停在线上就显示歌词；手机：只有点线中间的「N 句」标签才选中这条线
+  const canHover = matchMedia("(hover: hover) and (pointer: fine)").matches;
+  let lastPt = null, hoverT = null;
+  el.addEventListener("pointerdown", e => { const b = el.getBoundingClientRect(); lastPt = { x: e.clientX - b.left, y: e.clientY - b.top }; }, true);
+  // 手指 / 鼠标按下的位置是不是在某个「N 句」标签上（标签比后面的点优先）
+  function pillAt() {
+    if (!focus || !lastPt) return null;
+    const g = G.screen2GraphCoords(lastPt.x, lastPt.y), pad = 6 / G.zoom();
+    for (const l of hlLinks) { const q = l._pill; if (q && Math.abs(g.x - q.x) <= q.w / 2 + pad && Math.abs(g.y - q.y) <= q.h / 2 + pad) return l; }
+    return null;
+  }
+  function selectLink(l) {
+    sel = l; if (!focus) { hlNodes = new Set([l.e.s, l.e.t]); hlLinks = new Set([l]); }
+    ui.showEdge(l.e, focus && focus.raw);
+  }
   function highlight(n) {
     hlNodes = new Set(); hlLinks = new Set();
     if (!n) return;
@@ -46,30 +61,35 @@
         ctx.textAlign = "center"; ctx.textBaseline = "top";
         ctx.fillStyle = on ? "rgba(255,255,255,.92)" : "rgba(255,255,255,.2)";
         ctx.fillText(n.w, n.x, n.y + r + 2 / scale);
+        if (focus && on) {   // 聚焦时，词下面标罗马音
+          ctx.font = `400 ${fs * .72}px -apple-system,"Segoe UI",sans-serif`; ctx.fillStyle = "rgba(185,194,230,.9)";
+          ctx.fillText(n.r, n.x, n.y + r + 2 / scale + fs * 1.15);
+        }
       }
       ctx.globalAlpha = 1;
     })
     .nodePointerAreaPaint((n, color, ctx) => { if (focus && !hlNodes.has(n.id)) return; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(n.x, n.y, radius(n) + 3, 0, 2 * Math.PI); ctx.fill(); })
     .linkColor(l => l === sel ? "#fff" : hlLinks.has(l) ? "rgba(255,240,200,.55)" : (focus || hover) ? "rgba(255,255,255,.025)" : "rgba(140,160,255,.14)")
     .linkWidth(l => l === sel ? 3 + l.e.w * 10 : hlLinks.has(l) ? 1 + l.e.w * 10 : .3 + l.e.w * 3)
-    // 鼠标放在线上：说明这条线是什么
-    .linkLabel(l => `<div style="font-size:14px"><b>${d.nodes[l.e.s].w} × ${d.nodes[l.e.t].w}</b></div>` +
-      `<div>在同一句歌词里一起出现 ${l.e.n} 次</div><div style="opacity:.7">点击看这些歌词</div>`)
+    // 鼠标放在线上：说明这条线是什么（手机上没有悬停，不显示）
+    .linkLabel(l => canHover && !focus ? `<div style="font-size:14px"><b>${d.nodes[l.e.s].w} × ${d.nodes[l.e.t].w}</b></div>` +
+      `<div>在同一句歌词里一起出现 ${l.e.n} 次</div><div style="opacity:.7">点击看这些歌词</div>` : "")
     // 聚焦一个词时，在它的每条线中间标出「几句」
     .linkCanvasObjectMode(l => hlLinks.has(l) && focus ? "after" : undefined)
     .linkCanvasObject((l, ctx, scale) => {
       const a = l.source, b = l.target; if (typeof a !== "object") return;
       const x = a.x + (b.x - a.x) * .5, y = a.y + (b.y - a.y) * .5, text = l.e.n + " 句";
-      const fs = 10 / scale; ctx.font = `600 ${fs}px sans-serif`;
-      const w = ctx.measureText(text).width + fs, h = fs * 1.6;
+      const fs = (canHover ? 10 : 13) / scale; ctx.font = `600 ${fs}px sans-serif`;
+      const w = ctx.measureText(text).width + fs * 1.2, h = fs * 1.8;
+      l._pill = { x, y, w, h };
       ctx.fillStyle = l === sel ? "rgba(255,209,102,.95)" : "rgba(12,16,34,.85)";
       ctx.strokeStyle = "rgba(255,240,200,.6)"; ctx.lineWidth = 1 / scale;
       ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill(); ctx.stroke();
       ctx.fillStyle = l === sel ? "#1a1a1a" : "#fff2c4"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(text, x, y);
     })
-    // 线的可点范围加宽（手机上也好点）；聚焦时只有亮着的线能点
+    // 电脑上线的可点范围加宽；聚焦时只有亮着的线能点。手机上线本身不能点，只能点标签
     .linkPointerAreaPaint((l, color, ctx, scale) => {
-      if (focus && !hlLinks.has(l)) return;
+      if (!canHover || (focus && !hlLinks.has(l))) return;
       const a = l.source, b = l.target; if (typeof a !== "object") return;
       ctx.strokeStyle = color; ctx.lineWidth = (focus ? 14 : 6) / scale;
       ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
@@ -80,10 +100,14 @@
     .linkDirectionalParticleColor(l => byId.get(l.e.t).color)
     .linkHoverPrecision(8)
     .onNodeHover(n => { hover = n; if (!focus) highlight(n); el.style.cursor = n ? "pointer" : null; })
-    .onLinkHover(l => { el.style.cursor = l ? "pointer" : null; })
-    .onNodeClick(n => focusNode(n))
-    .onLinkClick(l => { sel = l; if (!focus) { hlNodes = new Set([l.e.s, l.e.t]); hlLinks = new Set([l]); } ui.showEdge(l.e, focus && focus.raw); })
-    .onBackgroundClick(() => { ui.close(); })
+    .onLinkHover(l => {
+      el.style.cursor = l ? "pointer" : null; clearTimeout(hoverT);
+      // 聚焦时鼠标在亮着的线上停 0.25 秒，就显示这条线的歌词（不用点）
+      if (l && focus && hlLinks.has(l) && l !== sel) hoverT = setTimeout(() => selectLink(l), 250);
+    })
+    .onNodeClick(n => { const l = pillAt(); if (l) selectLink(l); else focusNode(n); })
+    .onLinkClick(l => selectLink(pillAt() || l))
+    .onBackgroundClick(() => { const l = pillAt(); if (l) selectLink(l); else ui.close(); })
     .cooldownTime(8000);
   window.graph = G;                         // 方便在浏览器控制台里调试
   G.d3Force("charge").strength(-28);
@@ -95,14 +119,15 @@
   function focusNode(raw) {
     const n = byId.get(raw.id); if (!n) return;
     focus = n; sel = null; highlight(n);
-    ui.hint.textContent = "线上的数字：两个词在几句歌词里一起出现过。点线看这些歌词";
+    ui.hint.textContent = canHover ? "线上的数字 = 两个词一起出现在几句歌词里 · 鼠标停在线上看这些歌词" : "线上的数字 = 两个词一起出现在几句歌词里 · 点数字看这些歌词";
     // 手机上面板占了下半屏：把这个词放在屏幕上方 30% 的位置
     const z = Math.max(G.zoom(), 2.6), dy = innerWidth < 600 ? innerHeight * .2 / z : 0;
     G.centerAt(n.x, n.y + dy, 900); G.zoom(z, 900);
     ui.showNode(n.raw);
   }
   const ui = Demo.setup(d, { title: "方案一 · force-graph（2D）", focus: focusNode,
-    legendExtra: "点一个词后，它的每条线上会标出「几句」；点线或点面板里的词，就能看到这些歌词。",
+    legendExtra: canHover ? "点一个词后，它的每条线上会标出「几句」；鼠标停在线上，或点面板里的词，就能看到这些歌词。"
+      : "点一个词后，它的每条线上会标出「几句」；点这个数字，或点面板里的词，就能看到这些歌词。",
     onClose: () => { focus = null; sel = null; highlight(hover); ui.hint.textContent = "点一个词看它的关系；点一条线看两个词一起出现的歌词"; } });
 })();
 </script>
