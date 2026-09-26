@@ -4,5 +4,5 @@
  "supabase_url": "https://dgsqypzwqkjryvmydiix.supabase.co",
  "supabase_key": "sb_publishable_ITvseLxe0FsaQF1fPaFImA_aLq-bCyI",
  "supabase_github": true,
- "supabase_google": false
+ "supabase_google": true
 }
