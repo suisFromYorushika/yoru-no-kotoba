@@ -109,6 +109,11 @@ def main():
     pos = {i: (rnd.uniform(-1, 1), rnd.uniform(-1, 1)) for i in range(len(vocab))}
 
     band_of = {sid: albums[s["album"]]["artist"] for sid, s in songs.items()}
+    # 时间轴：专辑按发行时间排序；歌曲只算正式版本（dup_of 的其他版本不算）
+    album_list = sorted(data["albums"], key=lambda a: a["year"])
+    a_idx = {a["id"]: i for i, a in enumerate(album_list)}
+    song_list = [s for s in data["songs"] if not s.get("dup_of")]
+    s_idx = {s["id"]: i for i, s in enumerate(song_list)}
     nodes = []
     for i, v in enumerate(vocab):
         bands = {band_of[sid] for sid in v["occ"]}
@@ -124,10 +129,23 @@ def main():
             x = [k, line_words[k].get(i, [])]
         nodes.append({"id": i, "w": v["w"].split(" / ")[0], "full": v["w"], "k": v["k"], "r": v["r"], "m": v["m"],
                       "n": len(v["occ"]), "band": bands.pop() if len(bands) == 1 else "both",
-                      "g": group.get(i, -1), "x": round(float(pos[i][0]), 4), "y": round(float(pos[i][1]), 4), "ex": x})
+                      "g": group.get(i, -1), "x": round(float(pos[i][0]), 4), "y": round(float(pos[i][1]), 4), "ex": x,
+                      "so": sorted(s_idx[sid] for sid in v["occ"] if sid in s_idx),
+                      "fa": min(a_idx[songs[sid]["album"]] for sid in v["occ"])})
 
     out = {"nodes": nodes, "edges": edges, "groups": names, "lines": lines_out,
-           "bands": {b["id"]: b["ja"] for b in data["bands"]}}
+           "bands": {b["id"]: b["ja"] for b in data["bands"]},
+           "albums": [{"id": a["id"], "ja": a["ja"], "short": a.get("short") or a["ja"], "zh": a["zh"], "year": a["year"],
+                       "band": a["artist"], "cover": a.get("cover")} for a in album_list],
+           "songs": [{"id": s["id"], "ja": s["ja"], "zh": s["zh"], "a": a_idx[s["album"]]} for s in song_list]}
+    # 「一首歌的星座」用：每首歌逐行的歌词、读音和这行里的词（单独一个文件，用到时才加载）
+    per_song = {}
+    for s in song_list:
+        rows = []
+        for li, (ja, zh, segs, t) in enumerate(data["lines"][s["id"]]):
+            rows.append([ja, zh, reading(segs), sorted(line_words.get(f"{s['id']}|{li}", {}))])
+        per_song[s["id"]] = rows
+    (ROOT / "web" / "demos" / "songs.json").write_text(json.dumps(per_song, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     dst = ROOT / "web" / "demos" / "graph.json"
     dst.parent.mkdir(parents=True, exist_ok=True)
     dst.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
