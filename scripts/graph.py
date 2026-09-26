@@ -3,7 +3,7 @@
 - 节点：词表里的每个词（写法、读音、意思、出现在几首歌、属于哪个乐队、词群）
 - 连线：两个词在同一句歌词里一起出现的次数。强度 = 次数 / √(两个词各自出现的句数)，
   压低「君」「僕」这种到处都有的词；每个词只保留最强的 6 条，全图保留 2 次以上的
-- 每条线附 2 句一起出现的歌词（带两个词的位置），点线时直接显示
+- 每条线附上一起出现的歌词（最多 20 句，带两个词的位置），点线时直接显示
 - 词群：按连线强度用 Louvain 算法分群（最多 10 个），以群里出现最多的 3 个词命名
 - 位置：固定种子的随机初始位置，演示页里由各个库自己排布
 
@@ -19,7 +19,7 @@ import networkx as nx
 
 ROOT = Path(__file__).resolve().parent.parent
 TOP_K = 6
-REFS = 2
+REFS = 20   # 每条线最多带几句一起出现的歌词
 
 
 def main():
@@ -65,14 +65,20 @@ def main():
         # 例句：优先挑有中文翻译、长度适中的句子
         keys = sorted(keys, key=lambda k: (not data["lines"][k.split("|")[0]][int(k.split("|")[1])][1],
                                            abs(len(data["lines"][k.split("|")[0]][int(k.split("|")[1])][0]) - 18)))
+        # 同一首歌里一模一样的句子（副歌重复）只留一句，记下唱了几遍
+        uniq = {}
+        for k in keys:
+            sid, li = k.split("|")
+            uniq.setdefault((sid, data["lines"][sid][int(li)][0]), []).append(k)
         refs = []
-        for k in keys[:REFS]:
+        for ks in list(uniq.values())[:REFS]:
+            k = ks[0]
             sid, li = k.split("|")
             if k not in lines_out:
                 ja, zh = data["lines"][sid][int(li)][:2]
                 s = songs[sid]
                 lines_out[k] = [ja, zh, s["ja"], albums[s["album"]].get("short") or albums[s["album"]]["ja"]]
-            refs.append([k, line_words[k][a], line_words[k][b]])
+            refs.append([k, line_words[k][a], line_words[k][b], len(ks)])
         edges.append({"s": a, "t": b, "n": len(pair[a, b]), "w": round(scored[a, b], 4), "refs": refs})
 
     g = nx.Graph()

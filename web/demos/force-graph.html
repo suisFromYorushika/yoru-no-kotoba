@@ -18,7 +18,7 @@
   const byId = new Map(nodes.map(n => [n.id, n]));
   const links = d.links.map(e => ({ source: e.s, target: e.t, e }));
   const radius = n => 1.5 + Math.sqrt(n.n) * 1.5;
-  let focus = null, hover = null, hlNodes = new Set(), hlLinks = new Set();
+  let focus = null, hover = null, sel = null, hlNodes = new Set(), hlLinks = new Set();
   function highlight(n) {
     hlNodes = new Set(); hlLinks = new Set();
     if (!n) return;
@@ -49,9 +49,31 @@
       }
       ctx.globalAlpha = 1;
     })
-    .nodePointerAreaPaint((n, color, ctx) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(n.x, n.y, radius(n) + 3, 0, 2 * Math.PI); ctx.fill(); })
-    .linkColor(l => hlLinks.has(l) ? "rgba(255,240,200,.55)" : (focus || hover) ? "rgba(255,255,255,.025)" : "rgba(140,160,255,.14)")
-    .linkWidth(l => hlLinks.has(l) ? 1 + l.e.w * 10 : .3 + l.e.w * 3)
+    .nodePointerAreaPaint((n, color, ctx) => { if (focus && !hlNodes.has(n.id)) return; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(n.x, n.y, radius(n) + 3, 0, 2 * Math.PI); ctx.fill(); })
+    .linkColor(l => l === sel ? "#fff" : hlLinks.has(l) ? "rgba(255,240,200,.55)" : (focus || hover) ? "rgba(255,255,255,.025)" : "rgba(140,160,255,.14)")
+    .linkWidth(l => l === sel ? 3 + l.e.w * 10 : hlLinks.has(l) ? 1 + l.e.w * 10 : .3 + l.e.w * 3)
+    // 鼠标放在线上：说明这条线是什么
+    .linkLabel(l => `<div style="font-size:14px"><b>${d.nodes[l.e.s].w} × ${d.nodes[l.e.t].w}</b></div>` +
+      `<div>在同一句歌词里一起出现 ${l.e.n} 次</div><div style="opacity:.7">点击看这些歌词</div>`)
+    // 聚焦一个词时，在它的每条线中间标出「几句」
+    .linkCanvasObjectMode(l => hlLinks.has(l) && focus ? "after" : undefined)
+    .linkCanvasObject((l, ctx, scale) => {
+      const a = l.source, b = l.target; if (typeof a !== "object") return;
+      const x = a.x + (b.x - a.x) * .5, y = a.y + (b.y - a.y) * .5, text = l.e.n + " 句";
+      const fs = 10 / scale; ctx.font = `600 ${fs}px sans-serif`;
+      const w = ctx.measureText(text).width + fs, h = fs * 1.6;
+      ctx.fillStyle = l === sel ? "rgba(255,209,102,.95)" : "rgba(12,16,34,.85)";
+      ctx.strokeStyle = "rgba(255,240,200,.6)"; ctx.lineWidth = 1 / scale;
+      ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = l === sel ? "#1a1a1a" : "#fff2c4"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(text, x, y);
+    })
+    // 线的可点范围加宽（手机上也好点）；聚焦时只有亮着的线能点
+    .linkPointerAreaPaint((l, color, ctx, scale) => {
+      if (focus && !hlLinks.has(l)) return;
+      const a = l.source, b = l.target; if (typeof a !== "object") return;
+      ctx.strokeStyle = color; ctx.lineWidth = (focus ? 14 : 6) / scale;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    })
     .linkDirectionalParticles(l => hlLinks.has(l) ? 3 : 0)
     .linkDirectionalParticleWidth(l => 2 + l.e.w * 6)
     .linkDirectionalParticleSpeed(l => .004 + l.e.w * .01)
@@ -60,9 +82,10 @@
     .onNodeHover(n => { hover = n; if (!focus) highlight(n); el.style.cursor = n ? "pointer" : null; })
     .onLinkHover(l => { el.style.cursor = l ? "pointer" : null; })
     .onNodeClick(n => focusNode(n))
-    .onLinkClick(l => ui.showEdge(l.e, focus && focus.raw))
+    .onLinkClick(l => { sel = l; if (!focus) { hlNodes = new Set([l.e.s, l.e.t]); hlLinks = new Set([l]); } ui.showEdge(l.e, focus && focus.raw); })
     .onBackgroundClick(() => { ui.close(); })
     .cooldownTime(8000);
+  window.graph = G;                         // 方便在浏览器控制台里调试
   G.d3Force("charge").strength(-28);
   G.d3Force("link").distance(l => 34 - l.e.w * 30).strength(l => .2 + l.e.w * .8);
   G.onEngineStop(() => { if (!focus) G.zoomToFit(800, 30); });
@@ -71,12 +94,16 @@
 
   function focusNode(raw) {
     const n = byId.get(raw.id); if (!n) return;
-    focus = n; highlight(n);
-    G.centerAt(n.x, n.y, 900); G.zoom(Math.max(G.zoom(), 2.6), 900);
+    focus = n; sel = null; highlight(n);
+    ui.hint.textContent = "线上的数字：两个词在几句歌词里一起出现过。点线看这些歌词";
+    // 手机上面板占了下半屏：把这个词放在屏幕上方 30% 的位置
+    const z = Math.max(G.zoom(), 2.6), dy = innerWidth < 600 ? innerHeight * .2 / z : 0;
+    G.centerAt(n.x, n.y + dy, 900); G.zoom(z, 900);
     ui.showNode(n.raw);
   }
   const ui = Demo.setup(d, { title: "方案一 · force-graph（2D）", focus: focusNode,
-    onClose: () => { focus = null; highlight(hover); } });
+    legendExtra: "点一个词后，它的每条线上会标出「几句」；点线或点面板里的词，就能看到这些歌词。",
+    onClose: () => { focus = null; sel = null; highlight(hover); ui.hint.textContent = "点一个词看它的关系；点一条线看两个词一起出现的歌词"; } });
 })();
 </script>
 </body>
