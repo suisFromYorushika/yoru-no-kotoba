@@ -24,7 +24,7 @@ const Demo = (() => {
   }
 
   // 一句歌词：两个词分别高亮
-  function lyric(d, key, spansA, spansB, colA, colB) {
+  function lyric(d, key, spansA, spansB, colA, colB, times) {
     const [ja, zh, song, album] = d.lines[key];
     const box = $("div", "lyric"), p = $("div", "ja");
     const cls = [...ja].map((_, i) => spansA.some(([a, b]) => a <= i && i < b) ? "a" : (spansB || []).some(([a, b]) => a <= i && i < b) ? "b" : "");
@@ -34,7 +34,7 @@ const Demo = (() => {
     box.style.setProperty("--a", colA); box.style.setProperty("--b", colB || colA);
     box.appendChild(p);
     if (zh) box.appendChild($("div", "zh", zh));
-    box.appendChild($("div", "src", "《" + song + "》· " + album));
+    box.appendChild($("div", "src", "《" + song + "》· " + album + (times > 1 ? " · 这句唱了 " + times + " 遍" : "")));
     const s = $("button", "spk", "▶ 朗读这句"); s.onclick = () => speak(ja); box.appendChild(s);
     return box;
   }
@@ -74,7 +74,7 @@ const Demo = (() => {
       panel.append($("div", "pw", n.w), $("div", "pk", n.k), $("div", "pm", n.m),
         $("div", "pmeta", "出现在 " + n.n + " 首歌 · " + (n.g >= 0 ? "词群「" + d.groups[n.g] + "」" : "其他") + (n.band === "both" ? " · 两个乐队都唱过" : " · " + d.bands[n.band])));
       if (n.ex && d.lines[n.ex[0]]) { panel.appendChild($("div", "ph", "歌词例句")); panel.appendChild(lyric(d, n.ex[0], n.ex[1], [], n.color)); }
-      panel.appendChild($("div", "ph", "常和它在同一句里出现的词（点一个看歌词）"));
+      panel.appendChild($("div", "ph", "常和它在同一句歌词里出现的词（数字是一起出现了几句，点一个看这些歌词）"));
       const ch = $("div", "chips");
       n.edges.forEach(e => { const o = d.other(e, n); const b = $("button", "chip"); b.append(o.w, $("small", null, e.n + " 句")); b.onclick = () => showEdge(e, n); ch.appendChild(b); });
       panel.appendChild(ch);
@@ -83,9 +83,10 @@ const Demo = (() => {
       const a = from && from.id === e.t ? d.nodes[e.t] : d.nodes[e.s], b = d.other(e, a), flip = a.id !== e.s;
       head();
       const pr = $("div", "pair"); pr.append(a.w, $("em", null, "×"), b.w); panel.appendChild(pr);
-      panel.appendChild($("div", "pmeta", a.m + " × " + b.m + " · 在同一句歌词里一起出现 " + e.n + " 次"));
-      e.refs.forEach(([key, sa, sb]) => panel.appendChild(lyric(d, key, flip ? sb : sa, flip ? sa : sb, a.color, b.color)));
-      if (e.n > e.refs.length) panel.appendChild($("div", "pmeta", "还有 " + (e.n - e.refs.length) + " 句"));
+      panel.appendChild($("div", "pmeta", a.m + " × " + b.m));
+      const shown = e.refs.reduce((x, r) => x + (r[3] || 1), 0);
+      panel.appendChild($("div", "ph", "这两个词在 " + e.n + " 句歌词里一起出现过" + (shown < e.n ? "（下面是前 " + shown + " 句）" : "") + "，重复的句子只列一次："));
+      e.refs.forEach(([key, sa, sb, times]) => panel.appendChild(lyric(d, key, flip ? sb : sa, flip ? sa : sb, a.color, b.color, times)));
       const ch = $("div", "chips"); ch.style.marginTop = "12px";
       [a, b].forEach(n => { const x = $("button", "chip", "看「" + n.w + "」的关系"); x.onclick = () => opt.focus(n); ch.appendChild(x); });
       panel.appendChild(ch);
