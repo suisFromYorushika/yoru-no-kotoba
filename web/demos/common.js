@@ -2,6 +2,22 @@
 const Demo = (() => {
   const COLORS = ["#ffd166", "#ef476f", "#06d6a0", "#4cc9f0", "#b388ff", "#ff9f1c", "#f72585", "#90e0ef", "#c3f73a", "#ff8fab"];
   const OTHER = "#5b6488";
+  // 假名 → 罗马音（和主页面同一套规则：拗音、促音、长音）
+  const R = {あ:"a",い:"i",う:"u",え:"e",お:"o",か:"ka",き:"ki",く:"ku",け:"ke",こ:"ko",さ:"sa",し:"shi",す:"su",せ:"se",そ:"so",た:"ta",ち:"chi",つ:"tsu",て:"te",と:"to",な:"na",に:"ni",ぬ:"nu",ね:"ne",の:"no",は:"ha",ひ:"hi",ふ:"fu",へ:"he",ほ:"ho",ま:"ma",み:"mi",む:"mu",め:"me",も:"mo",や:"ya",ゆ:"yu",よ:"yo",ら:"ra",り:"ri",る:"ru",れ:"re",ろ:"ro",わ:"wa",ゐ:"i",ゑ:"e",を:"wo",ん:"n",が:"ga",ぎ:"gi",ぐ:"gu",げ:"ge",ご:"go",ざ:"za",じ:"ji",ず:"zu",ぜ:"ze",ぞ:"zo",だ:"da",ぢ:"ji",づ:"zu",で:"de",ど:"do",ば:"ba",び:"bi",ぶ:"bu",べ:"be",ぼ:"bo",ぱ:"pa",ぴ:"pi",ぷ:"pu",ぺ:"pe",ぽ:"po",ゔ:"vu",ぁ:"a",ぃ:"i",ぅ:"u",ぇ:"e",ぉ:"o",ゃ:"ya",ゅ:"yu",ょ:"yo",ゎ:"wa"};
+  const toHira = s => s.replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
+  const P = {"、": ",", "。": ".", "？": "?", "！": "!", "　": " ", "ー": "-"};
+  function morae(s) { const out = []; for (const c of s) { const last = out[out.length - 1];
+    if (last !== undefined && (/[ゃゅょぁぃぅぇぉゎャュョァィゥェォヮ]/.test(c) || c === "ー") && !/[っッ]$/.test(last)) out[out.length - 1] += c;
+    else if (last !== undefined && /[っッ]$/.test(last)) out[out.length - 1] += c; else out.push(c); } return out; }
+  function unit(u) { const h = toHira(u);
+    if (/^っ/.test(h)) { const r = unit(h.slice(1)); return r ? (r.startsWith("ch") ? "t" + r : r[0] + r) : ""; }
+    if (h.endsWith("ー")) { const r = unit(h.slice(0, -1)); return r + ((r.match(/[aeiou](?!.*[aeiou])/) || [""])[0]); }
+    const r = R[h[0]]; if (r === undefined) return P[h[0]] !== undefined ? P[h[0]] : u;
+    const sm = h.slice(1); if (!sm) return r; const sr = R[sm] || "";
+    if (/[ゃゅょ]/.test(sm)) return /^(shi|chi|ji)$/.test(r) ? r.slice(0, -1) + sr.slice(1) : r.slice(0, -1) + sr;
+    return r.replace(/[aeiou]$/, "") + sr; }
+  const romaji = s => s.split(" ").map(w => { const us = morae(w); return us.map((u, i) => { const r = unit(u);
+    return r === "n" && i + 1 < us.length && /^[aeiouy]/.test(unit(us[i + 1])) ? "n'" : r; }).join(""); }).join(" ");
   const $ = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 
   async function load() {
@@ -25,7 +41,7 @@ const Demo = (() => {
 
   // 一句歌词：两个词分别高亮
   function lyric(d, key, spansA, spansB, colA, colB, times) {
-    const [ja, zh, song, album] = d.lines[key];
+    const [ja, zh, song, album, rd] = d.lines[key];
     const box = $("div", "lyric"), p = $("div", "ja");
     const cls = [...ja].map((_, i) => spansA.some(([a, b]) => a <= i && i < b) ? "a" : (spansB || []).some(([a, b]) => a <= i && i < b) ? "b" : "");
     let run = "", cur = null;
@@ -33,6 +49,7 @@ const Demo = (() => {
     [...ja].forEach((ch, i) => { if (cls[i] !== cur) { flush(); cur = cls[i]; } run += ch; }); flush();
     box.style.setProperty("--a", colA); box.style.setProperty("--b", colB || colA);
     box.appendChild(p);
+    if (rd) box.appendChild($("div", "ro", romaji(rd)));
     if (zh) box.appendChild($("div", "zh", zh));
     box.appendChild($("div", "src", "《" + song + "》· " + album + (times > 1 ? " · 这句唱了 " + times + " 遍" : "")));
     const s = $("button", "spk", "▶ 朗读这句"); s.onclick = () => speak(ja); box.appendChild(s);
@@ -67,11 +84,16 @@ const Demo = (() => {
 
     const panel = $("div", "panel"); panel.hidden = true; document.body.appendChild(panel);
     const close = () => { panel.hidden = true; opt.onClose && opt.onClose(); };
-    const head = () => { panel.innerHTML = ""; panel.hidden = false; const x = $("button", "px", "×"); x.onclick = close; panel.appendChild(x); };
+    // 面板可以收起成一行标题，不挡住图；收起状态在换词时保持
+    let mini = false;
+    const head = () => { panel.innerHTML = ""; panel.hidden = false; panel.classList.toggle("min", mini);
+      const bar = $("div", "pbtns"), m = $("button", "pmin", mini ? "展开" : "收起"), x = $("button", "px", "×");
+      m.onclick = () => { mini = !mini; panel.classList.toggle("min", mini); m.textContent = mini ? "展开" : "收起"; };
+      x.onclick = close; bar.append(m, x); panel.appendChild(bar); };
 
     function showNode(n) {
       head();
-      panel.append($("div", "pw", n.w), $("div", "pk", n.k), $("div", "pm", n.m),
+      panel.append($("div", "pw", n.w), $("div", "pk", n.k + " · " + n.r), $("div", "pm", n.m),
         $("div", "pmeta", "出现在 " + n.n + " 首歌 · " + (n.g >= 0 ? "词群「" + d.groups[n.g] + "」" : "其他") + (n.band === "both" ? " · 两个乐队都唱过" : " · " + d.bands[n.band])));
       if (n.ex && d.lines[n.ex[0]]) { panel.appendChild($("div", "ph", "歌词例句")); panel.appendChild(lyric(d, n.ex[0], n.ex[1], [], n.color)); }
       panel.appendChild($("div", "ph", "常和它在同一句歌词里出现的词（数字是一起出现了几句，点一个看这些歌词）"));
@@ -83,6 +105,7 @@ const Demo = (() => {
       const a = from && from.id === e.t ? d.nodes[e.t] : d.nodes[e.s], b = d.other(e, a), flip = a.id !== e.s;
       head();
       const pr = $("div", "pair"); pr.append(a.w, $("em", null, "×"), b.w); panel.appendChild(pr);
+      panel.appendChild($("div", "pk", a.r + " × " + b.r));
       panel.appendChild($("div", "pmeta", a.m + " × " + b.m));
       const shown = e.refs.reduce((x, r) => x + (r[3] || 1), 0);
       panel.appendChild($("div", "ph", "这两个词在 " + e.n + " 句歌词里一起出现过" + (shown < e.n ? "（下面是前 " + shown + " 句）" : "") + "，重复的句子只列一次："));
@@ -92,7 +115,7 @@ const Demo = (() => {
       panel.appendChild(ch);
       opt.onEdge && opt.onEdge(e);
     }
-    return { showNode, showEdge, close, hint };
+    return { showNode, showEdge, close, hint, romaji };
   }
-  return { load, setup, COLORS, OTHER, $ };
+  return { load, setup, romaji, COLORS, OTHER, $ };
 })();
