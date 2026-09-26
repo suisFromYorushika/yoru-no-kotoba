@@ -590,12 +590,15 @@ const albumById=Object.fromEntries(DATA.albums.map(a=>[a.id,a]));
 const albumColor=Object.fromEntries(DATA.albums.map((a,i)=>[a.id,"var(--c"+(i%8)+")"]));
 const songById=Object.fromEntries(DATA.songs.map(s=>[s.id,s]));
 const bandById=Object.fromEntries(DATA.bands.map(b=>[b.id,b]));
-const vocabByW=Object.fromEntries(DATA.vocab.map(v=>[v.w,v]));
+// 主词表 DATA.vocab = 出现在 ≥2 首歌里的词；RARE = 只出现在 1 首歌里的词（点歌词、搜索、按歌曲筛选时用，不进关系图和已掌握统计）
+const RARE=DATA.rare||[];RARE.forEach(v=>v.one=1);
+const ALLV=DATA.vocab.concat(RARE);
+const vocabByW=Object.fromEntries(ALLV.map(v=>[v.w,v]));
 // 乐队按 catalog.json 里第一张专辑出现的先后排序；还没有专辑的乐队排在最后
 const bandRank=id=>{const i=DATA.albums.findIndex(a=>a.artist===id);return i<0?1e9:i;};
 const ARTISTS=[{id:"all",label:"全部"}].concat(DATA.bands.slice().sort((a,b)=>bandRank(a.id)-bandRank(b.id)).map(b=>({id:b.id,label:b.ja})));
-const TIERS=[{id:"all",label:"全部"},{id:"core",label:"核心",min:10},{id:"high",label:"高频",min:6},{id:"mid",label:"中频",min:3},{id:"base",label:"基础",min:2}];
-const TIERNAME={core:"核心",high:"高频",mid:"中频",base:"基础"};
+const TIERS=[{id:"all",label:"全部"},{id:"core",label:"核心",min:10},{id:"high",label:"高频",min:6},{id:"mid",label:"中频",min:3},{id:"base",label:"基础",min:2},{id:"one",label:"只在 1 首"}];
+const TIERNAME={core:"核心",high:"高频",mid:"中频",base:"基础",one:"只在 1 首歌里的"};
 const POSNAME={n:"名词",v:"动词",a:"形容词",na:"形容动词",adv:"副词",pr:"代词",p:"助词",aux:"助动词",suf:"后缀",pre:"前缀",cj:"连词",adn:"连体词",int:"感叹词"};
 const albumName=a=>a.short||a.ja;
 const NAMES=DATA.names||{};   // 人名、地名的注释（data/names.json）
@@ -869,7 +872,7 @@ function kanaGrid(k){
 // ---------- 词条 / 语法在每行里的位置（点词时查） ----------
 let IDX=null;
 function buildIdx(){IDX={};const add=(item,kind)=>Object.entries(item.loc||{}).forEach(([sid,hs])=>hs.forEach(([li,a,b])=>{(IDX[sid+"|"+li]||(IDX[sid+"|"+li]=[])).push([a,b,kind,item]);}));
-  DATA.vocab.forEach(v=>add(v,"v"));DATA.grammar.forEach(g=>add(g,"g"));}
+  ALLV.forEach(v=>add(v,"v"));DATA.grammar.forEach(g=>add(g,"g"));}
 function covering(sid,li,a,b){if(!IDX)buildIdx();
   let key=sid+"|"+li;
   // 重录版本（dup_of）不参与计数，没有自己的出现位置：按歌词原文找到原版里同样的一行
@@ -994,7 +997,7 @@ function vocabBox(v){
   lb.onclick=()=>{toggleLearned(v.w);lb.className="btn"+(learned[v.w]?" primary":"");lb.textContent=learned[v.w]?"✓ 已掌握":"标记为已掌握";};
   const go=el("button","btn","在词表里查看");go.type="button";go.onclick=()=>{closePop();goSearch("list",v.w);};
   const gr=el("button","btn","关系图");gr.type="button";gr.onclick=()=>{closePop();openGraph(v.w);};
-  acts.append(lb,go);if(ui.view!=="graph")acts.appendChild(gr);b.appendChild(acts);return b;
+  acts.append(lb,go);if(ui.view!=="graph"&&!v.one)acts.appendChild(gr);b.appendChild(acts);return b;
 }
 function openVocabPop(v){
   pop.innerHTML="";
@@ -1017,7 +1020,7 @@ function openTokPop(sid,li,a,b,x){
   if(!vs.length&&!nm){
     const g=GLOSS[x.p+":"+x.l]||GLOSS[x.p+":"+x.s]||(x.s==="ん"&&x.p==="p"?"口语的「の」，〜んだ 表示解释、强调":null);
     if(g)pop.appendChild(el("div","gl",g));
-    else if(/^(n|v|a|na|adv|pr)$/.test(x.p))pop.appendChild(el("div","gl","这个词还没有收进词表（词表只收在 2 首以上的歌里出现的词）。"));
+    else if(/^(n|v|a|na|adv|pr)$/.test(x.p))pop.appendChild(el("div","gl","这个词还没有收进词表。"));
   }
   const gs=[...new Set(cov.filter(c=>c[2]==="g").map(c=>c[3]))];
   gs.forEach(g=>pop.appendChild(el("div","gl","语法 "+g.g+"："+g.m)));
@@ -1035,10 +1038,12 @@ function tierOf(n){return n>=10?"core":n>=6?"high":n>=3?"mid":"base";}
 const norm=s=>toHira((s||"").toLowerCase()).replace(/[\s·・'’\-〜~（）()「」、，,。/]/g,"");
 function matchVocab(v,q){if(!q)return true;const n=norm(q);
   return norm(v.w).includes(n)||norm(v.k).includes(n)||norm(v.r).includes(n)||v.m.includes(q.trim())||v.k.split(" / ").some(k=>romaji(toHira(k)).includes(n));}
-function scopeVocab(){const ids=activeSongIds(), bySong=st.songs.size>0;
-  // 平时：在当前范围里出现在 ≥2 首歌的词，按首数排；选了具体的歌：这几首里出现的词都算，按在这几首里的次数排，档位按全部歌算
-  let list=DATA.vocab.map(v=>{const s=scoped(v,ids);return {...v,...s,tier:tierOf(bySong?Object.keys(v.occ).length:s.songs)};}).filter(v=>v.songs>=(bySong?1:2));
-  if(st.tier!=="all")list=list.filter(v=>v.tier===st.tier);
+function scopeVocab(){const ids=activeSongIds(), bySong=st.songs.size>0, one=st.tier==="one";
+  // 平时：主词表里在当前范围出现在 ≥2 首歌的词，按首数排；
+  // 选了具体的歌、在词表里搜索、或选「只在 1 首」：只出现在 1 首歌里的词也算，只要在范围里出现就行
+  const any=bySong||one||(!!st.q&&ui.view==="list");
+  let list=(one?RARE:any?ALLV:DATA.vocab).map(v=>{const s=scoped(v,ids);return {...v,...s,tier:v.one?"one":tierOf(bySong?Object.keys(v.occ).length:s.songs)};}).filter(v=>v.songs>=(any?1:2));
+  if(st.tier!=="all"&&!one)list=list.filter(v=>v.tier===st.tier);
   return list.sort(bySong?(a,b)=>b.total-a.total||Object.keys(b.occ).length-Object.keys(a.occ).length:(a,b)=>b.songs-a.songs||b.total-a.total);}
 function filteredVocab(){let list=scopeVocab();
   if(st.state==="todo")list=list.filter(v=>!learned[v.w]);
@@ -1091,7 +1096,7 @@ function currentList(){const l=filteredVocab();if(st.order){const m=new Map(l.ma
 function fillCard(v){
   const front=document.getElementById("front"), back=document.getElementById("back");
   front.innerHTML="";back.innerHTML="";document.getElementById("card").classList.remove("flipped");
-  front.appendChild(el("span","tier",TIERNAME[v.tier]));
+  front.appendChild(el("span","tier",TIERNAME[v.tier].replace(/的$/,"")));
   const wr=el("div","wordrow");wr.append(el("div","bigword",v.w),spkBtn(()=>wordReading(v),"朗读 "+v.w));front.appendChild(wr);
   front.appendChild(kanaGrid(v.k));
   const t=albumBadges(v.hits);t.style.justifyContent="center";front.appendChild(t);
@@ -1252,7 +1257,7 @@ function renderList(){
   if(st.q){   // 搜的是歌名：给一个按钮，只看这首歌里的词
     const n=norm(st.q), hit=DATA.songs.filter(s=>!s.dup_of&&(norm(s.ja).includes(n)||s.zh.includes(st.q))).slice(0,6);
     if(hit.length){const d=el("div","songhit");d.appendChild(el("span",null,"歌名里有「"+st.q+"」："));
-      hit.forEach(s=>{const b=el("button","badge bw","只看《"+s.ja+"》的词（"+DATA.vocab.filter(v=>v.occ[s.id]).length+"）");b.type="button";
+      hit.forEach(s=>{const b=el("button","badge bw","只看《"+s.ja+"》的词（"+ALLV.filter(v=>v.occ[s.id]).length+"）");b.type="button";
         b.onclick=()=>filterSong(s.id);d.appendChild(b);});box.appendChild(d);}
   }
   if(exact>0)list.unshift(list.splice(exact,1)[0]);
@@ -1348,13 +1353,13 @@ function renderGraph(){
   const box=document.getElementById("v-graph");box.innerHTML="";
   const set=new Set(activeSongIds());
   if(st.q){   // 搜索：列出匹配的词，点一个换成中心
-    const ms=scopeVocab().filter(v=>matchVocab(v,st.q)).slice(0,12);
+    const ms=scopeVocab().filter(v=>!v.one&&matchVocab(v,st.q)).slice(0,12);
     box.appendChild(el("div","h2",ms.length?"点一个词作为中心":"没有找到「"+st.q+"」"));
     const t=el("div","tags");ms.forEach(v=>{const b=el("button","badge bw",shortW(v)+" "+v.m);b.type="button";b.onclick=()=>openGraph(v.w);t.appendChild(b);});
     box.appendChild(t);return;
   }
   let c=vocabByW[ui.graphW];
-  if(!c||!vSongs(c,set).length){const f=scopeVocab()[0];if(!f){box.appendChild(el("div","empty","这个范围里没有词"));return;}c=vocabByW[f.w];ui.graphW=c.w;saveUI();}
+  if(!c||c.one||!vSongs(c,set).length){const f=scopeVocab().find(v=>!v.one);if(!f){box.appendChild(el("div","empty","这个范围里没有词"));return;}c=vocabByW[f.w];ui.graphW=c.w;saveUI();}
   // 星空图：全部词的发光关系网（演示页）
   const star=el("a","starlink");star.href="demos/force-graph.html";
   star.append(el("b",null,"✦ 星空图"),el("span",null,"全部词连成一张会发光的网：乐队对比、我的星图、一首歌的星座、按专辑的时间轴"));
@@ -1458,7 +1463,7 @@ function renderRecommend(box){
 }
 // 一首歌：点开是试听链接、词表词、歌词对照
 function songRow(s){
-  const sw=DATA.vocab.filter(v=>v.occ[s.id]), cv=coverage(s.id);
+  const sw=ALLV.filter(v=>v.occ[s.id]), cv=coverage(s.id);
   const row=el("div","row song"+(P.sid===s.id?" playing":"")), h=el("div","rowhead");row.dataset.sid=s.id;
   const w=el("div","rw",s.ja);w.appendChild(el("span","sz",s.zh));
   h.append(w,el("div","rc",s.dup_of?"其他版本":`${sw.length} 词 · 认识 ${Math.round(cv.pct*100)}%`));
@@ -2060,8 +2065,8 @@ function applyTheme(){
 function renderFooter(){
   const f=document.getElementById("foot");f.innerHTML="";
   const bands=ARTISTS.slice(1).map(b=>{const n=DATA.albums.filter(a=>a.artist===b.id).length;return b.label+(n?" "+n+" 张专辑":" 待收录");}).join(" · ");
-  f.appendChild(el("p",null,`已收录：${bands} · ${DATA.songs.length} 首歌 · ${DATA.vocab.length} 个词 · ${DATA.grammar.length} 个语法点`));
-  f.appendChild(el("p",null,"词表按「出现在几首歌里」排序，再按总次数排序；只收录出现在 2 首及以上歌里的词，同一首歌的不同版本只算一次。例句取自歌词，点歌词里的任何一个词都能查它的意思或词性。"));
+  f.appendChild(el("p",null,`已收录：${bands} · ${DATA.songs.length} 首歌 · ${DATA.vocab.length} 个词（另有 ${RARE.length} 个只出现在 1 首歌里的词）· ${DATA.grammar.length} 个语法点`));
+  f.appendChild(el("p",null,"词表按「出现在几首歌里」排序，再按总次数排序；闪卡和词表默认只用出现在 2 首及以上歌里的词，同一首歌的不同版本只算一次。只出现在 1 首歌里的词也写了意思：点歌词、搜索、按歌曲筛选时能看到，筛选的「频率」里选「只在 1 首」可以专门看它们；以后收录新歌，它们出现到第 2 首就自动进入词表。例句取自歌词，点歌词里的任何一个词都能查它的意思或词性。"));
   f.appendChild(el("p",null,"复习用间隔重复：记得的词间隔 1、2、4、7、15 天再出现，连续记得到 15 天间隔就算作已掌握。分词、假名注音、罗马音由程序生成，语法计数按分词结果匹配，个别地方可能有误。歌名的中文译名取自 QQ 音乐和网易云音乐。"));
   if(SITE.repo_url){const p=el("p");const a=el("a",null,"GitHub 仓库");a.href=SITE.repo_url;a.target="_blank";a.rel="noopener";p.append("数据和代码：",a);f.appendChild(p);}
 }
