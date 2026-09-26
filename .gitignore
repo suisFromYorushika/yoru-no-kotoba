@@ -9,4 +9,3 @@ local/
 __pycache__/
 *.pyc
 .DS_Store
-web/artifact.html
