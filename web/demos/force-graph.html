@@ -17,28 +17,37 @@
   const nodes = d.linked.map(n => ({ ...n, x: n.x * 700, y: n.y * 700, raw: n }));
   const byId = new Map(nodes.map(n => [n.id, n]));
   const links = d.links.map(e => ({ source: e.s, target: e.t, e }));
+  const linkOf = new Map(links.map(l => [l.e, l]));
   const radius = n => 1.5 + Math.sqrt(n.n) * 1.5;
-  let focus = null, hover = null, sel = null, hlNodes = new Set(), hlLinks = new Set();
-  // 电脑（有鼠标）：停在线上就显示歌词；手机：只有点线中间的「N 句」标签才选中这条线
+  // focus：点开的词；sel：选中的线（面板里正在看它的歌词）；pv：鼠标停在面板某个词上时预览的线 / 词
+  let focus = null, hover = null, sel = null, pv = null, pvNode = null, hlNodes = new Set(), hlLinks = new Set();
   const canHover = matchMedia("(hover: hover) and (pointer: fine)").matches;
-  let lastPt = null, hoverT = null;
-  el.addEventListener("pointerdown", e => { const b = el.getBoundingClientRect(); lastPt = { x: e.clientX - b.left, y: e.clientY - b.top }; }, true);
-  // 手指 / 鼠标按下的位置是不是在某个「N 句」标签上（标签比后面的点优先）
-  function pillAt() {
-    if (!focus || !lastPt) return null;
-    const g = G.screen2GraphCoords(lastPt.x, lastPt.y), pad = 6 / G.zoom();
-    for (const l of hlLinks) { const q = l._pill; if (q && Math.abs(g.x - q.x) <= q.w / 2 + pad && Math.abs(g.y - q.y) <= q.h / 2 + pad) return l; }
-    return null;
-  }
-  function selectLink(l) {
-    sel = l; if (!focus) { hlNodes = new Set([l.e.s, l.e.t]); hlLinks = new Set([l]); }
-    ui.showEdge(l.e, focus && focus.raw);
-  }
+  const active = () => pv || sel;                           // 当前突出的那条线
   function highlight(n) {
     hlNodes = new Set(); hlLinks = new Set();
     if (!n) return;
     hlNodes.add(n.id);
     links.forEach(l => { if (l.e.s === n.id || l.e.t === n.id) { hlLinks.add(l); hlNodes.add(l.e.s); hlNodes.add(l.e.t); } });
+  }
+  // 手指 / 鼠标按下的位置：用来判断点的是线还是点
+  let lastPt = null, hoverT = null;
+  el.addEventListener("pointerdown", e => { const b = el.getBoundingClientRect(); lastPt = { x: e.clientX - b.left, y: e.clientY - b.top }; }, true);
+  // 聚焦时，点在亮着的线中段（离线 12 像素以内、离两头的词较远）就算点了这条线，比后面的点优先
+  function lineAt() {
+    if (!focus || !lastPt) return null;
+    let best = null, bd = 12;
+    for (const l of hlLinks) {
+      const a = G.graph2ScreenCoords(l.source.x, l.source.y), b = G.graph2ScreenCoords(l.target.x, l.target.y);
+      const dx = b.x - a.x, dy = b.y - a.y, len2 = dx * dx + dy * dy; if (!len2) continue;
+      const t = ((lastPt.x - a.x) * dx + (lastPt.y - a.y) * dy) / len2; if (t < .15 || t > .85) continue;
+      const dd = Math.hypot(a.x + t * dx - lastPt.x, a.y + t * dy - lastPt.y);
+      if (dd < bd) { bd = dd; best = l; }
+    }
+    return best;
+  }
+  function selectLink(l) {
+    sel = l; if (!focus) { hlNodes = new Set([l.e.s, l.e.t]); hlLinks = new Set([l]); }
+    ui.showEdge(l.e, focus && focus.raw);
   }
   const t0 = performance.now();
   const G = ForceGraph()(el)
@@ -46,20 +55,23 @@
     .graphData({ nodes, links })
     .autoPauseRedraw(false)                 // 一直重绘：光点流动、节点呼吸
     .nodeCanvasObject((n, ctx, scale) => {
-      const on = !(focus || hover) || hlNodes.has(n.id), center = n === focus || (!focus && n === hover);
-      const t = (performance.now() - t0) / 1000, pulse = center ? 1 + .12 * Math.sin(t * 3) : 1;
-      const r = radius(n) * pulse;
-      ctx.globalAlpha = on ? 1 : .05;
-      ctx.shadowColor = n.color; ctx.shadowBlur = on ? (center ? 30 : 14) : 0;
+      const L = active(), onL = L && (L.e.s === n.id || L.e.t === n.id);
+      let on = !(focus || hover) || hlNodes.has(n.id);
+      const center = n === focus || (!focus && n === hover), mark = onL && n !== focus || pvNode === n.id;
+      const t = (performance.now() - t0) / 1000, pulse = center || mark ? 1 + .12 * Math.sin(t * 3) : 1;
+      const r = radius(n) * pulse * (mark ? 1.35 : 1);
+      // 选中一条线时，线两头以外的邻居变淡
+      ctx.globalAlpha = !on ? .05 : (L || pvNode != null) && !onL && !center && pvNode !== n.id ? .3 : 1;
+      ctx.shadowColor = n.color; ctx.shadowBlur = on ? (center || mark ? 30 : 14) : 0;
       ctx.fillStyle = n.color; ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, 2 * Math.PI); ctx.fill();
       ctx.shadowBlur = 0;
-      if (center) { ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.2 / scale; ctx.stroke(); }
+      if (center || mark) { ctx.strokeStyle = "#fff"; ctx.lineWidth = (mark ? 2 : 1.2) / scale; ctx.beginPath(); ctx.arc(n.x, n.y, r + (mark ? 3 / scale : 0), 0, 2 * Math.PI); ctx.stroke(); }
       // 文字：放大后、或高亮时、或常用词才显示
       if ((on && (focus || hover)) || scale * radius(n) > 9 || (n.n >= 25 && scale > .55)) {
-        const fs = Math.max(11 / scale, center ? 6 : 3);
-        ctx.font = `${center ? 700 : 500} ${fs}px "Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif`;
+        const fs = Math.max((mark ? 13 : 11) / scale, center ? 6 : 3);
+        ctx.font = `${center || mark ? 700 : 500} ${fs}px "Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif`;
         ctx.textAlign = "center"; ctx.textBaseline = "top";
-        ctx.fillStyle = on ? "rgba(255,255,255,.92)" : "rgba(255,255,255,.2)";
+        ctx.fillStyle = on ? (mark ? "#fff" : "rgba(255,255,255,.92)") : "rgba(255,255,255,.2)";
         ctx.fillText(n.w, n.x, n.y + r + 2 / scale);
         if (focus && on) {   // 聚焦时，词下面标罗马音
           ctx.font = `400 ${fs * .72}px -apple-system,"Segoe UI",sans-serif`; ctx.fillStyle = "rgba(185,194,230,.9)";
@@ -69,32 +81,19 @@
       ctx.globalAlpha = 1;
     })
     .nodePointerAreaPaint((n, color, ctx) => { if (focus && !hlNodes.has(n.id)) return; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(n.x, n.y, radius(n) + 3, 0, 2 * Math.PI); ctx.fill(); })
-    .linkColor(l => l === sel ? "#fff" : hlLinks.has(l) ? "rgba(255,240,200,.55)" : (focus || hover) ? "rgba(255,255,255,.025)" : "rgba(140,160,255,.14)")
-    .linkWidth(l => l === sel ? 3 + l.e.w * 10 : hlLinks.has(l) ? 1 + l.e.w * 10 : .3 + l.e.w * 3)
-    // 鼠标放在线上：说明这条线是什么（手机上没有悬停，不显示）
+    // 选中的线最亮最粗，同一个词的其他线变暗
+    .linkColor(l => { const L = active(); return l === L ? "#fff" : hlLinks.has(l) ? (L ? "rgba(255,240,200,.14)" : "rgba(255,240,200,.55)") : (focus || hover) ? "rgba(255,255,255,.025)" : "rgba(140,160,255,.14)"; })
+    .linkWidth(l => l === active() ? 3.5 + l.e.w * 10 : hlLinks.has(l) ? 1 + l.e.w * 10 : .3 + l.e.w * 3)
     .linkLabel(l => canHover && !focus ? `<div style="font-size:14px"><b>${d.nodes[l.e.s].w} × ${d.nodes[l.e.t].w}</b></div>` +
       `<div>在同一句歌词里一起出现 ${l.e.n} 次</div><div style="opacity:.7">点击看这些歌词</div>` : "")
-    // 聚焦一个词时，在它的每条线中间标出「几句」
-    .linkCanvasObjectMode(l => hlLinks.has(l) && focus ? "after" : undefined)
-    .linkCanvasObject((l, ctx, scale) => {
-      const a = l.source, b = l.target; if (typeof a !== "object") return;
-      const x = a.x + (b.x - a.x) * .5, y = a.y + (b.y - a.y) * .5, text = l.e.n + " 句";
-      const fs = (canHover ? 10 : 13) / scale; ctx.font = `600 ${fs}px sans-serif`;
-      const w = ctx.measureText(text).width + fs * 1.2, h = fs * 1.8;
-      l._pill = { x, y, w, h };
-      ctx.fillStyle = l === sel ? "rgba(255,209,102,.95)" : "rgba(12,16,34,.85)";
-      ctx.strokeStyle = "rgba(255,240,200,.6)"; ctx.lineWidth = 1 / scale;
-      ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = l === sel ? "#1a1a1a" : "#fff2c4"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(text, x, y);
-    })
-    // 电脑上线的可点范围加宽；聚焦时只有亮着的线能点。手机上线本身不能点，只能点标签
+    // 电脑上线的可点范围加宽；聚焦时只有亮着的线能点。手机上用 lineAt() 判断
     .linkPointerAreaPaint((l, color, ctx, scale) => {
       if (!canHover || (focus && !hlLinks.has(l))) return;
       const a = l.source, b = l.target; if (typeof a !== "object") return;
       ctx.strokeStyle = color; ctx.lineWidth = (focus ? 14 : 6) / scale;
       ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
     })
-    .linkDirectionalParticles(l => hlLinks.has(l) ? 3 : 0)
+    .linkDirectionalParticles(l => { const L = active(); return L ? (l === L ? 5 : 0) : hlLinks.has(l) ? 3 : 0; })
     .linkDirectionalParticleWidth(l => 2 + l.e.w * 6)
     .linkDirectionalParticleSpeed(l => .004 + l.e.w * .01)
     .linkDirectionalParticleColor(l => byId.get(l.e.t).color)
@@ -102,12 +101,12 @@
     .onNodeHover(n => { hover = n; if (!focus) highlight(n); el.style.cursor = n ? "pointer" : null; })
     .onLinkHover(l => {
       el.style.cursor = l ? "pointer" : null; clearTimeout(hoverT);
-      // 聚焦时鼠标在亮着的线上停 0.25 秒，就显示这条线的歌词（不用点）
+      // 电脑：聚焦时鼠标在亮着的线上停 0.25 秒，就显示这条线的歌词（不用点）
       if (l && focus && hlLinks.has(l) && l !== sel) hoverT = setTimeout(() => selectLink(l), 250);
     })
-    .onNodeClick(n => { const l = pillAt(); if (l) selectLink(l); else focusNode(n); })
-    .onLinkClick(l => selectLink(pillAt() || l))
-    .onBackgroundClick(() => { const l = pillAt(); if (l) selectLink(l); else ui.close(); })
+    .onNodeClick(n => { const l = canHover ? null : lineAt(); if (l) selectLink(l); else focusNode(n); })
+    .onLinkClick(l => selectLink(l))
+    .onBackgroundClick(() => { const l = lineAt(); if (l) selectLink(l); else ui.close(); })
     .cooldownTime(8000);
   window.graph = G;                         // 方便在浏览器控制台里调试
   G.d3Force("charge").strength(-28);
@@ -118,17 +117,19 @@
 
   function focusNode(raw) {
     const n = byId.get(raw.id); if (!n) return;
-    focus = n; sel = null; highlight(n);
-    ui.hint.textContent = canHover ? "线上的数字 = 两个词一起出现在几句歌词里 · 鼠标停在线上看这些歌词" : "线上的数字 = 两个词一起出现在几句歌词里 · 点数字看这些歌词";
+    focus = n; sel = null; pv = null; pvNode = null; highlight(n);
     // 手机上面板占了下半屏：把这个词放在屏幕上方 30% 的位置
     const z = Math.max(G.zoom(), 2.6), dy = innerWidth < 600 ? innerHeight * .2 / z : 0;
     G.centerAt(n.x, n.y + dy, 900); G.zoom(z, 900);
     ui.showNode(n.raw);
   }
   const ui = Demo.setup(d, { title: "方案一 · force-graph（2D）", focus: focusNode,
-    legendExtra: canHover ? "点一个词后，它的每条线上会标出「几句」；鼠标停在线上，或点面板里的词，就能看到这些歌词。"
-      : "点一个词后，它的每条线上会标出「几句」；点这个数字，或点面板里的词，就能看到这些歌词。",
-    onClose: () => { focus = null; sel = null; highlight(hover); ui.hint.textContent = "点一个词看它的关系；点一条线看两个词一起出现的歌词"; } });
+    hint: canHover ? "点一个词，它和常一起出现的词会亮起来。鼠标停在一条线上，或把鼠标放到面板里的词上，就能看到这两个词一起出现的歌词，图里对应的词和线也会高亮。"
+      : "点一个词，它和常一起出现的词会亮起来。点一条线的中段，或点面板里的词，就能看到这两个词一起出现的歌词，图里对应的词和线会高亮。",
+    onEdge: e => { const l = linkOf.get(e); if (l) sel = l; },
+    onPreview: e => { pv = e ? linkOf.get(e) || null : null; },
+    onPreviewNode: n => { pvNode = n ? n.id : null; },
+    onClose: () => { focus = null; sel = null; pv = null; pvNode = null; highlight(hover); } });
 })();
 </script>
 </body>
