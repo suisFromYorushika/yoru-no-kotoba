@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>关系图 · sigma.js</title>
+<link rel="stylesheet" href="common.css">
+</head>
+<body>
+<div id="graph"></div>
+<script src="vendor/graphology@0.26.0.min.js"></script>
+<script src="vendor/graphology-library@0.8.0.min.js"></script>
+<script src="vendor/sigma@3.0.3.min.js"></script>
+<script src="common.js"></script>
+<script>
+(async () => {
+  const d = await Demo.load();
+  const G = new graphology.Graph();
+  // 从随机位置出发，用 ForceAtlas2 一帧一帧排开，能看到词慢慢聚成团
+  d.linked.forEach(n => G.addNode(String(n.id), { x: (Math.random() - .5) * 10, y: (Math.random() - .5) * 10,
+    size: 1 + Math.sqrt(n.n) * .8, color: n.color, label: n.w, raw: n }));
+  d.links.forEach(e => G.addEdge(String(e.s), String(e.t), { size: .3 + e.w * 5, color: "rgba(140,160,255,.2)", raw: e }));
+
+  let focus = null, hover = null;
+  const active = () => focus || hover;
+  const R = new Sigma(G, document.getElementById("graph"), {
+    enableEdgeEvents: true, zIndex: true,
+    labelColor: { color: "#e9ecf8" }, labelSize: 13, labelWeight: "500",
+    labelFont: '"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif',
+    labelRenderedSizeThreshold: 9, labelDensity: .5,
+    defaultEdgeColor: "rgba(140,160,255,.2)",
+    // 悬停时的文字：默认是白底黑字的框，这里改成发光的白字
+    defaultDrawNodeHover: (ctx, data, s) => {
+      ctx.save(); ctx.shadowColor = data.color; ctx.shadowBlur = 18;
+      ctx.fillStyle = data.color; ctx.beginPath(); ctx.arc(data.x, data.y, data.size + 2, 0, Math.PI * 2); ctx.fill();
+      ctx.font = `700 ${s.labelSize + 3}px ${s.labelFont}`; ctx.fillStyle = "#fff"; ctx.shadowColor = "#000"; ctx.shadowBlur = 6;
+      ctx.fillText(data.label || "", data.x + data.size + 5, data.y + (s.labelSize + 3) / 3); ctx.restore();
+    },
+    nodeReducer: (key, a) => {
+      const c = active(); if (!c) return a;
+      if (key === c || G.areNeighbors(key, c)) return { ...a, forceLabel: true, zIndex: 1, highlighted: key === c };
+      return { ...a, color: "#1a2035", label: "", zIndex: 0 };
+    },
+    edgeReducer: (key, a) => {
+      const c = active(); if (!c) return a;
+      return G.hasExtremity(key, c) ? { ...a, color: "rgba(255,240,200,.75)", size: a.size + 1.2, zIndex: 1 } : { ...a, hidden: true };
+    }
+  });
+  R.on("enterNode", ({ node }) => { hover = node; R.refresh({ skipIndexation: true }); });
+  R.on("leaveNode", () => { hover = null; R.refresh({ skipIndexation: true }); });
+  R.on("clickNode", ({ node }) => focusNode(G.getNodeAttribute(node, "raw")));
+  R.on("clickEdge", ({ edge }) => ui.showEdge(G.getEdgeAttribute(edge, "raw"), focus && G.getNodeAttribute(focus, "raw")));
+  R.on("clickStage", () => ui.close());
+
+  const fa2 = graphologyLibrary.layoutForceAtlas2, settings = { ...fa2.inferSettings(G), barnesHutOptimize: true, slowDown: 3, gravity: .6, scalingRatio: 12, adjustSizes: false };
+  let frames = 0;
+  (function step() { fa2.assign(G, { iterations: 2, settings }); if (++frames < 400) requestAnimationFrame(step); })();
+
+  function focusNode(raw) {
+    const key = String(raw.id); if (!G.hasNode(key)) return;
+    focus = key; R.refresh({ skipIndexation: true });
+    const p = R.getNodeDisplayData(key);
+    R.getCamera().animate({ x: p.x, y: p.y, ratio: .35 }, { duration: 700 });
+    ui.showNode(raw);
+  }
+  const ui = Demo.setup(d, { title: "方案四 · sigma.js", focus: focusNode,
+    onClose: () => { focus = null; R.refresh({ skipIndexation: true }); } });
+})();
+</script>
+</body>
+</html>

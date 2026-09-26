@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>关系图 · 3D 星空</title>
+<link rel="stylesheet" href="common.css">
+<style>body{background:#070b18;}</style>
+</head>
+<body>
+<div id="graph"></div>
+<!-- 3d-force-graph 1.80.0 + three 0.183.2 + UnrealBloomPass，用 esbuild 打成一个文件（vendor/3d-bundle.js） -->
+<script src="vendor/3d-bundle.js"></script>
+<script src="common.js"></script>
+<script>
+(async () => {
+const d = await Demo.load();
+const el = document.getElementById("graph");
+const nodes = d.linked.map(n => ({ ...n, x: n.x * 500, y: n.y * 500, z: (Math.random() - .5) * 200, raw: n }));
+const byId = new Map(nodes.map(n => [n.id, n]));
+const links = d.links.map(e => ({ source: e.s, target: e.t, e }));
+let focus = null, hlNodes = new Set(), hlLinks = new Set();
+const DIM = "#121829";
+
+// 常用词挂一个文字标签（画在画布上的贴图）
+function label(text, color) {
+  const c = document.createElement("canvas"), ctx = c.getContext("2d"), fs = 64;
+  ctx.font = `600 ${fs}px "Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif`;
+  c.width = Math.ceil(ctx.measureText(text).width) + 16; c.height = fs + 16;
+  ctx.font = `600 ${fs}px "Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif`;
+  ctx.fillStyle = color; ctx.textBaseline = "middle"; ctx.fillText(text, 8, c.height / 2);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthWrite: false, transparent: true }));
+  s.scale.set(c.width / c.height * 7, 7, 1); s.position.y = -9; return s;
+}
+const G = new ForceGraph3D(el, { controlType: "orbit" })
+  .backgroundColor("#070b18")
+  .graphData({ nodes, links })
+  .nodeVal(n => 1 + n.n * .6)
+  .nodeRelSize(2.2)
+  .nodeOpacity(.95)
+  .nodeResolution(12)
+  .nodeLabel(n => `<b style="font-size:16px">${n.w}</b> ${n.m}`)
+  .nodeColor(n => !focus || hlNodes.has(n.id) ? n.color : DIM)
+  .nodeThreeObjectExtend(true)
+  .nodeThreeObject(n => n.n >= 22 ? label(n.w, "rgba(255,255,255,.9)") : null)
+  .linkColor(l => hlLinks.has(l) ? "#fff2c4" : focus ? "#141a2c" : "#6f7fd8")
+  .linkOpacity(.12)
+  .linkWidth(l => hlLinks.has(l) ? 1.2 + l.e.w * 4 : 0)
+  .linkDirectionalParticles(l => hlLinks.has(l) ? 4 : 0)
+  .linkDirectionalParticleWidth(l => 1.5 + l.e.w * 4)
+  .linkDirectionalParticleSpeed(l => .005 + l.e.w * .012)
+  .linkDirectionalParticleColor(l => byId.get(l.e.t).color)
+  .onNodeClick(n => focusNode(n.raw))
+  .onLinkClick(l => ui.showEdge(l.e, focus && focus.raw))
+  .onBackgroundClick(() => ui.close());
+G.d3Force("charge").strength(-60);
+G.d3Force("link").distance(l => 40 - l.e.w * 30);
+
+// 泛光：让亮的点发光；地址后面加 ?bloom=0 可以关掉（旧手机更流畅）
+if (new URLSearchParams(location.search).get("bloom") !== "0") {
+  const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), .9, .4, .2);
+  G.postProcessingComposer().addPass(bloom);
+}
+const ctl = G.controls(); ctl.autoRotate = true; ctl.autoRotateSpeed = .6;
+setTimeout(() => G.zoomToFit(1200, 40), 2500);
+
+function refresh() { G.nodeColor(G.nodeColor()).linkColor(G.linkColor()).linkWidth(G.linkWidth()).linkDirectionalParticles(G.linkDirectionalParticles()); }
+function focusNode(raw) {
+  const n = byId.get(raw.id); if (!n) return;
+  focus = n; hlNodes = new Set([n.id]); hlLinks = new Set();
+  links.forEach(l => { if (l.e.s === n.id || l.e.t === n.id) { hlLinks.add(l); hlNodes.add(l.e.s); hlNodes.add(l.e.t); } });
+  refresh(); ctl.autoRotate = false;
+  const dist = 110, r = 1 + dist / Math.hypot(n.x, n.y, n.z);
+  G.cameraPosition({ x: n.x * r, y: n.y * r, z: n.z * r }, n, 1500);
+  ui.showNode(n.raw);
+}
+const ui = Demo.setup(d, { title: "方案二 · 3D 星空", focus: focusNode,
+  hint: "拖动旋转、双指缩放；点一个词飞过去；点线看歌词",
+  onClose: () => { focus = null; hlNodes = new Set(); hlLinks = new Set(); refresh(); ctl.autoRotate = true; } });
+addEventListener("resize", () => G.width(innerWidth).height(innerHeight));
+})();
+</script>
+</body>
+</html>

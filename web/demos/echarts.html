@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>关系图 · ECharts</title>
+<link rel="stylesheet" href="common.css">
+</head>
+<body>
+<div id="graph"></div>
+<script src="vendor/echarts@5.6.0.min.js"></script>
+<script src="common.js"></script>
+<script>
+(async () => {
+  const d = await Demo.load();
+  const chart = echarts.init(document.getElementById("graph"), null, { renderer: "canvas" });
+  const nodes = d.linked, index = new Map(nodes.map((n, i) => [n.id, i]));
+  const S = Math.min(innerWidth, innerHeight) * .45;
+  chart.setOption({
+    backgroundColor: "transparent",
+    animationDurationUpdate: 700,
+    tooltip: { confine: true, backgroundColor: "rgba(18,24,46,.95)", borderColor: "rgba(255,255,255,.15)", textStyle: { color: "#e9ecf8" },
+      formatter: p => p.dataType === "edge" ? `${d.nodes[p.data.e.s].w} × ${d.nodes[p.data.e.t].w}<br>同一句里一起出现 ${p.data.e.n} 次`
+        : `<b>${p.data.name}</b> ${p.data.raw.m}<br>出现在 ${p.data.raw.n} 首歌` },
+    series: [{
+      type: "graph", layout: "force", roam: true, draggable: true, scaleLimit: { min: .4, max: 8 },
+      force: { repulsion: 38, gravity: .06, edgeLength: [6, 40], friction: .2, layoutAnimation: true },
+      data: nodes.map(n => ({ id: String(n.id), name: n.w, raw: n, x: n.x * S, y: n.y * S, value: n.n,
+        symbolSize: 3 + Math.sqrt(n.n) * 2.8,
+        itemStyle: { color: n.color, shadowBlur: 16, shadowColor: n.color },
+        label: { show: n.n >= 22 } })),
+      links: d.links.map(e => ({ source: String(e.s), target: String(e.t), e, lineStyle: { width: .4 + e.w * 7 } })),
+      lineStyle: { color: "source", opacity: .22, curveness: .18 },
+      label: { position: "bottom", color: "#e9ecf8", fontSize: 11, fontFamily: '"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif' },
+      labelLayout: { hideOverlap: true },
+      emphasis: { focus: "adjacency", scale: 1.4, label: { show: true, fontSize: 13 }, lineStyle: { opacity: .95, width: 3 } },
+      blur: { itemStyle: { opacity: .08 }, lineStyle: { opacity: .02 }, label: { show: false } }
+    }]
+  });
+  let focused = null;
+  function focusNode(n) {
+    const i = index.get(n.id); if (i == null) return;
+    if (focused != null) chart.dispatchAction({ type: "downplay", seriesIndex: 0, dataIndex: focused });
+    focused = i;
+    chart.dispatchAction({ type: "highlight", seriesIndex: 0, dataIndex: i });
+    const lay = chart.getModel().getSeriesByIndex(0).getData().getItemLayout(i);
+    if (lay) chart.setOption({ series: [{ center: [lay[0], lay[1]], zoom: 2.4 }] });
+    ui.showNode(n);
+  }
+  chart.on("click", p => {
+    if (p.dataType === "node") focusNode(p.data.raw);
+    else if (p.dataType === "edge") ui.showEdge(p.data.e, focused != null ? nodes[focused] : null);
+  });
+  chart.getZr().on("click", e => { if (!e.target) ui.close(); });
+  const ui = Demo.setup(d, { title: "方案三 · ECharts", focus: focusNode,
+    hint: "拖动平移、滚轮或双指缩放、可以拖动节点；点词或点线",
+    onClose: () => { if (focused != null) chart.dispatchAction({ type: "downplay", seriesIndex: 0, dataIndex: focused }); focused = null; } });
+  addEventListener("resize", () => chart.resize());
+})();
+</script>
+</body>
+</html>
