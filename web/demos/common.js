@@ -103,7 +103,7 @@ const Demo = (() => {
       if (n.ex && d.lines[n.ex[0]]) { panel.appendChild($("div", "ph", "歌词例句")); panel.appendChild(lyric(d, n.ex[0], n.ex[1], [], n.color)); }
       panel.appendChild($("div", "ph", "常和它在同一句歌词里出现的词（数字是一起出现了几句，点一个看这些歌词）"));
       const ch = $("div", "chips");
-      n.edges.forEach(e => { const o = d.other(e, n); const b = $("button", "chip"); b.append(o.w, $("small", null, e.n + " 句")); b.onclick = () => showEdge(e, n);
+      n.edges.slice().sort((a, b) => b.n - a.n || b.w - a.w).forEach(e => { const o = d.other(e, n); const b = $("button", "chip"); b.append(o.w, $("small", null, e.n + " 句")); b.onclick = () => showEdge(e, n);
         b.onmouseenter = () => opt.onPreview && opt.onPreview(e); b.onmouseleave = () => opt.onPreview && opt.onPreview(null); ch.appendChild(b); });
       panel.appendChild(ch);
     }
@@ -122,7 +122,7 @@ const Demo = (() => {
       panel.appendChild(ch);
       opt.onEdge && opt.onEdge(e);
     }
-    return { showNode, showEdge, close, hint, romaji };
+    return { showNode, showEdge, close, hint, romaji, panel };
   }
   return { load, setup, romaji, COLORS, OTHER, $ };
 })();

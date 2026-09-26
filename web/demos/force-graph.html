@@ -5,34 +5,134 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>关系图 · force-graph</title>
 <link rel="stylesheet" href="common.css">
+<style>
+/* 模式切换 + 左侧列表 */
+.modes{position:fixed;z-index:5;left:12px;top:54px;display:flex;gap:6px;max-width:calc(100% - 24px);overflow-x:auto;scrollbar-width:none;}
+.modes::-webkit-scrollbar{display:none;}
+.modes button{flex:none;background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:6px 12px;font:inherit;font-size:.8rem;cursor:pointer;white-space:nowrap;}
+.modes button.on{color:#1a1a1a;background:var(--accent);border-color:var(--accent);font-weight:600;}
+.modes .sidebtn{display:none;}
+.side{position:fixed;z-index:4;left:12px;top:96px;width:300px;max-height:calc(100vh - 110px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:.84rem;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+.side[hidden]{display:none;}
+.side h3{margin:0 0 6px;font-size:.9rem;padding-right:24px;}
+.side .sub{color:var(--muted);font-size:.76rem;line-height:1.6;margin:0 0 8px;}
+.side .x{position:absolute;right:8px;top:6px;background:none;border:0;color:var(--muted);font-size:1.2rem;cursor:pointer;}
+.rows{display:flex;flex-direction:column;gap:2px;}
+.rowb{display:grid;grid-template-columns:auto 1fr auto;gap:2px 10px;align-items:baseline;text-align:left;background:none;border:1px solid transparent;border-radius:10px;color:var(--ink);padding:6px 8px;cursor:pointer;font:inherit;}
+.rowb:hover{background:rgba(255,255,255,.06);}
+.rowb.on{border-color:var(--accent);background:rgba(255,209,102,.1);}
+.rowb b{font-family:var(--jp);font-size:1rem;}
+.rowb .rr,.side .rr{color:var(--muted);font-size:.72rem;}
+.rowb .rm{grid-column:1/3;color:var(--muted);font-size:.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rowb .rn{grid-row:1/3;grid-column:3;align-self:center;color:var(--accent);font-size:.8rem;white-space:nowrap;}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;box-shadow:0 0 6px currentColor;}
+.big{font-size:1.6rem;font-weight:700;color:var(--accent);}
+.bar{height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;margin:6px 0 10px;}
+.bar i{display:block;height:100%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
+.btn2{background:rgba(255,255,255,.07);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:.8rem;cursor:pointer;}
+.btn2:hover{border-color:var(--accent);}
+.btn2.primary{background:var(--accent);color:#1a1a1a;border-color:var(--accent);font-weight:600;}
+.ctrl{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0;}
+.side select{width:100%;background:rgba(0,0,0,.25);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:7px 8px;font:inherit;font-size:.84rem;}
+.nowline{border-left:2px solid var(--accent);padding:6px 0 6px 10px;margin:8px 0;}
+.nowline .ja{font-family:var(--jp);font-size:1.05rem;line-height:1.6;}
+.nowline .ro{color:#b9c2e6;font-size:.76rem;}
+.nowline .zh{color:var(--muted);font-size:.8rem;}
+.side input[type=range]{width:100%;accent-color:var(--accent);}
+.acover{display:flex;gap:10px;align-items:center;margin:6px 0;}
+.acover img{width:56px;height:56px;border-radius:8px;object-fit:cover;box-shadow:0 0 16px rgba(255,209,102,.3);}
+.tags2{display:flex;flex-wrap:wrap;gap:5px;}
+.tags2 button{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:3px 9px;font:inherit;font-size:.78rem;cursor:pointer;}
+@media (max-width:899px){
+  .modes .sidebtn{display:inline-block;}
+  .side{left:8px;right:8px;width:auto;top:96px;max-height:42vh;}
+}
+</style>
 </head>
 <body>
 <div id="graph"></div>
+<div class="modes" id="modes"></div>
+<div class="side" id="side" hidden></div>
 <script src="vendor/force-graph@1.51.4.min.js"></script>
 <script src="common.js"></script>
 <script>
 (async () => {
   const d = await Demo.load();
-  const el = document.getElementById("graph");
+  const $ = Demo.$;
+  const el = document.getElementById("graph"), side = document.getElementById("side"), modesEl = document.getElementById("modes");
   const nodes = d.linked.map(n => ({ ...n, x: n.x * 700, y: n.y * 700, raw: n }));
   const byId = new Map(nodes.map(n => [n.id, n]));
   const links = d.links.map(e => ({ source: e.s, target: e.t, e }));
   const linkOf = new Map(links.map(l => [l.e, l]));
   const radius = n => 1.5 + Math.sqrt(n.n) * 1.5;
-  // focus：点开的词；sel：选中的线（面板里正在看它的歌词）；pv：鼠标停在面板某个词上时预览的线 / 词
-  let focus = null, hover = null, sel = null, pv = null, pvNode = null, hlNodes = new Set(), hlLinks = new Set();
   const canHover = matchMedia("(hover: hover) and (pointer: fine)").matches;
-  const active = () => pv || sel;                           // 当前突出的那条线
+  const wide = () => innerWidth >= 900;
+
+  // ================= 状态 =================
+  // mode：group 词群 / band 乐队对比 / mine 我的星图 / song 一首歌 / time 时间轴
+  let mode = "group";
+  let focus = null, hover = null, sel = null, pv = null, pvNode = null, hlNodes = new Set(), hlLinks = new Set();
+  let song = null, songRows = null, lineIdx = -1, lineWords = new Set(), playT = null;   // 一首歌
+  let tAlbum = d.albums.length - 1, timeT = null;                                          // 时间轴
+  let learned = new Set(), simulated = false;                                               // 我的星图
+  let songsData = null;
+  const BAND = { yorushika: "#4cc9f0", atarayo: "#ff8fab", both: "#ffd166" };
+
+  // 主站的学习进度（同一个网站，浏览器里存的「已掌握」）
+  function loadLearned() {
+    if (simulated) return;
+    try { const o = JSON.parse(localStorage.getItem("yorushika_learned_v1") || "{}"); learned = new Set(nodes.filter(n => o[n.full]).map(n => n.id)); }
+    catch (e) { learned = new Set(); }
+  }
+  loadLearned();
+  addEventListener("storage", e => { if (e.key === "yorushika_learned_v1") { loadLearned(); recompute(); if (!focus) renderSide(); } });
+
+  // 下一颗该点亮的星：还没掌握、和已掌握的词连得最紧的词
+  function nextStars(k = 10) {
+    const sc = [];
+    nodes.forEach(n => { if (learned.has(n.id)) return; let s = 0, c = 0;
+      n.edges.forEach(e => { const o = d.other(e, n).id; if (learned.has(o)) { s += e.w; c++; } });
+      if (c) sc.push({ n, s: s + n.n / 200, c }); });
+    return sc.sort((a, b) => b.s - a.s).slice(0, k);
+  }
+  let suggest = new Set();
+
+  // 每个点当前的样子：v 可见度（0 不画不可点），c 颜色，glow 发光，ring 白圈
+  let look = new Map();
+  function recompute() {
+    look = new Map();
+    const inSong = song ? new Set(nodes.filter(n => n.so.includes(song.i)).map(n => n.id)) : null;
+    suggest = mode === "mine" ? new Set(nextStars(10).map(x => x.n.id)) : new Set();
+    // 时间轴：这张专辑的新词都带白圈，但只给出现最多的 12 个标名字，免得太挤
+    const named = mode === "time" ? new Set(nodes.filter(n => n.fa === tAlbum).sort((a, b) => b.n - a.n).slice(0, 12).map(n => n.id)) : null;
+    nodes.forEach(n => {
+      let v = 1, c = n.color, glow = true, ring = false, label = true;
+      if (mode === "band") c = BAND[n.band] || n.color;
+      else if (mode === "mine") { if (!learned.has(n.id)) { c = "#56608a"; v = .3; glow = false; if (suggest.has(n.id)) { v = .95; ring = true; c = n.color; } } }
+      else if (mode === "song" && inSong) { if (!inSong.has(n.id)) { v = .04; glow = false; } else if (lineWords.has(n.id)) ring = true; }
+      else if (mode === "time") { if (n.fa > tAlbum) v = 0; else if (n.fa === tAlbum) { ring = true; label = named.has(n.id); } }
+      look.set(n.id, { v, c, glow, ring, label });
+    });
+  }
+  const visible = n => (look.get(n.id) || { v: 1 }).v > .2;
+  const clickable = n => { const L = look.get(n.id); return L && L.v > .2 && (!focus || hlNodes.has(n.id)); };
   function highlight(n) {
     hlNodes = new Set(); hlLinks = new Set();
     if (!n) return;
     hlNodes.add(n.id);
-    links.forEach(l => { if (l.e.s === n.id || l.e.t === n.id) { hlLinks.add(l); hlNodes.add(l.e.s); hlNodes.add(l.e.t); } });
+    links.forEach(l => { if ((l.e.s === n.id || l.e.t === n.id) && visible(byId.get(l.e.s)) && visible(byId.get(l.e.t))) { hlLinks.add(l); hlNodes.add(l.e.s); hlNodes.add(l.e.t); } });
   }
-  // 手指 / 鼠标按下的位置：用来判断点的是线还是点
+  const active = () => pv || sel;
+
+  // ================= 点线：手机上「N 句」标签优先，其次是线的中段 =================
   let lastPt = null, hoverT = null;
   el.addEventListener("pointerdown", e => { const b = el.getBoundingClientRect(); lastPt = { x: e.clientX - b.left, y: e.clientY - b.top }; }, true);
-  // 聚焦时，点在亮着的线中段（离线 12 像素以内、离两头的词较远）就算点了这条线，比后面的点优先
+  function pillAt() {
+    if (!focus || !lastPt || canHover) return null;
+    const g = G.screen2GraphCoords(lastPt.x, lastPt.y), pad = 6 / G.zoom();
+    for (const l of hlLinks) { const q = l._pill; if (q && Math.abs(g.x - q.x) <= q.w / 2 + pad && Math.abs(g.y - q.y) <= q.h / 2 + pad) return l; }
+    return null;
+  }
   function lineAt() {
     if (!focus || !lastPt) return null;
     let best = null, bd = 12;
@@ -45,91 +145,285 @@
     }
     return best;
   }
+  const tapLine = () => pillAt() || (canHover ? null : lineAt());
   function selectLink(l) {
     sel = l; if (!focus) { hlNodes = new Set([l.e.s, l.e.t]); hlLinks = new Set([l]); }
-    ui.showEdge(l.e, focus && focus.raw);
+    ui.showEdge(l.e, focus && focus.raw); markRows();
   }
+
+  // ================= 画图 =================
   const t0 = performance.now();
   const G = ForceGraph()(el)
     .backgroundColor("rgba(0,0,0,0)")
     .graphData({ nodes, links })
-    .autoPauseRedraw(false)                 // 一直重绘：光点流动、节点呼吸
+    .autoPauseRedraw(false)
+    .nodeVisibility(n => (look.get(n.id) || { v: 1 }).v !== 0)
     .nodeCanvasObject((n, ctx, scale) => {
+      const Lk = look.get(n.id) || { v: 1, c: n.color, glow: true };
       const L = active(), onL = L && (L.e.s === n.id || L.e.t === n.id);
-      let on = !(focus || hover) || hlNodes.has(n.id);
-      const center = n === focus || (!focus && n === hover), mark = onL && n !== focus || pvNode === n.id;
-      const t = (performance.now() - t0) / 1000, pulse = center || mark ? 1 + .12 * Math.sin(t * 3) : 1;
+      const on = !(focus || hover) || hlNodes.has(n.id);
+      const center = n === focus || (!focus && n === hover), mark = (onL && n !== focus) || pvNode === n.id;
+      const t = (performance.now() - t0) / 1000, pulse = center || mark || Lk.ring ? 1 + .12 * Math.sin(t * 3) : 1;
       const r = radius(n) * pulse * (mark ? 1.35 : 1);
-      // 选中一条线时，线两头以外的邻居变淡
-      ctx.globalAlpha = !on ? .05 : (L || pvNode != null) && !onL && !center && pvNode !== n.id ? .3 : 1;
-      ctx.shadowColor = n.color; ctx.shadowBlur = on ? (center || mark ? 30 : 14) : 0;
-      ctx.fillStyle = n.color; ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, 2 * Math.PI); ctx.fill();
+      let a = Lk.v * (on ? 1 : .08);
+      if (on && (L || pvNode != null) && !onL && !center && pvNode !== n.id) a *= .3;
+      ctx.globalAlpha = a;
+      ctx.shadowColor = Lk.c; ctx.shadowBlur = on && Lk.glow ? (center || mark ? 30 : 14) : 0;
+      ctx.fillStyle = Lk.c; ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, 2 * Math.PI); ctx.fill();
       ctx.shadowBlur = 0;
-      if (center || mark) { ctx.strokeStyle = "#fff"; ctx.lineWidth = (mark ? 2 : 1.2) / scale; ctx.beginPath(); ctx.arc(n.x, n.y, r + (mark ? 3 / scale : 0), 0, 2 * Math.PI); ctx.stroke(); }
-      // 文字：放大后、或高亮时、或常用词才显示
-      if ((on && (focus || hover)) || scale * radius(n) > 9 || (n.n >= 25 && scale > .55)) {
-        const fs = Math.max((mark ? 13 : 11) / scale, center ? 6 : 3);
-        ctx.font = `${center || mark ? 700 : 500} ${fs}px "Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif`;
+      if (center || mark || Lk.ring) {
+        ctx.strokeStyle = "#fff"; ctx.lineWidth = (mark || Lk.ring ? 2 : 1.2) / scale;
+        ctx.beginPath(); ctx.arc(n.x, n.y, r + (mark || Lk.ring ? 3 / scale : 0), 0, 2 * Math.PI); ctx.stroke();
+      }
+      const labelIt = (on && (focus || hover)) || (Lk.ring && Lk.label !== false) || scale * radius(n) > 9 || (n.n >= 25 && scale > .55 && Lk.v > .5)
+        || (mode === "song" && song && Lk.v === 1);
+      if (labelIt && a > .15) {
+        const fs = Math.max((mark || Lk.ring ? 13 : 11) / scale, center ? 6 : 3);
+        ctx.font = `${center || mark || Lk.ring ? 700 : 500} ${fs}px "Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif`;
         ctx.textAlign = "center"; ctx.textBaseline = "top";
-        ctx.fillStyle = on ? (mark ? "#fff" : "rgba(255,255,255,.92)") : "rgba(255,255,255,.2)";
+        ctx.fillStyle = mark || Lk.ring ? "#fff" : "rgba(255,255,255,.92)";
         ctx.fillText(n.w, n.x, n.y + r + 2 / scale);
-        if (focus && on) {   // 聚焦时，词下面标罗马音
+        if ((focus && on) || (Lk.ring && Lk.label !== false)) {
           ctx.font = `400 ${fs * .72}px -apple-system,"Segoe UI",sans-serif`; ctx.fillStyle = "rgba(185,194,230,.9)";
           ctx.fillText(n.r, n.x, n.y + r + 2 / scale + fs * 1.15);
         }
       }
       ctx.globalAlpha = 1;
     })
-    .nodePointerAreaPaint((n, color, ctx) => { if (focus && !hlNodes.has(n.id)) return; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(n.x, n.y, radius(n) + 3, 0, 2 * Math.PI); ctx.fill(); })
-    // 选中的线最亮最粗，同一个词的其他线变暗
-    .linkColor(l => { const L = active(); return l === L ? "#fff" : hlLinks.has(l) ? (L ? "rgba(255,240,200,.14)" : "rgba(255,240,200,.55)") : (focus || hover) ? "rgba(255,255,255,.025)" : "rgba(140,160,255,.14)"; })
+    .nodePointerAreaPaint((n, color, ctx) => { if (!clickable(n)) return; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(n.x, n.y, radius(n) + 3, 0, 2 * Math.PI); ctx.fill(); })
+    .linkVisibility(l => visible(byId.get(l.e.s)) && visible(byId.get(l.e.t)))
+    .linkColor(l => {
+      const L = active();
+      if (l === L) return "#fff";
+      if (hlLinks.has(l)) return L ? "rgba(255,240,200,.14)" : "rgba(255,240,200,.55)";
+      if (focus || hover) return "rgba(255,255,255,.025)";
+      if (mode === "song" && song) return lineWords.has(l.e.s) && lineWords.has(l.e.t) ? "rgba(255,255,255,.8)" : "rgba(255,240,200,.3)";
+      if (mode === "mine") return learned.has(l.e.s) && learned.has(l.e.t) ? "rgba(255,240,200,.35)" : "rgba(140,160,255,.06)";
+      return "rgba(140,160,255,.14)";
+    })
     .linkWidth(l => l === active() ? 3.5 + l.e.w * 10 : hlLinks.has(l) ? 1 + l.e.w * 10 : .3 + l.e.w * 3)
     .linkLabel(l => canHover && !focus ? `<div style="font-size:14px"><b>${d.nodes[l.e.s].w} × ${d.nodes[l.e.t].w}</b></div>` +
       `<div>在同一句歌词里一起出现 ${l.e.n} 次</div><div style="opacity:.7">点击看这些歌词</div>` : "")
-    // 电脑上线的可点范围加宽；聚焦时只有亮着的线能点。手机上用 lineAt() 判断
+    // 手机：聚焦时在线中间标「N 句」，点这个标签看歌词（不会点到后面的词）
+    .linkCanvasObjectMode(l => !canHover && focus && hlLinks.has(l) ? "after" : undefined)
+    .linkCanvasObject((l, ctx, scale) => {
+      const a = l.source, b = l.target; if (typeof a !== "object") return;
+      const x = (a.x + b.x) / 2, y = (a.y + b.y) / 2, text = l.e.n + " 句", isSel = l === active();
+      const fs = 13 / scale; ctx.font = `600 ${fs}px sans-serif`;
+      const w = ctx.measureText(text).width + fs * 1.2, h = fs * 1.8; l._pill = { x, y, w, h };
+      ctx.globalAlpha = active() && !isSel ? .45 : 1;
+      ctx.fillStyle = isSel ? "rgba(255,209,102,.95)" : "rgba(12,16,34,.85)";
+      ctx.strokeStyle = "rgba(255,240,200,.6)"; ctx.lineWidth = 1 / scale;
+      ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = isSel ? "#1a1a1a" : "#fff2c4"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(text, x, y);
+      ctx.globalAlpha = 1;
+    })
     .linkPointerAreaPaint((l, color, ctx, scale) => {
       if (!canHover || (focus && !hlLinks.has(l))) return;
       const a = l.source, b = l.target; if (typeof a !== "object") return;
       ctx.strokeStyle = color; ctx.lineWidth = (focus ? 14 : 6) / scale;
       ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
     })
-    .linkDirectionalParticles(l => { const L = active(); return L ? (l === L ? 5 : 0) : hlLinks.has(l) ? 3 : 0; })
+    .linkDirectionalParticles(l => { const L = active(); if (L) return l === L ? 5 : 0;
+      if (hlLinks.has(l)) return 3; return mode === "song" && lineWords.has(l.e.s) && lineWords.has(l.e.t) ? 4 : 0; })
     .linkDirectionalParticleWidth(l => 2 + l.e.w * 6)
     .linkDirectionalParticleSpeed(l => .004 + l.e.w * .01)
     .linkDirectionalParticleColor(l => byId.get(l.e.t).color)
     .linkHoverPrecision(8)
-    .onNodeHover(n => { hover = n; if (!focus) highlight(n); el.style.cursor = n ? "pointer" : null; })
+    .onNodeHover(n => { hover = n && clickable(n) ? n : null; if (!focus) highlight(hover); el.style.cursor = hover ? "pointer" : null; })
     .onLinkHover(l => {
       el.style.cursor = l ? "pointer" : null; clearTimeout(hoverT);
-      // 电脑：聚焦时鼠标在亮着的线上停 0.25 秒，就显示这条线的歌词（不用点）
       if (l && focus && hlLinks.has(l) && l !== sel) hoverT = setTimeout(() => selectLink(l), 250);
     })
-    .onNodeClick(n => { const l = canHover ? null : lineAt(); if (l) selectLink(l); else focusNode(n); })
+    .onNodeClick(n => { const l = tapLine(); if (l) selectLink(l); else if (clickable(n)) focusNode(n); })
     .onLinkClick(l => selectLink(l))
-    .onBackgroundClick(() => { const l = lineAt(); if (l) selectLink(l); else ui.close(); })
+    .onBackgroundClick(() => { const l = tapLine(); if (l) selectLink(l); else ui.close(); })
     .cooldownTime(8000);
-  window.graph = G;                         // 方便在浏览器控制台里调试
+  window.graph = G;
   G.d3Force("charge").strength(-28);
   G.d3Force("link").distance(l => 34 - l.e.w * 30).strength(l => .2 + l.e.w * .8);
-  G.onEngineStop(() => { if (!focus) G.zoomToFit(800, 30); });
   let fitted = false;
   G.onEngineTick(() => { if (!fitted && performance.now() - t0 > 1500) { fitted = true; G.zoomToFit(900, 30); } });
+  G.onEngineStop(() => { if (!focus && mode !== "song") G.zoomToFit(800, 30, visible); });
 
   function focusNode(raw) {
     const n = byId.get(raw.id); if (!n) return;
     focus = n; sel = null; pv = null; pvNode = null; highlight(n);
-    // 手机上面板占了下半屏：把这个词放在屏幕上方 30% 的位置
-    const z = Math.max(G.zoom(), 2.6), dy = innerWidth < 600 ? innerHeight * .2 / z : 0;
+    if (!wide()) { sideOpen = false; syncModes(); }   // 手机：列表和底部面板会叠在一起，面板里已经按次数排好了
+    const z = Math.max(G.zoom(), 2.6), dy = !wide() ? innerHeight * .2 / z : 0;
     G.centerAt(n.x, n.y + dy, 900); G.zoom(z, 900);
-    ui.showNode(n.raw);
+    ui.showNode(n.raw); renderSide();
   }
+
+  // ================= 左侧列表 =================
+  let sideOpen = wide();
+  function rowBtn(n, right, onClick, onEnter) {
+    const b = $("button", "rowb"); b.type = "button";
+    b.append($("b", null, n.w), $("span", "rr", n.r), $("span", "rn", right), $("span", "rm", n.m));
+    b.onclick = onClick;
+    if (onEnter) { b.onmouseenter = () => onEnter(true); b.onmouseleave = () => onEnter(false); }
+    return b;
+  }
+  function markRows() { side.querySelectorAll(".rowb[data-e]").forEach(b => b.classList.toggle("on", !!sel && String(sel.e.id) === b.dataset.e)); }
+  function sideHead(title, sub) {
+    side.innerHTML = "";
+    const x = $("button", "x", "×"); x.onclick = () => { sideOpen = false; side.hidden = true; syncModes(); }; side.appendChild(x);
+    side.appendChild($("h3", null, title)); if (sub) side.appendChild($("p", "sub", sub));
+  }
+  function renderSide() {
+    side.hidden = !sideOpen;
+    if (focus) return sideFocus();
+    ({ group: sideGroup, band: sideBand, mine: sideMine, song: sideSong, time: sideTime })[mode]();
+  }
+  // 选中一个词：和它一起出现的词，按次数排
+  function sideFocus() {
+    const n = focus.raw;
+    sideHead("和「" + n.w + "」一起出现的词", "按一起出现的句数排序。" + (canHover ? "鼠标放上去，图里对应的词和线会高亮；点一下看这些歌词。" : "点一个看这些歌词，图里对应的线会高亮。"));
+    const rows = $("div", "rows");
+    n.edges.filter(e => linkOf.has(e) && hlLinks.has(linkOf.get(e))).sort((a, b) => b.n - a.n || b.w - a.w).forEach(e => {
+      const o = d.other(e, n), b = rowBtn(o, e.n + " 句", () => selectLink(linkOf.get(e)), on => { pv = on ? linkOf.get(e) : null; });
+      b.dataset.e = e.id; rows.appendChild(b);
+    });
+    side.appendChild(rows); markRows();
+    const back = $("button", "btn2", "‹ 返回" + ({ group: "词群", band: "乐队对比", mine: "我的星图", song: "这首歌", time: "时间轴" })[mode]);
+    back.style.marginTop = "10px"; back.onclick = () => ui.close(); side.appendChild(back);
+  }
+  function sideGroup() {
+    sideHead("词群", "程序把经常在同一句里出现的词自动分成 10 组，同一组同一种颜色。点一组，镜头移到这一组。");
+    const rows = $("div", "rows");
+    d.groups.forEach((g, i) => {
+      const cnt = nodes.filter(n => n.g === i).length, b = $("button", "rowb"); b.type = "button";
+      const w = $("span"); const dt = $("i", "dot"); dt.style.background = dt.style.color = Demo.COLORS[i]; w.append(dt, g);
+      b.append(w, $("span"), $("span", "rn", cnt + " 个"));
+      b.onclick = () => { const set = new Set(nodes.filter(n => n.g === i).map(n => n.id)); G.zoomToFit(800, 60, n => set.has(n.id)); };
+      rows.appendChild(b);
+    });
+    side.appendChild(rows);
+  }
+  function sideBand() {
+    const cat = { yorushika: [], atarayo: [], both: [] }; nodes.forEach(n => (cat[n.band] || cat.both).push(n));
+    sideHead("两个乐队的对比", "蓝色只在 ヨルシカ 的歌里出现，粉色只在 あたらよ 的歌里出现，金色两个乐队都唱过。");
+    [["both", "两个乐队都唱过"], ["yorushika", "只有 ヨルシカ"], ["atarayo", "只有 あたらよ"]].forEach(([k, t]) => {
+      const h = $("div"); h.style.margin = "10px 0 4px"; const dt = $("i", "dot"); dt.style.background = dt.style.color = BAND[k];
+      h.append(dt, t + "（" + cat[k].length + " 个）"); side.appendChild(h);
+      const tg = $("div", "tags2");
+      cat[k].sort((a, b) => b.n - a.n).slice(0, 16).forEach(n => { const b = $("button", null, n.w); b.title = n.m; b.onclick = () => focusNode(n.raw); tg.appendChild(b); });
+      side.appendChild(tg);
+    });
+  }
+  function sideMine() {
+    const total = nodes.length, k = nodes.filter(n => learned.has(n.id)).length;
+    sideHead("我的词汇星图", simulated ? "（演示数据：假设你已掌握出现在最多首歌里的 150 个词）" : "你在主站标记为「已掌握」的词会亮起来，没学的暗着。学得越多，星图越亮。");
+    const big = $("div"); big.append($("span", "big", String(k)), " / " + total + " 颗星已点亮"); side.appendChild(big);
+    const bar = $("div", "bar"), i = $("i"); i.style.width = (k / total * 100) + "%"; bar.appendChild(i); side.appendChild(bar);
+    if (!k && !simulated) side.appendChild($("p", "sub", "你在这个浏览器里还没有标记已掌握的词。在主站的词表或闪卡里标记后，回到这里就会亮起来。"));
+    const ctl = $("div", "ctrl"), sim = $("button", "btn2", simulated ? "看我自己的进度" : "先看看效果（演示数据）");
+    sim.onclick = () => { simulated = !simulated; if (simulated) learned = new Set(nodes.slice().sort((a, b) => b.n - a.n).slice(0, 150).map(n => n.id)); else loadLearned(); recompute(); renderSide(); };
+    ctl.appendChild(sim); side.appendChild(ctl);
+    const ns = nextStars(10);
+    if (ns.length) {
+      side.appendChild($("h3", null, "下一颗星"));
+      side.appendChild($("p", "sub", "还没掌握、又和你已掌握的词连得最紧的词（图里带白圈）。先学它们，最容易记住。"));
+      const rows = $("div", "rows");
+      ns.forEach(x => rows.appendChild(rowBtn(x.n, "连着 " + x.c + " 个", () => focusNode(x.n.raw), on => { pvNode = on ? x.n.id : null; })));
+      side.appendChild(rows);
+    }
+  }
+  function sideSong() {
+    sideHead("一首歌的星座", "选一首歌，只点亮这首歌里的词。点「播放」逐句前进，当前这句里的词带白圈，它们之间的线会流动。");
+    const sl = $("select"); sl.appendChild(new Option("选一首歌…", ""));
+    d.albums.forEach((a, ai) => { const og = document.createElement("optgroup"); og.label = a.short + "（" + a.year + "）";
+      d.songs.forEach((s, si) => { if (s.a === ai) og.appendChild(new Option(s.ja + "　" + s.zh, String(si))); });
+      if (og.children.length) sl.appendChild(og); });
+    if (song) sl.value = String(song.i);
+    sl.onchange = () => chooseSong(sl.value === "" ? null : +sl.value);
+    side.appendChild(sl);
+    if (!song) return;
+    const ctl = $("div", "ctrl");
+    const play = $("button", "btn2 primary", playT ? "暂停" : "▶ 播放");
+    play.onclick = () => { if (playT) stopPlay(); else startPlay(); renderSide(); };
+    const prev = $("button", "btn2", "上一句"), next = $("button", "btn2", "下一句");
+    prev.onclick = () => { stopPlay(); stepLine(-1); renderSide(); }; next.onclick = () => { stopPlay(); stepLine(1); renderSide(); };
+    ctl.append(play, prev, next); side.appendChild(ctl);
+    const now = $("div", "nowline"); now.id = "nowline"; side.appendChild(now); drawNowLine();
+    const ws = nodes.filter(n => n.so.includes(song.i)).sort((a, b) => b.n - a.n);
+    side.appendChild($("p", "sub", "这首歌里有 " + ws.length + " 个图里的词："));
+    const tg = $("div", "tags2"); ws.forEach(n => { const b = $("button", null, n.w); b.title = n.m; b.onclick = () => focusNode(n.raw); tg.appendChild(b); }); side.appendChild(tg);
+  }
+  function drawNowLine() {
+    const box = document.getElementById("nowline"); if (!box) return; box.innerHTML = "";
+    if (!songRows || lineIdx < 0) { box.appendChild($("div", "zh", "点「播放」或「下一句」开始")); return; }
+    const [ja, zh, rd] = songRows[lineIdx];
+    box.append($("div", "ja", ja), $("div", "ro", Demo.romaji(rd)), $("div", "zh", zh || ""), $("div", "rr", (lineIdx + 1) + " / " + songRows.length));
+  }
+  async function chooseSong(i) {
+    stopPlay(); lineIdx = -1; lineWords = new Set(); song = i == null ? null : { i, ...d.songs[i] }; songRows = null;
+    if (song) {
+      if (!songsData) songsData = await (await fetch("songs.json")).json();
+      songRows = songsData[song.id] || [];
+      recompute(); const set = new Set(nodes.filter(n => n.so.includes(i)).map(n => n.id));
+      G.zoomToFit(900, 60, n => set.has(n.id));
+    } else recompute();
+    renderSide();
+  }
+  function stepLine(dir) {
+    if (!songRows || !songRows.length) return;
+    lineIdx = Math.max(0, Math.min(songRows.length - 1, lineIdx + dir));
+    lineWords = new Set(songRows[lineIdx][3].filter(id => byId.has(id)));
+    recompute(); drawNowLine();
+  }
+  function startPlay() {
+    if (!songRows) return; if (lineIdx >= songRows.length - 1) lineIdx = -1;
+    const tick = () => { stepLine(1); if (lineIdx >= songRows.length - 1) { stopPlay(); renderSide(); return; }
+      playT = setTimeout(tick, songRows[lineIdx][3].length ? 2600 : 900); };
+    tick();
+  }
+  function stopPlay() { clearTimeout(playT); playT = null; }
+  function sideTime() {
+    const a = d.albums[tAlbum], shown = nodes.filter(n => n.fa <= tAlbum).length, fresh = nodes.filter(n => n.fa === tAlbum);
+    sideHead("时间轴", "按专辑发行顺序，一张张把词加进来。白圈是这张专辑里第一次出现的词。");
+    const rg = $("input"); rg.type = "range"; rg.min = 0; rg.max = d.albums.length - 1; rg.value = tAlbum;
+    rg.oninput = () => { stopTime(); setAlbum(+rg.value); };
+    side.appendChild(rg);
+    const ac = $("div", "acover");
+    if (a.cover) { const img = $("img"); img.src = "../" + a.cover; img.alt = ""; ac.appendChild(img); }
+    const info = $("div"); info.append($("div", null, a.ja), $("div", "rr", a.year + " · " + d.bands[a.band]));
+    ac.appendChild(info); side.appendChild(ac);
+    const big = $("div"); big.append($("span", "big", String(shown)), " 个词 · 这张新增 " + fresh.length + " 个"); side.appendChild(big);
+    const ctl = $("div", "ctrl"), play = $("button", "btn2 primary", timeT ? "暂停" : "▶ 从头播放");
+    play.onclick = () => { if (timeT) stopTime(); else { setAlbum(0); timeT = setInterval(() => { if (tAlbum >= d.albums.length - 1) { stopTime(); renderSide(); } else setAlbum(tAlbum + 1); }, 1800); } renderSide(); };
+    ctl.appendChild(play); side.appendChild(ctl);
+    side.appendChild($("p", "sub", "这张专辑新出现的词（按出现次数）："));
+    const tg = $("div", "tags2"); fresh.sort((x, y) => y.n - x.n).slice(0, 30).forEach(n => { const b = $("button", null, n.w); b.title = n.m; b.onclick = () => focusNode(n.raw); tg.appendChild(b); }); side.appendChild(tg);
+  }
+  function setAlbum(i) { tAlbum = i; recompute(); renderSide(); }
+  function stopTime() { clearInterval(timeT); timeT = null; }
+
+  // ================= 模式切换 =================
+  const MODES = [["group", "词群"], ["band", "乐队对比"], ["mine", "我的星图"], ["song", "一首歌"], ["time", "时间轴"]];
+  function syncModes() {
+    modesEl.innerHTML = "";
+    const sb = $("button", "sidebtn" + (sideOpen ? " on" : ""), "列表"); sb.onclick = () => { sideOpen = !sideOpen; renderSide(); syncModes(); };
+    modesEl.appendChild(sb);
+    MODES.forEach(([k, t]) => { const b = $("button", k === mode ? "on" : "", t); b.onclick = () => setMode(k); modesEl.appendChild(b); });
+  }
+  function setMode(k) {
+    if (mode === "song" && k !== "song") stopPlay();
+    if (mode === "time" && k !== "time") { stopTime(); tAlbum = d.albums.length - 1; }
+    mode = k; ui.close(); if (!wide()) sideOpen = true;
+    if (k === "mine") loadLearned();
+    recompute(); highlight(null); renderSide(); syncModes();
+    if (k !== "song") G.zoomToFit(800, 30, visible);
+  }
+
   const ui = Demo.setup(d, { title: "方案一 · force-graph（2D）", focus: focusNode,
-    hint: canHover ? "点一个词，它和常一起出现的词会亮起来。鼠标停在一条线上，或把鼠标放到面板里的词上，就能看到这两个词一起出现的歌词，图里对应的词和线也会高亮。"
-      : "点一个词，它和常一起出现的词会亮起来。点一条线的中段，或点面板里的词，就能看到这两个词一起出现的歌词，图里对应的词和线会高亮。",
-    onEdge: e => { const l = linkOf.get(e); if (l) sel = l; },
+    hint: canHover ? "点一个词，左边按次数列出和它一起出现的词。鼠标放在列表或线上，图里对应的词和线会高亮；点一下看这两个词一起出现的歌词。上面可以切换：词群、乐队对比、我的星图、一首歌、时间轴。"
+      : "点一个词，和它一起出现的词会亮起来，线中间标着一起出现了几句。点这个「N 句」标签，或点面板里的词，看这两个词一起出现的歌词。上面可以切换：词群、乐队对比、我的星图、一首歌、时间轴。",
+    onEdge: e => { const l = linkOf.get(e); if (l) sel = l; markRows(); },
     onPreview: e => { pv = e ? linkOf.get(e) || null : null; },
     onPreviewNode: n => { pvNode = n ? n.id : null; },
-    onClose: () => { focus = null; sel = null; pv = null; pvNode = null; highlight(hover); } });
+    onClose: () => { focus = null; sel = null; pv = null; pvNode = null; highlight(hover); renderSide(); } });
+  recompute(); syncModes(); renderSide();
 })();
 </script>
 </body>
