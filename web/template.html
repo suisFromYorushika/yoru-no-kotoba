@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>夜の言葉</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#f6f3ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12172b" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="夜の言葉">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
@@ -704,18 +712,19 @@ async function syncCloud(){
   const remote=await be.load();
   if(uid!==sbUid)return;
   lastPull=Date.now();
-  const base=lsGet(flagKey,false)?lsGet(baseKey,null):null;
+  // 云端还没有这份进度时不用基准，只取并集：本机的内容一个都不删
+  const base=remote&&lsGet(flagKey,false)?lsGet(baseKey,null):null;
   const local=packCloud(), merged=mergeCloud(base,local,remote||{});
   dirty=false;   // 从这里起本机的新改动会重新标记 dirty，再同步一次
   applyCloud(merged);
-  lsSet(baseKey,remote||{});lsSet(flagKey,true);
+  if(remote){lsSet(baseKey,remote);lsSet(flagKey,true);}
   if(cloudKey(merged)!==cloudKey(local))render();
-  if(!remote||cloudKey(merged)!==cloudKey(remote)){await be.save(merged);lsSet(baseKey,merged);}
+  if(!remote||cloudKey(merged)!==cloudKey(remote)){await be.save(merged);lsSet(baseKey,merged);lsSet(flagKey,true);}
 }
 function runSync(){
   writing=writing.then(syncCloud)
     .then(()=>{if(syncState!=="synced")setSync("synced");})
-    .catch(()=>{dirty=true;setSync("error");});
+    .catch(()=>{dirty=true;setSync(navigator.onLine===false?"offline":"error");});
   return writing;
 }
 function queueCloudWrite(){
@@ -731,7 +740,7 @@ function loadScript(src){return new Promise((ok,no)=>{const s=document.createEle
 async function initSupabase(){
   setSync("connecting");
   try{await loadScript(SUPABASE_JS);sb=window.supabase.createClient(SITE.supabase_url,SITE.supabase_key);}
-  catch(e){setSync("error");return;}
+  catch(e){sb=null;setSync(navigator.onLine===false?"offline":"error");return;}
   // 创建后会马上以 INITIAL_SESSION 回调一次当前登录状态；之后登录、退出、改密码都会回调
   sb.auth.onAuthStateChange((event,session)=>{
     if(event==="PASSWORD_RECOVERY"){recovering=true;openSheet(true);}
@@ -742,14 +751,18 @@ async function onSession(session){
   const u=session&&session.user;
   if(!u){
     if(sbUid)lsSet(LS_SYNC+":"+sbUid,false);   // 退出后本机再学的内容，下次登录时合并上去
-    sbUid=null;backend=null;account=null;dirty=false;setSync("signedout");return;
+    sbUid=null;backend=null;account=null;dirty=false;
+    // 断网时打开、登录凭证又已过期：并没有退出，联网后 supabase-js 换到新凭证会再回调这里
+    setSync(navigator.onLine===false&&hasStoredLogin()?"offline":"signedout");return;
   }
-  if(u.id===sbUid)return;
+  if(u.id===sbUid){if(dirty)queueCloudWrite();return;}   // 例如刚换到新的登录凭证：把上次没同步成功的改动补上
   sbUid=u.id;
   const md=u.user_metadata||{};
   account={nick:md.nickname||"",email:u.email||"",name:md.nickname||md.user_name||md.name||(u.email||"").split("@")[0]||"已登录",avatar:md.avatar_url||null};
   backend={
-    load:async()=>{const {data,error}=await sb.from("progress").select("data").eq("user_id",u.id).maybeSingle();if(error)throw error;return data?data.data:null;},
+    // 登录凭证过期又还没换到新的（比如刚联网）时，supabase-js 会改用公开 key 去读，读到的是空的，不能当成「云端没有进度」
+    load:async()=>{const {data:{session}}=await sb.auth.getSession();if(!session)throw new Error("no session");
+      const {data,error}=await sb.from("progress").select("data").eq("user_id",u.id).maybeSingle();if(error)throw error;return data?data.data:null;},
     save:async d=>{const {error}=await sb.from("progress").upsert({user_id:u.id,data:d,updated_at:new Date().toISOString()});if(error)throw error;}};
   setSync("connecting");
   await runSync();
@@ -759,6 +772,20 @@ document.addEventListener("visibilitychange",()=>{
   if(document.visibilityState!=="visible"||!backend)return;
   if(dirty)queueCloudWrite();
   else if(Date.now()-lastPull>30000)runSync();
+});
+// 这台设备上有没有保存着的登录（supabase-js 默认的存放位置）
+function hasStoredLogin(){try{return !!localStorage.getItem("sb-"+new URL(SITE.supabase_url).hostname.split(".")[0]+"-auth-token");}catch(e){return false;}}
+// 断网、恢复联网：联网后把离线时的改动同步上去，顺便拿别的设备的改动
+addEventListener("offline",()=>{if(backend)setSync("offline");});
+addEventListener("online",()=>{
+  if(CLOUD!=="supabase")return;
+  if(!sb){if(syncState!=="connecting")initSupabase();return;}   // 断网时打开的网页可能还没加载 supabase-js
+  if(backend){if(dirty)queueCloudWrite();else runSync();return;}
+  if(syncState!=="offline")return;
+  // 断网时打开、登录凭证已过期的网页：换到新凭证后 onSession 会接着同步
+  if(!hasStoredLogin()){setSync("signedout");return;}
+  setSync("connecting");
+  sb.auth.getSession().then(({data})=>{if(data.session)onSession(data.session);}).catch(()=>{});
 });
 const pageUrl=()=>location.origin+location.pathname;
 const AUTH_ERR=[[/invalid login credentials/i,"邮箱或密码不对。"],[/email not confirmed/i,"这个邮箱还没确认。请先去邮箱点确认链接，再回来登录。"],
@@ -1594,7 +1621,8 @@ const SYNC_TEXT={
   supabase:{local:"正在准备登录…",connecting:"正在连接云端…",
     signedout:"登录后，已掌握的词、复习记录和每天的学习记录会保存到云端，在别的设备上登录同一个账号就能接着学。第一次用请先注册。",
     synced:"已登录，进度自动保存到云端。在别的设备上登录同一个账号就能接着学。",
-    error:"暂时连不上云端，进度先保存在本机，恢复后会自动同步。"},
+    error:"暂时连不上云端，进度先保存在本机，恢复后会自动同步。",
+    offline:"现在没有网络。进度先保存在这台设备上，联网后会自动同步到云端。"},
   none:{local:"当前是本机模式：进度只保存在这个浏览器里，换设备或清除浏览器数据就没有了。"}};
 const PERSON_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20.5c1.2-4 4.2-6 7.5-6s6.3 2 7.5 6"/></svg>';
 function avatarNode(cls){if(account&&account.avatar){const i=el("img");i.src=account.avatar;i.alt="";return i;}
@@ -1603,12 +1631,13 @@ function avatarNode(cls){if(account&&account.avatar){const i=el("img");i.src=acc
 function renderAccount(){
   const synced=syncState==="synced", shortName=account?[...(account.name||"")].slice(0,8).join("")+([...(account.name||"")].length>8?"…":""):"";
   const b=document.getElementById("acct");b.innerHTML="";
-  b.append(avatarNode(),el("span","dot"+(synced?" on":"")),el("span","an",synced?(shortName||"已同步"):syncState==="connecting"?"连接中":"我的"));
+  b.append(avatarNode(),el("span","dot"+(synced?" on":"")),el("span","an",synced?(shortName||"已同步"):syncState==="connecting"?"连接中":syncState==="offline"?"离线":"我的"));
   const who=document.getElementById("who");who.innerHTML="";
   if(account){const t=el("div");t.append(el("b",null,account.name||"已登录"));if(account.email&&account.email.split("@")[0]!==account.name)t.append(el("div","am",account.email));who.append(avatarNode(),t);}
   const p=document.getElementById("syncText");p.textContent=(SYNC_TEXT[CLOUD]||{})[syncState]||SYNC_TEXT.none.local;
   const sbOn=CLOUD==="supabase"&&!!sb;
-  document.getElementById("authForm").hidden=!(sbOn&&!sbUid&&!recovering);
+  // 断网、或者正在用保存着的登录连接云端时，先不显示登录框
+  document.getElementById("authForm").hidden=!(sbOn&&!sbUid&&!recovering&&syncState!=="offline"&&syncState!=="connecting");
   document.getElementById("pwForm").hidden=!(sbOn&&recovering);
   document.getElementById("authOut").hidden=!(sbOn&&sbUid);
   const nf=document.getElementById("nickForm");nf.hidden=!(sbOn&&sbUid);if(!nf.hidden&&document.activeElement!==document.getElementById("nick"))document.getElementById("nick").value=account?account.nick:"";
@@ -2120,11 +2149,16 @@ if("mediaSession" in navigator)[["play",()=>{if(audio.paused)plToggle();}],["pau
 
 // ================= 深色 / 浅色（在「我的 → 显示与朗读」里切换） =================
 const THEMES=[{id:"system",label:"跟随系统"},{id:"light",label:"浅色"},{id:"dark",label:"深色"}];
+const darkMQ=matchMedia("(prefers-color-scheme: dark)");
 function applyTheme(){
   const t=THEMES.find(x=>x.id===ui.theme)||THEMES[0], root=document.documentElement;
   if(t.id==="system")root.removeAttribute("data-theme");
   else root.setAttribute("data-theme",t.id);
+  // 手机状态栏、装到桌面后的标题栏跟着主题变色
+  const dark=t.id==="dark"||(t.id==="system"&&darkMQ.matches);
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m.content=dark?"#12172b":"#f6f3ec");
 }
+try{darkMQ.addEventListener("change",applyTheme);}catch(e){}
 
 // ================= 页脚 =================
 function renderFooter(){
@@ -2174,6 +2208,16 @@ document.addEventListener("keydown",e=>{
 });
 applyTheme();applyDisplay();renderAccount();renderFooter();render();
 if(CLOUD==="supabase")initSupabase();
+// 离线缓存（web/sw.js）：装到手机桌面后断网也能打开。双击本地文件打开（file://）时不启用
+if("serviceWorker" in navigator&&location.protocol!=="file:"){
+  addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+  // 第一次打开时，登录用的 supabase-js 和专辑封面在离线缓存启用前就加载完了：启用后再取一次，存进缓存
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{
+    const urls=new Set([...DATA.albums,...(DATA.pending||[])].map(a=>a.cover).filter(Boolean));
+    if(CLOUD==="supabase")urls.add(SUPABASE_JS);
+    urls.forEach(u=>fetch(u).catch(()=>{}));
+  },{once:true});
+}
 </script>
 </body>
 </html>

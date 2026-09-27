@@ -10,6 +10,8 @@
 
 也可以直接双击打开 `web/index.html`，离线可用。
 
+**装到手机桌面**：用手机浏览器打开网址，iPhone 在 Safari 的分享菜单里选「添加到主屏幕」，安卓在 Chrome 的菜单里选「添加到主屏幕」或「安装应用」。打开过一次以后，断网也能刷闪卡、查词表、看歌词；离线时学的进度先存在手机上，联网后自动同步。登录、同步和听歌需要联网。iPhone 桌面上的版本和 Safari 的进度是分开存的，在桌面版里登录一次就会合并过来。离线缓存由 `web/sw.js` 负责。
+
 - **闪卡**有三种模式：
   - **浏览**：按频率一张张看，手机上左右滑动换词。
   - **复习**：间隔重复。每张卡选「忘了 / 模糊 / 记得」，记得的词隔 1、2、4、7、15… 天再出现，到 15 天间隔自动算已掌握；每天的新词数量可以在「我的」里调。
@@ -56,6 +58,7 @@ web/demos/             星空图（force-graph.html）和它的数据
 db/schema.sql          SQLite 表结构；docs/queries.sql 为示例查询
 db/supabase.sql        Supabase 建表和权限（GitHub Pages 版的云端进度）
 web/vendor/            第三方文件（supabase-js）
+web/sw.js              离线缓存（service worker）；web/manifest.webmanifest 和 web/icons/ 是装到桌面用的名字和图标
 scripts/               ingest → analyze → export → build，以及 make_db
 ```
 
