@@ -219,6 +219,7 @@
    "track": 2,
    "file": "yorushika/dakara/02.藍二乗",
    "links": {
+    "qq": "003AwcFA470AwT",
     "ne": 1357960253
    }
   },
@@ -230,6 +231,7 @@
    "track": 3,
    "file": "yorushika/dakara/03.八月、某、月明かり",
    "links": {
+    "qq": "002WB2OR1cdzBd",
     "ne": 1357953772
    }
   },
@@ -241,6 +243,7 @@
    "track": 4,
    "file": "yorushika/dakara/04.詩書きとコーヒー",
    "links": {
+    "qq": "004YBK9W1n8G2N",
     "ne": 1357953770
    }
   },
@@ -252,6 +255,7 @@
    "track": 6,
    "file": "yorushika/dakara/06.踊ろうぜ",
    "links": {
+    "qq": "0028YmCC33FpuF",
     "ne": 1357953774
    }
   },
@@ -263,6 +267,7 @@
    "track": 7,
    "file": "yorushika/dakara/07.六月は雨上がりの街を書く",
    "links": {
+    "qq": "000xywDd4JRR0W",
     "ne": 1357953771
    }
   },
@@ -274,6 +279,7 @@
    "track": 8,
    "file": "yorushika/dakara/08.五月は花緑青の窓辺から",
    "links": {
+    "qq": "000iuF93083kXL",
     "ne": 1357953769
    }
   },
@@ -393,6 +399,7 @@
    "track": 8,
    "file": "yorushika/elma/08.歩く",
    "links": {
+    "qq": "002Z2PMw3hfXNR",
     "ne": 1387098937
    }
   },
@@ -404,6 +411,7 @@
    "track": 9,
    "file": "yorushika/elma/09.心に穴が空いた",
    "links": {
+    "qq": "002hcHL818Nrc9",
     "ne": 1373789511
    }
   },
@@ -415,6 +423,7 @@
    "track": 11,
    "file": "yorushika/elma/11.声",
    "links": {
+    "qq": "001JR3Va2dpYGi",
     "ne": 1387099649
    }
   },
@@ -426,6 +435,7 @@
    "track": 12,
    "file": "yorushika/elma/12.エイミー",
    "links": {
+    "qq": "001PShgT0syBd5",
     "ne": 1387098938
    }
   },
@@ -437,6 +447,7 @@
    "track": 14,
    "file": "yorushika/elma/14.ノーチラス",
    "links": {
+    "qq": "004RHcZa1ZZO99",
     "ne": 1387098940
    }
   },
@@ -448,6 +459,7 @@
    "track": 2,
    "file": "yorushika/natsukusa/02.カトレア",
    "links": {
+    "qq": "003onUSr2LRgyl",
     "ne": 487527979
    }
   },
@@ -459,6 +471,7 @@
    "track": 3,
    "file": "yorushika/natsukusa/03.言って。",
    "links": {
+    "qq": "000VlKzg06Wkiu",
     "ne": 487527980
    }
   },
@@ -470,6 +483,7 @@
    "track": 4,
    "file": "yorushika/natsukusa/04.あの夏に咲け",
    "links": {
+    "qq": "000uAuLr0Bcbrw",
     "ne": 487527981
    }
   },
@@ -481,7 +495,8 @@
    "track": 6,
    "file": "yorushika/natsukusa/06.靴の花火",
    "links": {
-    "ne": 3400022206
+    "qq": "003uPr2p3IClnU",
+    "ne": 487527983
    }
   },
   {
@@ -492,6 +507,7 @@
    "track": 7,
    "file": "yorushika/natsukusa/07.雲と幽霊",
    "links": {
+    "qq": "003LPpqt4Qc7WS",
     "ne": 487527984
    }
   },
@@ -503,6 +519,7 @@
    "track": 2,
    "file": "yorushika/makeinu/02.負け犬にアンコールはいらない",
    "links": {
+    "qq": "001SiBgA30EgSE",
     "ne": 557581314
    }
   },
@@ -512,7 +529,11 @@
    "ja": "爆弾魔",
    "zh": "炸弹魔",
    "track": 3,
-   "file": "yorushika/makeinu/03.爆弾魔"
+   "file": "yorushika/makeinu/03.爆弾魔",
+   "links": {
+    "qq": "001nwesZ0LBp75",
+    "ne": 557583335
+   }
   },
   {
    "id": "s27",
@@ -522,6 +543,7 @@
    "track": 4,
    "file": "yorushika/makeinu/04.ヒッチコック",
    "links": {
+    "qq": "002khQke3D5YTV",
     "ne": 557581315
    }
   },
@@ -594,7 +616,7 @@
    "file": "yorushika/tousaku/04.爆弾魔",
    "dup_of": "s26",
    "links": {
-    "qq": "001nwesZ0LBp75",
+    "qq": "000THq1W3px7TR",
     "ne": 1466520413
    }
   },
@@ -654,6 +676,7 @@
    "track": 11,
    "file": "yorushika/tousaku/11.逃亡",
    "links": {
+    "qq": "000exdsm4cQHxT",
     "ne": 1466519476
    }
   },
@@ -665,6 +688,7 @@
    "track": 13,
    "file": "yorushika/tousaku/13.夜行",
    "links": {
+    "qq": "000Ityxe4akDlR",
     "ne": 1428153831
    }
   },
@@ -676,6 +700,7 @@
    "track": 14,
    "file": "yorushika/tousaku/14.花に亡霊",
    "links": {
+    "qq": "0002w1rU4TFInF",
     "ne": 1442466883
    }
   },
@@ -687,6 +712,7 @@
    "track": 1,
    "file": "yorushika/yorushika-singles/01.斜陽",
    "links": {
+    "qq": "004CKq1z3jCB1G",
     "ne": 2045828022
    }
   },
@@ -698,6 +724,7 @@
    "track": 2,
    "file": "yorushika/yorushika-singles/02.テレパス",
    "links": {
+    "qq": "004Nlu3u45UinW",
     "ne": 2013921197
    }
   },
@@ -709,6 +736,7 @@
    "track": 3,
    "file": "yorushika/yorushika-singles/03.あぶく",
    "links": {
+    "qq": "000mwQAa3m0JFQ",
     "ne": 3373113236
    }
   },
@@ -720,6 +748,7 @@
    "track": 4,
    "file": "yorushika/yorushika-singles/04.憂、燦々",
    "links": {
+    "qq": "001LXFjr2pkKKB",
     "ne": 2621539053
    }
   },
@@ -914,6 +943,7 @@
    "track": 4,
    "file": "yorushika/gentou/04.チノカテ",
    "links": {
+    "qq": "004FAHuI1reEqw",
     "ne": 3400023085
    }
   },
@@ -925,6 +955,7 @@
    "track": 5,
    "file": "yorushika/gentou/05.雪国",
    "links": {
+    "qq": "0036ihid12acc0",
     "ne": 3400022205
    }
   },
@@ -936,6 +967,7 @@
    "track": 6,
    "file": "yorushika/gentou/06.月に吠える",
    "links": {
+    "qq": "002K8a4F2Mu9YJ",
     "ne": 1884380173
    }
   },
@@ -947,6 +979,7 @@
    "track": 7,
    "file": "yorushika/gentou/07.451",
    "links": {
+    "qq": "003mpdEs3MaZd3",
     "ne": 3400023087
    }
   },
@@ -958,6 +991,7 @@
    "track": 8,
    "file": "yorushika/gentou/08.パドドゥ",
    "links": {
+    "qq": "0005plhV2f2UOt",
     "ne": 3400023088
    }
   },
@@ -969,6 +1003,7 @@
    "track": 9,
    "file": "yorushika/gentou/09.又三郎",
    "links": {
+    "qq": "003o63W22PoCOd",
     "ne": 1850977722
    }
   },
@@ -981,6 +1016,7 @@
    "file": "yorushika/gentou/10.靴の花火",
    "dup_of": "s23",
    "links": {
+    "qq": "004eOzwW4A1iMK",
     "ne": 3400022206
    }
   },
@@ -992,6 +1028,7 @@
    "track": 11,
    "file": "yorushika/gentou/11.老人と海",
    "links": {
+    "qq": "004VGqaC2OWN3l",
     "ne": 1870469768
    }
   },
@@ -1003,6 +1040,7 @@
    "track": 12,
    "file": "yorushika/gentou/12.さよならモルテン",
    "links": {
+    "qq": "001H2kKG303NoZ",
     "ne": 3400022208
    }
   },
@@ -1014,6 +1052,7 @@
    "track": 13,
    "file": "yorushika/gentou/13.いさな",
    "links": {
+    "qq": "004Vw0rK0InQ6D",
     "ne": 3400023090
    }
   },
@@ -1025,6 +1064,7 @@
    "track": 14,
    "file": "yorushika/gentou/14.左右盲",
    "links": {
+    "qq": "001ERViv0QA0ng",
     "ne": 1966766526
    }
   },
@@ -1036,6 +1076,7 @@
    "track": 15,
    "file": "yorushika/gentou/15.アルジャーノン",
    "links": {
+    "qq": "001hhN4h1NwQ1M",
     "ne": 2020247157
    }
   },
@@ -1167,6 +1208,7 @@
    "track": 12,
    "file": "yorushika/nininshou/12.ルバート",
    "links": {
+    "qq": "0046wzxR20TsnZ",
     "ne": 3355480214
    }
   },
@@ -1178,6 +1220,7 @@
    "track": 13,
    "file": "yorushika/nininshou/13.火葬",
    "links": {
+    "qq": "004aBuqC0mRG0d",
     "ne": 3355480215
    }
   },
@@ -1189,6 +1232,7 @@
    "track": 14,
    "file": "yorushika/nininshou/14.アポリア",
    "links": {
+    "qq": "0022Kf8d1Ny5ss",
     "ne": 2634153295
    }
   },
@@ -1200,6 +1244,7 @@
    "track": 15,
    "file": "yorushika/nininshou/15.へび",
    "links": {
+    "qq": "000317U90dUHG4",
     "ne": 2666842841
    }
   },
@@ -1211,6 +1256,7 @@
    "track": 16,
    "file": "yorushika/nininshou/16.うめき",
    "links": {
+    "qq": "001hEKJ53CykdK",
     "ne": 3355479294
    }
   },
@@ -1222,6 +1268,7 @@
    "track": 17,
    "file": "yorushika/nininshou/17.啄木鳥",
    "links": {
+    "qq": "000E1FVU0aq6GB",
     "ne": 3355479295
    }
   },
@@ -1234,7 +1281,8 @@
    "file": "yorushika/nininshou/18.ヒッチコック",
    "dup_of": "s27",
    "links": {
-    "ne": 557581315
+    "qq": "002doXqM27Cny1",
+    "ne": 3355479296
    }
   },
   {
@@ -1245,6 +1293,7 @@
    "track": 19,
    "file": "yorushika/nininshou/19.月光浴",
    "links": {
+    "qq": "002PWo160quf1j",
     "ne": 3355480218
    }
   },
@@ -1256,6 +1305,7 @@
    "track": 20,
    "file": "yorushika/nininshou/20.千鳥",
    "links": {
+    "qq": "001Kq5ft3NAF5M",
     "ne": 3355479297
    }
   },
@@ -1267,6 +1317,7 @@
    "track": 21,
    "file": "yorushika/nininshou/21.櫂",
    "links": {
+    "qq": "001C3c4R0eIJVx",
     "ne": 3355480219
    }
   },
@@ -1278,6 +1329,7 @@
    "track": 1,
    "file": "atarayo/yoakemae/01.10月無口な君を忘れる",
    "links": {
+    "qq": "001Jk3Y80SVFEb",
     "ne": 1830636201
    }
   },
@@ -1289,6 +1341,7 @@
    "track": 2,
    "file": "atarayo/yoakemae/02.夏霞",
    "links": {
+    "qq": "003dR6Yv1cTeAi",
     "ne": 1867150097
    }
   },
@@ -1300,6 +1353,7 @@
    "track": 3,
    "file": "atarayo/yoakemae/03.晴るる",
    "links": {
+    "qq": "003sexrN3uTv1C",
     "ne": 1839931917
    }
   },
@@ -1409,6 +1463,7 @@
    "track": 5,
    "file": "atarayo/kyokuya/05.知りたくなかった、失うのなら",
    "links": {
+    "qq": "002V7iYj2tA75q",
     "ne": 1929062243
    }
   },
@@ -1420,6 +1475,7 @@
    "track": 6,
    "file": "atarayo/kyokuya/06.悲しいラブソング",
    "links": {
+    "qq": "003y43T11hIplr",
     "ne": 1929065680
    }
   },
@@ -1432,7 +1488,8 @@
    "file": "atarayo/kyokuya/07.嘘つき",
    "dup_of": "s98",
    "links": {
-    "ne": 1882027031
+    "qq": "001rpC2a3Ytekf",
+    "ne": 1929062244
    }
   },
   {
@@ -1443,6 +1500,7 @@
    "track": 8,
    "file": "atarayo/kyokuya/08.outcry",
    "links": {
+    "qq": "004bo9nr1MtEyh",
     "ne": 1929062245
    }
   },
@@ -1454,6 +1512,7 @@
    "track": 9,
    "file": "atarayo/kyokuya/09.52",
    "links": {
+    "qq": "0040cRWx4ElvaR",
     "ne": 1929065681
    }
   },
@@ -1466,6 +1525,7 @@
    "file": "atarayo/kyokuya/10.10月無口な君を忘れる",
    "dup_of": "s92",
    "links": {
+    "qq": "0006860F2pOUzU",
     "ne": 1830636201
    }
   },
@@ -1477,6 +1537,7 @@
    "track": 11,
    "file": "atarayo/kyokuya/11.差異",
    "links": {
+    "qq": "003KWIXS0rWoYx",
     "ne": 1929062246
    }
   },
@@ -1489,7 +1550,8 @@
    "file": "atarayo/acoustic/01.10月無口な君を忘れる (Piano ver.)",
    "dup_of": "s92",
    "links": {
-    "ne": 1830636201
+    "qq": "003MhO4X2Hx15m",
+    "ne": 1960380465
    }
   },
   {
@@ -1501,7 +1563,8 @@
    "file": "atarayo/acoustic/02.夏霞 (Acoustic ver.)",
    "dup_of": "s93",
    "links": {
-    "ne": 1867150097
+    "qq": "001vsL9b3ktGCi",
+    "ne": 1960384346
    }
   },
   {
@@ -1513,7 +1576,8 @@
    "file": "atarayo/acoustic/03.晴るる (Acoustic ver.)",
    "dup_of": "s94",
    "links": {
-    "ne": 1839931917
+    "qq": "0028mOHK0a1XS5",
+    "ne": 1960380466
    }
   },
   {
@@ -1525,7 +1589,8 @@
    "file": "atarayo/acoustic/04.8.8 (Acoustic ver.)",
    "dup_of": "s96",
    "links": {
-    "ne": 1856336348
+    "qq": "003I8Xg81kBhOq",
+    "ne": 1960384347
    }
   },
   {
@@ -1537,7 +1602,8 @@
    "file": "atarayo/acoustic/05.ピアス (Acoustic ver.)",
    "dup_of": "s97",
    "links": {
-    "ne": 1882029901
+    "qq": "000BqLr31iOIyH",
+    "ne": 1960380467
    }
   },
   {
@@ -1549,7 +1615,8 @@
    "file": "atarayo/acoustic/06.祥月 (Acoustic ver.)",
    "dup_of": "s95",
    "links": {
-    "ne": 1878896691
+    "qq": "004bWqGR25F7Rz",
+    "ne": 1960380468
    }
   },
   {
@@ -1561,7 +1628,8 @@
    "file": "atarayo/acoustic/07.嘘つき (Acoustic ver.)",
    "dup_of": "s98",
    "links": {
-    "ne": 1882027031
+    "qq": "002Xx9e64C1cEO",
+    "ne": 1960384348
    }
   },
   {
@@ -1572,6 +1640,7 @@
    "track": 8,
    "file": "atarayo/acoustic/08.優しいエイプリルフール (demo)",
    "links": {
+    "qq": "001C0Cf91WBHHb",
     "ne": 1960384349
    }
   },
@@ -1667,6 +1736,7 @@
    "track": 8,
    "file": "atarayo/kioku/08.クリスマスのよる",
    "links": {
+    "qq": "003hLOqn4VvTMd",
     "ne": 2002397763
    }
   },
@@ -1678,6 +1748,7 @@
    "track": 9,
    "file": "atarayo/kioku/09.青を掬う",
    "links": {
+    "qq": "004Yqr8k37NtY3",
     "ne": 1941665884
    }
   },
@@ -1689,6 +1760,7 @@
    "track": 10,
    "file": "atarayo/kioku/10.届く、未来へ",
    "links": {
+    "qq": "001DqTso0gubNd",
     "ne": 2037937776
    }
   },
@@ -1700,6 +1772,7 @@
    "track": 11,
    "file": "atarayo/kioku/11.眠れない夜を君に",
    "links": {
+    "qq": "003Pfe9R3wA6VV",
     "ne": 2019583879
    }
   },
@@ -1711,6 +1784,7 @@
    "track": 12,
    "file": "atarayo/kioku/12.雪冴ゆる",
    "links": {
+    "qq": "000waSc80IQ3Z9",
     "ne": 2008006028
    }
   },
@@ -1722,6 +1796,7 @@
    "track": 13,
    "file": "atarayo/kioku/13.空蒼いまま",
    "links": {
+    "qq": "000m5CVc0hjBzm",
     "ne": 2014227976
    }
   },
@@ -1733,6 +1808,7 @@
    "track": 14,
    "file": "atarayo/kioku/14.13月",
    "links": {
+    "qq": "003KKUjt12dX8c",
     "ne": 2074460524
    }
   },
@@ -1744,6 +1820,7 @@
    "track": 1,
    "file": "atarayo/asatsuyu/01.「僕は...」",
    "links": {
+    "qq": "001314oL3W1lne",
     "ne": 2112531307
    }
   },
@@ -1755,6 +1832,7 @@
    "track": 2,
    "file": "atarayo/asatsuyu/02.明け方の夏",
    "links": {
+    "qq": "000OrU1P19Eo8w",
     "ne": 2622391689
    }
   },
@@ -1766,6 +1844,7 @@
    "track": 3,
    "file": "atarayo/asatsuyu/03.リフレイン",
    "links": {
+    "qq": "002EHdBW1homrR",
     "ne": 2623889446
    }
   },
@@ -1777,6 +1856,7 @@
    "track": 4,
    "file": "atarayo/asatsuyu/04.realize",
    "links": {
+    "qq": "000xF8jR1O5Cwj",
     "ne": 2623889447
    }
   },
@@ -1788,6 +1868,7 @@
    "track": 5,
    "file": "atarayo/asatsuyu/05.少年、風薫る",
    "links": {
+    "qq": "002vWXUG0KL34D",
     "ne": 2164294439
    }
   },
@@ -1799,6 +1880,7 @@
    "track": 6,
    "file": "atarayo/asatsuyu/06.君と",
    "links": {
+    "qq": "0037UY1V4fIlqx",
     "ne": 2623888120
    }
   },
@@ -1810,6 +1892,7 @@
    "track": 7,
    "file": "atarayo/asatsuyu/07.光れ",
    "links": {
+    "qq": "000LslpL1A2wVg",
     "ne": 2623888121
    }
   },
@@ -1822,7 +1905,8 @@
    "file": "atarayo/asatsuyu/08.「僕は...」(Piano Ver.)",
    "dup_of": "s132",
    "links": {
-    "ne": 2112531307
+    "qq": "000VMPAV2GTC9D",
+    "ne": 2623889448
    }
   },
   {
@@ -1833,6 +1917,7 @@
    "track": 1,
    "file": "atarayo/utakata/01.朝凪",
    "links": {
+    "qq": "002KkHjn3W7ROR",
     "ne": 2745058436
    }
   },
@@ -1928,6 +2013,7 @@
    "track": 1,
    "file": "atarayo/watakushiame/01.涼風",
    "links": {
+    "qq": "001FKBh13fMzqK",
     "ne": 3419824395
    }
   },
@@ -1951,6 +2037,7 @@
    "track": 3,
    "file": "atarayo/watakushiame/03.春となり",
    "links": {
+    "qq": "001K2Hqq3ozFVQ",
     "ne": 3346455829
    }
   },
@@ -1962,6 +2049,7 @@
    "track": 4,
    "file": "atarayo/watakushiame/04.ふたり -Atarayo Cover-",
    "links": {
+    "qq": "0020OqwC4RxcKF",
     "ne": 3419827262
    }
   },
@@ -1973,6 +2061,7 @@
    "track": 5,
    "file": "atarayo/watakushiame/05.バディ -Atarayo Cover-",
    "links": {
+    "qq": "00391Xb82dGoac",
     "ne": 3419827263
    }
   },
@@ -1984,6 +2073,7 @@
    "track": 6,
    "file": "atarayo/watakushiame/06.ハク",
    "links": {
+    "qq": "001s1ttp3RsGXW",
     "ne": 3419827264
    }
   },
@@ -1995,6 +2085,7 @@
    "track": 7,
    "file": "atarayo/watakushiame/07.√",
    "links": {
+    "qq": "004DT72M1LrcWf",
     "ne": 3419824398
    }
   },
@@ -2006,6 +2097,7 @@
    "track": 8,
    "file": "atarayo/watakushiame/08.蝉とトリトマ",
    "links": {
+    "qq": "004SiSDY3UwXvS",
     "ne": 3419827265
    }
   },
@@ -2017,6 +2109,7 @@
    "track": 9,
    "file": "atarayo/watakushiame/09.伝えたかったこと",
    "links": {
+    "qq": "003rFw554NjQFy",
     "ne": 3419824399
    }
   }
