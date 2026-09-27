@@ -23,7 +23,7 @@ build:
 db:                                ## 生成 local/kotoba.sqlite
 	$(PY) scripts/make_db.py
 
-graph:                             ## 关系图演示的数据 web/demos/graph.json（需要 pip install networkx）
+graph:                             ## 星空图的数据 web/demos/graph.json（需要 pip install networkx）
 	$(PY) scripts/graph.py
 
 cand:                              ## 某张专辑的候选词（附原句）：make cand ALBUM=tousaku
