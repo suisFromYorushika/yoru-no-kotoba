@@ -66,9 +66,23 @@ GitHub Pages 是纯静态网站，自己存不了数据。这里用 [Supabase](h
 
 ## 需要知道的限制
 
-- **免费项目一周没人访问会被暂停**。数据不会丢，到 Supabase 控制台点一下 Restore 就恢复。只要每周至少打开一次网页，就不会暂停。
+- **免费项目一周没人访问会被暂停**。数据不会丢，到 Supabase 控制台点一下 Restore 就恢复。现在有两道保活，见下面「防止暂停」。
 - 免费额度：数据库 500 MB、每月 5 万个活跃用户。一个人学习用，一年的进度也只有几十 KB。
 - **忘记密码**：登录框里点「忘记密码」会发一封重设邮件（受上面的发信限制）。也可以在 Supabase 控制台 → Authentication → Users 里直接处理。
+
+## 防止暂停
+
+1. **GitHub Actions（已开启，不用管）**：[`.github/workflows/supabase-keepalive.yml`](../.github/workflows/supabase-keepalive.yml) 每 3 天查一次数据库。查询用的是网页里本来就公开的 publishable key；未登录身份读不到任何数据，数据库会回 `401` 和 `42501`，这是正常结果，说明请求到了数据库。如果项目已经被暂停，这个任务会失败，GitHub 会发邮件提醒。
+   - 注意：仓库连续 60 天没有任何提交时，GitHub 会停掉定时任务（会发邮件）。到仓库 Actions 页面点一下 Enable 就恢复。
+   - 想马上试一次：仓库 → Actions → Supabase keepalive → Run workflow。
+2. **Uptime Kuma（可选，家里 NAS 上的）**：作为第二道保险，NAS 关机也不影响第 1 道。新建监控：
+   - 监控类型：HTTP(s)
+   - URL：`https://dgsqypzwqkjryvmydiix.supabase.co/rest/v1/progress?select=updated_at&limit=1`
+   - 心跳间隔：`86400`（一天一次就够）
+   - 高级 → 请求头（Headers）：`{"apikey": "sb_publishable_ITvseLxe0FsaQF1fPaFImA_aLq-bCyI"}`
+   - 高级 → 可接受的状态码：删掉默认的 `200-299`，改成 `401`
+   
+   显示绿色就是正常；变红一般说明项目被暂停了。用的都是公开的 key，不涉及任何密码。
 
 ## 数据格式
 
