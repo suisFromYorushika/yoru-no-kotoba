@@ -73,6 +73,7 @@ make db        # 生成 local/kotoba.sqlite，用来做 SQL 组合查询
 make graph     # 星空图的数据 web/demos/graph.json、songs.json（需要 pip install networkx）；星空图：网址后面加 demos/force-graph.html
 make cand ALBUM=tousaku    # 这张专辑还没收录的候选词（附原句），需先 make db；scripts/candidates.py 加 --min 1 连只出现在 1 首歌里的也列出
 make audit ALBUM=tousaku   # 核对词条在这张专辑里命中的读音，抽查分词
+npm test       # 云同步的浏览器测试（tests/），第一次先 npm install && npx playwright install chromium
 ```
 
 ## 词表规则
