@@ -131,22 +131,28 @@ def collect(songs, finder):
 
 
 BY_TAG = re.compile(r"^\[by:(.*)\]\s*$", re.M)
+FROM_TAG = re.compile(r"^\[from:(.*)\]\s*$", re.M)
 
 
 def zh_credit(meta):
-    """中文译文的译者：lyrics/*.zh.lrc 开头的 [by:昵称]（网易云音乐译文的署名）。"""
+    """中文译文的译者和来源：lyrics/*.zh.lrc 开头的 [by:昵称]（网易云音乐译文自带的署名）和
+    可选的 [from:来源]（不是网易云的译文才写，例如哔哩哔哩视频字幕）。"""
     path = ROOT / "lyrics" / (meta["file"] + ".zh.lrc")
     if not path.exists():
-        return ""
-    m = BY_TAG.search(path.read_text(encoding="utf-8"))
-    return m.group(1).strip() if m else ""
+        return "", ""
+    text = path.read_text(encoding="utf-8")
+    by = BY_TAG.search(text)
+    src = FROM_TAG.search(text)
+    return (by.group(1).strip() if by else ""), (src.group(1).strip() if src else "")
 
 
 def song_entry(m):
     d = {k: m[k] for k in ("id", "album", "track", "ja", "zh", "dup_of", "links") if k in m}
-    by = zh_credit(m)
+    by, src = zh_credit(m)
     if by:
         d["zh_by"] = by
+    if src:
+        d["zh_src"] = src
     return d
 
 

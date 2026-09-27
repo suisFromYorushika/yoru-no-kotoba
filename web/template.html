@@ -1556,7 +1556,7 @@ function songRow(s){
     lyr=el("details","lyr");lyr.appendChild(el("summary",null,"歌词对照（注音 + 罗马音 + 中文，点词查意思）"));
     const lb=el("div","lyrics");lyr.appendChild(lb);let lbuilt=false;
     buildLyrics=()=>{if(lbuilt)return;lbuilt=true;(DATA.lines[s.id]||[]).forEach((_,li)=>lb.appendChild(lyricLine(s.id,li,{seek:true})));
-      if((DATA.lines[s.id]||[]).some(l=>l[1]))lb.appendChild(el("div","dupnote lyrcredit","中文翻译："+(s.zh_by?s.zh_by+"（网易云音乐用户译文）":"网易云音乐用户译文")));
+      if((DATA.lines[s.id]||[]).some(l=>l[1]))lb.appendChild(el("div","dupnote lyrcredit","中文翻译："+(s.zh_by?s.zh_by+"（"+(s.zh_src||"网易云音乐用户译文")+"）":(s.zh_src||"网易云音乐用户译文"))));
       plMarkLyrics(false);};
     lyr.addEventListener("toggle",()=>{if(lyr.open)buildLyrics();});
     rb.appendChild(lyr);};
