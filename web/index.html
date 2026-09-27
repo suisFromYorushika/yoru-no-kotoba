@@ -1710,12 +1710,12 @@ function renderPlayerSettings(){
     let av;if(pl.user.avatar){av=el("img");av.src=pl.user.avatar;av.alt="";}else av=el("span","ph",(pl.user.name||"?").charAt(0));
     const t=el("div"), nm=el("b",null,pl.user.name||"网易云用户");t.appendChild(nm);
     if(pl.user.vip)t.appendChild(el("span","vip","会员"));
-    t.appendChild(el("div","am","已登录网易云音乐"));who.append(av,t);
+    t.appendChild(el("div","am",pl.cookie?"已登录网易云音乐":"用的是播放服务器上的网易云账号（容器的 NETEASE_COOKIE），这台设备不用再登录"));who.append(av,t);
   }else who.appendChild(el("div","am",pl.cookie?"网易云的登录已经过期，请重新登录。":"还没有登录网易云音乐。"));
   const logged=!!pl.user;
   document.getElementById("plLoginBtns").hidden=logged||!!qr;
   document.getElementById("plSms").hidden=logged||!smsOpen;
-  document.getElementById("plOut").hidden=!logged;
+  document.getElementById("plOut").hidden=!logged||!pl.cookie;   // 服务器上的账号只能在 NAS 上换，这里退不掉
   chipRow(document.getElementById("plLevel"),[{v:"standard",label:"标准"},{v:"exhigh",label:"极高"},{v:"lossless",label:"无损"}],
     x=>pl.level===x.v,x=>{pl.level=x.v;savePl();renderPlayerSettings();});
   document.getElementById("plFollow").checked=pl.follow;
