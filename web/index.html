@@ -349,6 +349,8 @@ body.pb .toast{bottom:calc(var(--pbb,0px) + var(--pbh,120px) + 12px);}
 .ll.cur{border-left-color:var(--accent);background:var(--mark);border-radius:0 8px 8px 0;}
 .lplay{border:0;background:var(--soft);color:var(--accent);border-radius:999px;padding:2px 8px;cursor:pointer;font-size:.7rem;font-variant-numeric:tabular-nums;flex:none;}
 .lplay:hover{background:var(--mark);}
+.lonce{border:0;background:none;color:var(--accent);cursor:pointer;padding:4px;border-radius:6px;line-height:0;flex:none;}
+.lonce svg{width:18px;height:18px;}
 .plbtn{padding:6px 12px;font-size:.84rem;}
 .ainfo .plbtn{margin-top:8px;}
 .row.song.playing .rw::before{content:"♪ ";color:var(--accent);}
@@ -819,6 +821,7 @@ const tokParts=t=>typeof t==="string"?{s:t,k:"",p:""}:{s:t[0],k:t[1]||"",p:t[2]|
 function lineReading(sid,li){return DATA.lines[sid][li][2].map(seg=>seg.map(t=>{const x=tokParts(t);return /^[\s　]+$/.test(x.s)?"、":toHira(x.k||x.s);}).join("")).join("");}
 const wordReading=v=>v.k.split(" / ")[0].replace(/[〜~]/g,"");
 const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+const NOTE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>';
 function spkBtn(getText,label){const b=el("button","spk");b.type="button";b.innerHTML=SPK;b.setAttribute("aria-label",label||"朗读");
   b.onclick=e=>{e.stopPropagation();speak(typeof getText==="function"?getText():getText);};return b;}
 
@@ -910,6 +913,8 @@ function lyricLine(sid,li,opts={}){
   else if(opts.time!==false&&t!=null)foot.appendChild(el("span","lt",fmtTime(t)));
   foot.appendChild(el("div","lz",zh||""));
   const fh=opts.base&&opts.spans&&formHint(opts.base,ja,opts.spans);if(fh)foot.appendChild(fh);
+  if(opts.seek&&t!=null&&plOn()&&!opts.blank){const b=el("button","lonce");b.type="button";b.innerHTML=NOTE;b.title="只听这句（原唱）";
+    b.setAttribute("aria-label","只听这句原唱（"+fmtTime(t)+"）");b.onclick=e=>{e.stopPropagation();plPlayLine(sid,li);};foot.appendChild(b);}
   if(!opts.blank)foot.appendChild(spkBtn(()=>lineReading(sid,li),"朗读这句"));
   box.appendChild(foot);
   return box;
@@ -1820,8 +1825,8 @@ document.getElementById("plOut").onclick=()=>{
 
 // ---------- 播放 ----------
 const audio=new Audio();audio.preload="auto";
-// sid 当前歌；q/qi 播放队列（整张专辑）；li 正在唱的歌词行；off/end 试听片段在整首歌里的起止（毫秒）；loop 单句循环
-const P={sid:null,q:[],qi:0,li:-1,off:0,end:0,loop:false,tok:0,real:false,src:"",urlAt:0,seekTo:null,retried:false,ended:false,msgKind:null};
+// sid 当前歌；q/qi 播放队列（整张专辑）；li 正在唱的歌词行；off/end 试听片段在整首歌里的起止（毫秒）；loop 单句循环；once 只听这一句（行号，放完就停）
+const P={sid:null,q:[],qi:0,li:-1,off:0,end:0,loop:false,once:null,tok:0,real:false,src:"",urlAt:0,seekTo:null,retried:false,ended:false,msgKind:null};
 // iPhone 要求第一次播放发生在点击里；拿播放地址要等网络，所以先在点击时播一小段静音，之后同一个 audio 就能直接播
 const SILENT="data:audio/wav;base64,UklGRnQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==";
 let unlocked=false;
@@ -1861,6 +1866,7 @@ async function plPlay(sid,o={}){
   P.qi=Math.max(0,P.q.indexOf(sid));
   const tok=++P.tok, changed=P.sid!==sid;
   P.sid=sid;P.li=-1;P.ended=false;P.real=false;if(!o.keepLoop)P.loop=false;
+  P.once=o.once!=null?o.once:o.keepOnce?P.once:null;
   if(!fresh)audio.pause();
   plShowBar();plMsg("正在获取播放地址…");plRenderBar();plMarkRows();plMarkLyrics(false);
   if(changed)mediaMeta();
@@ -1895,10 +1901,12 @@ function seekMs(ms){
   audio.currentTime=Math.max(0,(ms-P.off)/1000);return true;
 }
 function plGoLine(li){
-  if(!P.real||li<0)return;
-  if(!seekMs(DATA.lines[P.sid][li][3]))return;
+  P.once=null;
+  if(!P.real||li<0)return false;
+  if(!seekMs(DATA.lines[P.sid][li][3]))return false;
   P.li=li;plRenderLine();plMarkLyrics(true);
   if(audio.paused)audio.play().catch(()=>{});
+  return true;
 }
 function plPlayAt(sid,t){
   if(P.sid===sid&&P.real){
@@ -1907,6 +1915,16 @@ function plPlayAt(sid,t){
     return;
   }
   plPlay(sid,{at:t,queue:albumQueue(songById[sid].album)});
+}
+// 只听这句：从这句开头放到下一句开始（同 lineSpan，最长 12 秒），放完停在这句开头，再点再听一遍
+function plPlayLine(sid,li){
+  const t=DATA.lines[sid][li][3];
+  if(P.sid===sid&&P.real){
+    if(plExpired()){plPlay(sid,{at:t,once:li,keepLoop:true});return;}
+    if(plGoLine(li))P.once=li;
+    return;
+  }
+  plPlay(sid,{at:t,once:li,queue:albumQueue(songById[sid].album)});
 }
 function plToggle(){
   if(!P.sid)return;
@@ -1919,14 +1937,17 @@ function plToggle(){
 function plNextSong(){if(P.qi+1<P.q.length)plPlay(P.q[P.qi+1],{queue:P.q});}
 function plPrevSong(){if(P.real&&audio.currentTime>3){audio.currentTime=0;return;}if(P.qi>0)plPlay(P.q[P.qi-1],{queue:P.q});}
 function plStop(){
-  P.tok++;P.sid=null;P.real=false;P.loop=false;P.li=-1;
+  P.tok++;P.sid=null;P.real=false;P.loop=false;P.once=null;P.li=-1;
   audio.pause();audio.removeAttribute("src");audio.load();
   pbar.hidden=true;document.body.classList.remove("pb");plMarkRows();plMarkLyrics(false);mediaMeta();
 }
 // 同步：播放时每帧检查一次（后台标签页里靠 timeupdate）
 function plTick(){
   if(!P.sid||!P.real)return;
-  const ms=curMs();
+  let ms=curMs();
+  if(P.once!=null&&P.seekTo==null){const [a,b]=lineSpan(P.sid,P.once);   // seekTo 还没用上时（刚换歌）先不判断
+    if(ms<a-800||ms>b+1500)P.once=null;   // 进度条被拖走了：不再管
+    else if(!audio.paused&&ms>=b-60){P.once=null;audio.pause();seekMs(a);ms=curMs();}}
   if(P.loop&&P.li>=0){const [a,b]=lineSpan(P.sid,P.li);if(!audio.paused&&(ms>=b-60||ms<a-800))seekMs(a);}
   else{const li=lineAt(P.sid,ms);if(li!==P.li){P.li=li;plRenderLine();plMarkLyrics(true);}}
   plRenderTime();
@@ -1944,12 +1965,13 @@ audio.addEventListener("loadedmetadata",()=>{
 });
 audio.addEventListener("ended",()=>{
   if(!P.real)return;
+  if(P.once!=null){const a=lineSpan(P.sid,P.once)[0];P.once=null;seekMs(a);return;}   // 只听的是最后一句
   if(P.loop&&P.li>=0){seekMs(lineSpan(P.sid,P.li)[0]);audio.play().catch(()=>{});return;}
   if(P.qi+1<P.q.length)plNextSong();else{P.ended=true;plRenderBar();}
 });
 audio.addEventListener("error",()=>{
   if(!P.real||!P.sid)return;
-  if(!P.retried){plPlay(P.sid,{at:curMs(),retry:true,keepLoop:true,queue:P.q});return;}   // 地址过期之类：重新拿一次
+  if(!P.retried){plPlay(P.sid,{at:curMs(),retry:true,keepLoop:true,keepOnce:true,queue:P.q});return;}   // 地址过期之类：重新拿一次
   P.real=false;plMsg("播放出错了，可能是网络问题。点 ▶ 重试。","err");plRenderBar();
 });
 
