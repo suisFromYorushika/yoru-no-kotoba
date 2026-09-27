@@ -1674,7 +1674,8 @@ document.getElementById("importBtn").onclick=()=>{
 
 // ================= 播放器：接自己部署的网易云 API（api-enhanced） =================
 // 服务器地址、访问密码、网易云登录凭证只存在这个浏览器里（LS_PLAYER），不进云端同步，也不进「复制我的进度」。
-// 请求都用 POST 表单（跨域「简单请求」，不触发预检）；访问密码放在查询参数 k 里，由反向代理检查；
+// 请求平时用 POST 表单（跨域「简单请求」，不触发预检）；本机没登录网易云时，查登录状态和拿播放地址改发 JSON（cookie: null，
+// 让服务器用 NETEASE_COOKIE），会多一次预检。访问密码放在查询参数 k 里，由反向代理检查（预检也带着）；
 // 登录凭证、手机号、验证码放在请求体里，不会出现在服务器的访问日志里。
 // api-enhanced 按「地址 + Cookie 头」缓存 2 分钟，不看请求体，所以跟登录状态有关的请求都在地址里带 timestamp。
 const LS_PLAYER="yoru_player_v1";
@@ -1687,17 +1688,23 @@ async function ncm(path,query={},body={},o={}){
   if(pl.k)u.searchParams.set("k",pl.k);
   for(const [a,b] of Object.entries(query))u.searchParams.set(a,b);
   if(!o.cache)u.searchParams.set("timestamp",Date.now());
-  const fd=new URLSearchParams();for(const [a,b] of Object.entries(body))if(b)fd.set(a,b);
+  // 平时发表单（跨域「简单请求」，没有预检）。cookie 是 null 时只能发 JSON：api-enhanced 会先拿请求头里的 Cookie（空的也算）
+  // 当 cookie，只有请求体里明确给 null，它才改用容器的 NETEASE_COOKIE（server.js 的 Object.assign + util/option.js）
+  let init;
+  if(body.cookie===null){const b={};for(const [a,v] of Object.entries(body))if(v||v===null)b[a]=v;
+    init={body:JSON.stringify(b),headers:{"Content-Type":"application/json"}};}
+  else{const fd=new URLSearchParams();for(const [a,b] of Object.entries(body))if(b)fd.set(a,b);init={body:fd};}
   const ctl=new AbortController(), timer=setTimeout(()=>ctl.abort(),o.timeout||15000);
   let r;
-  try{r=await fetch(u,{method:"POST",body:fd,signal:ctl.signal,cache:"no-store"});}
+  try{r=await fetch(u,Object.assign({method:"POST",signal:ctl.signal,cache:"no-store"},init));}
   catch(e){throw plErr(ctl.signal.aborted?"timeout":"net");}
   finally{clearTimeout(timer);}
   let j=null;try{j=await r.json();}catch(e){}
   if(!j)throw plErr("http","播放服务器返回了 "+r.status+"，内容不是 JSON。");
   return j;
 }
-const withCookie=b=>Object.assign({cookie:pl.cookie},b);
+// 本机没登录网易云时发 null，让播放服务器用它自己的 NETEASE_COOKIE（没设就和以前一样是游客）。退出只对本机的凭证做，见 plOut
+const withCookie=b=>Object.assign({cookie:pl.cookie||null},b);
 function plErrText(e){
   if(e&&e.code==="net")return "连不上播放服务器。请检查地址（包括 https:// 和端口）、访问密码，以及 NAS 上的容器有没有在运行。";
   if(e&&e.code==="timeout")return "播放服务器太久没有响应，稍后再试。";
@@ -1751,7 +1758,7 @@ function renderPlayerSettings(){
   const logged=!!pl.user;
   document.getElementById("plLoginBtns").hidden=logged||!!qr;
   document.getElementById("plSms").hidden=logged||!smsOpen;
-  document.getElementById("plOut").hidden=!logged||!pl.cookie;   // 服务器上的账号只能在 NAS 上换，这里退不掉
+  document.getElementById("plOut").hidden=!pl.cookie;   // 只退本机的凭证（过期的也能退，退了就改用服务器上的账号）；服务器上的账号只能在 NAS 上换
   chipRow(document.getElementById("plLevel"),[{v:"standard",label:"标准"},{v:"exhigh",label:"极高"},{v:"lossless",label:"无损"}],
     x=>pl.level===x.v,x=>{pl.level=x.v;savePl();renderPlayerSettings();});
   document.getElementById("plFollow").checked=pl.follow;
@@ -1856,7 +1863,7 @@ document.getElementById("plSms").onsubmit=async e=>{
 document.getElementById("plOut").onclick=()=>{
   const c=pl.cookie;pl.cookie="";pl.user=null;savePl();
   if(c)ncm("/logout",{},{cookie:c}).catch(()=>{});
-  loginMsg("已退出网易云。");renderPlayerSettings();
+  loginMsg("已退出这台设备上的网易云登录。");plStatus=null;renderPlayerSettings();   // 重新查一次：NAS 上设了 NETEASE_COOKIE 的话会显示服务器账号
 };
 
 // ---------- 播放 ----------
