@@ -1,0 +1,29 @@
+name: Supabase keepalive
+
+# 免费的 Supabase 项目一周没有访问会被暂停（issue #34）。
+# 每 3 天用网页里公开的 publishable key 查一次 progress 表：
+# 未登录身份没有读权限，数据库会回 401 + 42501，这说明请求已经到了数据库，算作一次活动。
+on:
+  schedule:
+    - cron: "17 3 */3 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Query Supabase
+        run: |
+          url=$(jq -r .supabase_url data/site.json)
+          key=$(jq -r .supabase_key data/site.json)
+          code=$(curl -sS -o body.txt -w '%{http_code}' \
+            "$url/rest/v1/progress?select=updated_at&limit=1" -H "apikey: $key")
+          echo "HTTP $code"; cat body.txt; echo
+          # 200：有读权限；401 + 42501：数据库拒绝了匿名读取（正常）。其它情况（例如项目已暂停）让任务失败，GitHub 会发邮件提醒。
+          if [ "$code" = 200 ] || grep -q 42501 body.txt; then exit 0; fi
+          echo "::error::Supabase 没有正常响应，可能已被暂停，请到 Supabase 控制台点 Restore。"
+          exit 1
