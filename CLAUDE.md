@@ -6,6 +6,7 @@
 
 - 在给这个会话指定的开发分支上改，改完开 PR 合并到 main，再把分支重置到最新的 main。main 更新后 GitHub Pages 自动发布。
 - 改了 data/ 或 web/template.html 以后跑 `make all`（分词 → data.json → web/index.html），生成的文件一起提交。第一次先 `make setup`。
+- PR 上会自动跑检查（.github/workflows/check.yml）：`scripts/check.py` 确认 `w` 一个没少、localStorage 键名还在，再跑 `make all` 确认生成的文件已经提交。本地也可以先跑 `.venv/bin/python scripts/check.py`。
 
 ## 不能动的东西
 
@@ -21,7 +22,3 @@
 
 - 任何密钥、密码、token、登录凭证都不要写进仓库，也不要在对话里发给用户或让用户发过来。
 - 播放器的访问密码、网易云登录凭证只存在用户浏览器的 `yoru_player_v1` 里；DNSPod、Supabase 后台的密钥由用户自己填在对应后台。`data/site.json` 里的 Supabase publishable key 是公开的，可以提交。
-
-## 待办
-
-- NAS 播放器的部署（issue #7）：按 docs/player.md 在用户家的 Unraid 上配置，云端会话连不到 NAS，只能由用户在本地操作；用户确认测试通过后关闭 issue。

@@ -1,0 +1,39 @@
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Check lemmas and storage keys
+        run: python scripts/check.py ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || 'HEAD~1' }}
+
+      - name: Rebuild (make all)
+        run: make all PY=python
+
+      - name: Generated files are committed
+        run: |
+          if ! git diff --quiet; then
+            echo "::error::make all 生成的文件和提交的不一致，请在本地跑 make all 后一起提交"
+            git diff --stat
+            exit 1
+          fi
