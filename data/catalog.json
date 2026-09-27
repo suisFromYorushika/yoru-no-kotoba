@@ -293,7 +293,7 @@
    "id": "s7",
    "album": "dakara",
    "ja": "パレード",
-   "zh": "游行",
+   "zh": "盛装游行",
    "track": 11,
    "file": "yorushika/dakara/11.パレード",
    "links": {
@@ -466,7 +466,7 @@
    "id": "s22",
    "album": "natsukusa",
    "ja": "あの夏に咲け",
-   "zh": "在那个夏天绽放吧！",
+   "zh": "在那个夏天绽放",
    "track": 4,
    "file": "yorushika/natsukusa/04.あの夏に咲け",
    "links": {
@@ -477,7 +477,7 @@
    "id": "s23",
    "album": "natsukusa",
    "ja": "靴の花火",
-   "zh": "靴上烟火",
+   "zh": "靴之花火",
    "track": 6,
    "file": "yorushika/natsukusa/06.靴の花火",
    "links": {
@@ -672,7 +672,7 @@
    "id": "s40",
    "album": "tousaku",
    "ja": "花に亡霊",
-   "zh": "花上亡灵",
+   "zh": "花上的亡灵",
    "track": 14,
    "file": "yorushika/tousaku/14.花に亡霊",
    "links": {
@@ -694,7 +694,7 @@
    "id": "s42",
    "album": "yorushika-singles",
    "ja": "テレパス",
-   "zh": "心灵感应",
+   "zh": "心电感应",
    "track": 2,
    "file": "yorushika/yorushika-singles/02.テレパス",
    "links": {
@@ -932,7 +932,7 @@
    "id": "s62",
    "album": "gentou",
    "ja": "月に吠える",
-   "zh": "对月长啸",
+   "zh": "吠月",
    "track": 6,
    "file": "yorushika/gentou/06.月に吠える",
    "links": {
@@ -976,7 +976,7 @@
    "id": "s66",
    "album": "gentou",
    "ja": "靴の花火",
-   "zh": "靴上烟火 (画集重编版)",
+   "zh": "靴之花火 (画集重编版)",
    "track": 10,
    "file": "yorushika/gentou/10.靴の花火",
    "dup_of": "s23",
@@ -1127,7 +1127,7 @@
    "id": "s79",
    "album": "nininshou",
    "ja": "忘れてください",
-   "zh": "还请遗忘",
+   "zh": "还请忘却",
    "track": 9,
    "file": "yorushika/nininshou/09.忘れてください",
    "links": {
@@ -1405,7 +1405,7 @@
    "id": "s103",
    "album": "kyokuya",
    "ja": "知りたくなかった、失うのなら",
-   "zh": "知りたくなかった、失うのなら",
+   "zh": "如果会失去，我一点也不想知道",
    "track": 5,
    "file": "atarayo/kyokuya/05.知りたくなかった、失うのなら",
    "links": {
@@ -1568,7 +1568,7 @@
    "id": "s117",
    "album": "acoustic",
    "ja": "優しいエイプリルフール (demo)",
-   "zh": "温柔的愚人节 (小样)",
+   "zh": "温柔愚人节 (小样)",
    "track": 8,
    "file": "atarayo/acoustic/08.優しいエイプリルフール (demo)",
    "links": {
@@ -1591,7 +1591,7 @@
    "id": "s119",
    "album": "kioku",
    "ja": "今夜2人だけのダンスを",
-   "zh": "今晚跳支属于我们两个人的舞",
+   "zh": "今夜跳支只有我们2人的舞",
    "track": 2,
    "file": "atarayo/kioku/02.今夜2人だけのダンスを",
    "links": {
@@ -1663,7 +1663,7 @@
    "id": "s125",
    "album": "kioku",
    "ja": "クリスマスのよる",
-   "zh": "圣诞夜",
+   "zh": "圣诞节的夜晚",
    "track": 8,
    "file": "atarayo/kioku/08.クリスマスのよる",
    "links": {
@@ -1685,7 +1685,7 @@
    "id": "s127",
    "album": "kioku",
    "ja": "届く、未来へ",
-   "zh": "触及、未来",
+   "zh": "传向未来",
    "track": 10,
    "file": "atarayo/kioku/10.届く、未来へ",
    "links": {
@@ -1707,7 +1707,7 @@
    "id": "s129",
    "album": "kioku",
    "ja": "雪冴ゆる",
-   "zh": "雪冽",
+   "zh": "雪洌",
    "track": 12,
    "file": "atarayo/kioku/12.雪冴ゆる",
    "links": {
@@ -1900,7 +1900,7 @@
    "id": "s146",
    "album": "utakata",
    "ja": "しないで",
-   "zh": "别这样",
+   "zh": "别做",
    "track": 7,
    "file": "atarayo/utakata/07.しないで",
    "links": {
