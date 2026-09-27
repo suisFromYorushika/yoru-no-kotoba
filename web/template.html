@@ -666,6 +666,10 @@ function unpackCloud(o,merge){
   learned=L;srs=S;log=G;saveLocal();
 }
 function saveLocal(){lsSet(LS,learned);lsSet(LS_SRS,srs);lsSet(LS_LOG,log);}
+// 同一个浏览器可能开着几个标签页，它们共用 localStorage 但各有一份内存里的进度。别的标签页写了进度就重新读进来，
+// 同步前也先读一遍，否则会把别的标签页刚学的词当成「本机取消掌握」传到云端（然后从云端删掉）
+function reloadLocal(){learned=lsGet(LS,{});srs=lsGet(LS_SRS,{});log=lsGet(LS_LOG,{});}
+addEventListener("storage",e=>{if(e.key===null||e.key===LS||e.key===LS_SRS||e.key===LS_LOG){reloadLocal();render();}});
 function setSync(s){syncState=s;renderAccount();}
 // ---- 保存前先合并云端：三方合并 ----
 // 基准（LS_BASE:账号）是这台设备上次和云端对齐时云端的内容。同步时先读云端，把「本机相对基准的改动」加到云端上再写回，
@@ -705,8 +709,9 @@ function applyCloud(o){const m=cloudMaps(o), since=today()-180, L={}, G={};
   Object.entries(log).forEach(([d,e])=>{if(+d<since)G[d]=e;});
   Object.entries(m.G).forEach(([d,[r,n,i,q]])=>{G[d]={r,n,i,q};});
   learned=L;srs=m.S;log=G;saveLocal();}
-// 读云端 → 合并 → 内容有变化才写回。由 runSync 串行调用。
-async function syncCloud(){
+// 读云端 → 合并 → 内容有变化才写回。由 runSync 串行调用；几个标签页之间也排队（Web Locks），不会交叉读写云端
+function syncCloud(){return navigator.locks?navigator.locks.request("yoru_sync_v1",syncCloudNow):syncCloudNow();}
+async function syncCloudNow(){
   const uid=sbUid, be=backend;if(!uid||!be)return;
   const flagKey=LS_SYNC+":"+uid, baseKey=LS_BASE+":"+uid;
   const remote=await be.load();
@@ -714,6 +719,7 @@ async function syncCloud(){
   lastPull=Date.now();
   // 云端还没有这份进度时不用基准，只取并集：本机的内容一个都不删
   const base=remote&&lsGet(flagKey,false)?lsGet(baseKey,null):null;
+  reloadLocal();   // 别的标签页可能刚写过
   const local=packCloud(), merged=mergeCloud(base,local,remote||{});
   dirty=false;   // 从这里起本机的新改动会重新标记 dirty，再同步一次
   applyCloud(merged);
