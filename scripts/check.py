@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-STORAGE_KEYS = ["yorushika_learned_v1", "yoru_srs_v1", "yoru_log_v1", "yoru_ui_v1", "yoru_player_v1", "yoru_synced_v1"]
+STORAGE_KEYS = ["yorushika_learned_v1", "yoru_srs_v1", "yoru_log_v1", "yoru_ui_v1", "yoru_player_v1", "yoru_synced_v1", "yoru_cloudbase_v1"]
 
 
 def words(lemmas):

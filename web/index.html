@@ -659,23 +659,69 @@ function unpackCloud(o,merge){
 }
 function saveLocal(){lsSet(LS,learned);lsSet(LS_SRS,srs);lsSet(LS_LOG,log);}
 function setSync(s){syncState=s;renderAccount();}
-const sameAsLocal=o=>JSON.stringify(o||{})===JSON.stringify(packCloud());
-// 这台设备第一次同步：本机进度和云端合并；以前同步过：以云端为准
-async function adoptRemote(remote,flagKey){
-  const before=JSON.stringify(packCloud());
-  unpackCloud(remote||{},!lsGet(flagKey,false));
-  if(!remote||!sameAsLocal(remote)) await backend.save(packCloud());
-  lsSet(flagKey,true);
-  if(JSON.stringify(packCloud())!==before) render();
+// ---- 保存前先合并云端：三方合并 ----
+// 基准（LS_BASE:账号）是这台设备上次和云端对齐时云端的内容。同步时先读云端，把「本机相对基准的改动」加到云端上再写回，
+// 所以别的设备在这期间学的内容不会被覆盖。没有基准时（这台设备第一次同步、退出后再登录）取并集，只增不减。
+const LS_BASE="yoru_cloudbase_v1";
+function cloudMaps(o){o=o||{};const L=new Set(o.learned||[]),S={},G={};
+  (o.srs||[]).forEach(([w,b,d])=>{S[w]=[b,d];});
+  (o.log||[]).forEach(([d,r,n,i,q])=>{G[d]=[r||0,n||0,i||0,q||0];});
+  return {L,S,G};}
+const sameBox=(x,y)=>!!x&&!!y&&x[0]===y[0]&&x[1]===y[1];
+const laterBox=(x,y)=>!y||x[1]>y[1]||(x[1]===y[1]&&x[0]>=y[0])?x:y;   // 到期日更晚（记得更牢）的那条
+function mergeCloud(base,local,remote){
+  const b=base?cloudMaps(base):null, l=cloudMaps(local), r=cloudMaps(remote);
+  // 已掌握：云端 + 本机新掌握的 − 本机取消掌握的
+  const L=new Set(r.L);
+  if(b){l.L.forEach(w=>{if(!b.L.has(w))L.add(w);});b.L.forEach(w=>{if(!l.L.has(w))L.delete(w);});}
+  else l.L.forEach(w=>L.add(w));
+  // 复习记录：本机没动过的词用云端的；本机动过、云端没动过的用本机的；两边都动过取到期日更晚的
+  const S={...r.S};
+  Object.entries(l.S).forEach(([w,x])=>{const bx=b&&b.S[w], y=r.S[w];
+    if(b&&sameBox(x,bx))S[w]=y||x;
+    else S[w]=b&&bx&&sameBox(y,bx)?x:laterBox(x,y);});
+  // 每日记录：云端的次数 + 本机自基准以来新增的次数；没有基准时取较大值
+  const G={...r.G};
+  Object.entries(l.G).forEach(([d,x])=>{const y=G[d]||[0,0,0,0];
+    if(b){const bx=b.G[d]||[0,0,0,0];G[d]=y.map((v,k)=>v+Math.max(0,x[k]-bx[k]));}
+    else G[d]=y.map((v,k)=>Math.max(v,x[k]));});
+  return {v:2,learned:[...L].sort(),srs:Object.keys(S).sort().map(w=>[w,S[w][0],S[w][1]]),
+    log:Object.keys(G).map(Number).sort((x,y)=>x-y).map(d=>[d,...G[d]])};
+}
+// 比较两份进度内容是否相同（不管顺序）
+function cloudKey(o){const m=cloudMaps(o);
+  return JSON.stringify([[...m.L].sort(),Object.keys(m.S).sort().map(w=>[w,...m.S[w]]),Object.keys(m.G).map(Number).sort((x,y)=>x-y).map(d=>[d,...m.G[d]])]);}
+// 用合并结果替换本机进度；180 天以前的每日记录云端不存，保留本机的
+function applyCloud(o){const m=cloudMaps(o), since=today()-180, L={}, G={};
+  m.L.forEach(w=>{L[w]=true;});
+  Object.entries(log).forEach(([d,e])=>{if(+d<since)G[d]=e;});
+  Object.entries(m.G).forEach(([d,[r,n,i,q]])=>{G[d]={r,n,i,q};});
+  learned=L;srs=m.S;log=G;saveLocal();}
+// 读云端 → 合并 → 内容有变化才写回。由 runSync 串行调用。
+async function syncCloud(){
+  const uid=sbUid, be=backend;if(!uid||!be)return;
+  const flagKey=LS_SYNC+":"+uid, baseKey=LS_BASE+":"+uid;
+  const remote=await be.load();
+  if(uid!==sbUid)return;
+  lastPull=Date.now();
+  const base=lsGet(flagKey,false)?lsGet(baseKey,null):null;
+  const local=packCloud(), merged=mergeCloud(base,local,remote||{});
+  dirty=false;   // 从这里起本机的新改动会重新标记 dirty，再同步一次
+  applyCloud(merged);
+  lsSet(baseKey,remote||{});lsSet(flagKey,true);
+  if(cloudKey(merged)!==cloudKey(local))render();
+  if(!remote||cloudKey(merged)!==cloudKey(remote)){await be.save(merged);lsSet(baseKey,merged);}
+}
+function runSync(){
+  writing=writing.then(syncCloud)
+    .then(()=>{if(syncState!=="synced")setSync("synced");})
+    .catch(()=>{dirty=true;setSync("error");});
+  return writing;
 }
 function queueCloudWrite(){
   if(!backend)return;
   dirty=true;clearTimeout(pendingWrite);
-  pendingWrite=setTimeout(()=>{
-    writing=writing.then(()=>backend.save(packCloud()))
-      .then(()=>{dirty=false;if(syncState!=="synced")setSync("synced");})
-      .catch(()=>setSync("error"));
-  },800);
+  pendingWrite=setTimeout(runSync,800);
 }
 
 // ---------- Supabase 账号（GitHub Pages 版） ----------
@@ -702,27 +748,17 @@ async function onSession(session){
   sbUid=u.id;
   const md=u.user_metadata||{};
   account={nick:md.nickname||"",email:u.email||"",name:md.nickname||md.user_name||md.name||(u.email||"").split("@")[0]||"已登录",avatar:md.avatar_url||null};
-  backend={save:async d=>{const {error}=await sb.from("progress").upsert({user_id:u.id,data:d,updated_at:new Date().toISOString()});if(error)throw error;}};
+  backend={
+    load:async()=>{const {data,error}=await sb.from("progress").select("data").eq("user_id",u.id).maybeSingle();if(error)throw error;return data?data.data:null;},
+    save:async d=>{const {error}=await sb.from("progress").upsert({user_id:u.id,data:d,updated_at:new Date().toISOString()});if(error)throw error;}};
   setSync("connecting");
-  await pullSupabase(true);
+  await runSync();
 }
-async function pullSupabase(first){
-  const uid=sbUid;if(!uid)return;
-  try{
-    const {data,error}=await sb.from("progress").select("data").eq("user_id",uid).maybeSingle();
-    if(error)throw error;
-    if(uid!==sbUid)return;
-    lastPull=Date.now();
-    if(first)await adoptRemote(data?data.data:null,LS_SYNC+":"+uid);
-    else if(data&&!dirty&&!sameAsLocal(data.data)){unpackCloud(data.data,false);render();}
-    setSync("synced");
-  }catch(e){setSync("error");}
-}
-// 切回这个页面时：有没保存的改动就补存；否则从云端拉一次（别的设备可能改过）
+// 切回这个页面时：有没保存的改动，或者超过 30 秒没和云端对过，就同步一次（别的设备可能改过）
 document.addEventListener("visibilitychange",()=>{
   if(document.visibilityState!=="visible"||!backend)return;
   if(dirty)queueCloudWrite();
-  else if(CLOUD==="supabase"&&Date.now()-lastPull>30000)pullSupabase(false);
+  else if(Date.now()-lastPull>30000)runSync();
 });
 const pageUrl=()=>location.origin+location.pathname;
 const AUTH_ERR=[[/invalid login credentials/i,"邮箱或密码不对。"],[/email not confirmed/i,"这个邮箱还没确认。请先去邮箱点确认链接，再回来登录。"],
