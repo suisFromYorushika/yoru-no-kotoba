@@ -235,6 +235,7 @@ img.cover{padding:0;}
 details.lyr>summary{cursor:pointer;color:var(--accent);padding:6px 0;font-size:.85rem;}
 .lyrics .ll{margin-top:10px;}
 .dupnote{font-size:.76rem;color:var(--muted);}
+.lyrcredit{margin-top:8px;}
 .pending{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:12px;margin-top:8px;}
 .pend{display:flex;flex-direction:column;gap:4px;font-size:.75rem;color:var(--muted);text-align:center;}
 .pend .cover{width:100%;height:auto;aspect-ratio:1;max-width:100%;opacity:.55;filter:grayscale(.5);}
@@ -1554,7 +1555,9 @@ function songRow(s){
       fb.onclick=e=>{e.stopPropagation();ui.view="flash";filterSong(s.id);};const d=el("div","listen");d.appendChild(fb);rb.appendChild(d);}
     lyr=el("details","lyr");lyr.appendChild(el("summary",null,"歌词对照（注音 + 罗马音 + 中文，点词查意思）"));
     const lb=el("div","lyrics");lyr.appendChild(lb);let lbuilt=false;
-    buildLyrics=()=>{if(lbuilt)return;lbuilt=true;(DATA.lines[s.id]||[]).forEach((_,li)=>lb.appendChild(lyricLine(s.id,li,{seek:true})));plMarkLyrics(false);};
+    buildLyrics=()=>{if(lbuilt)return;lbuilt=true;(DATA.lines[s.id]||[]).forEach((_,li)=>lb.appendChild(lyricLine(s.id,li,{seek:true})));
+      if((DATA.lines[s.id]||[]).some(l=>l[1]))lb.appendChild(el("div","dupnote lyrcredit","中文翻译："+(s.zh_by?s.zh_by+"（网易云音乐用户译文）":"网易云音乐用户译文")));
+      plMarkLyrics(false);};
     lyr.addEventListener("toggle",()=>{if(lyr.open)buildLyrics();});
     rb.appendChild(lyr);};
   h.onclick=()=>{row.classList.toggle("open");build();};
