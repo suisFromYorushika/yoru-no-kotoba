@@ -50,9 +50,9 @@ data/site.json         网址和 Supabase 配置
 data/grammar.json      语法点 + rule（正则或按分词匹配）
 data/songs/sN.json     每首歌拆好的词：每行歌词含时间戳、中日文、词列表、语法命中位置
 data/data.json         给网页用的汇总（脚本生成）
-data/legacy/           v1 的数据，留作对照
 web/template.html      网页模板；web/index.html 为生成的成品
 web/covers/            专辑封面缩略图
+web/demos/             星空图（force-graph.html）和它的数据
 db/schema.sql          SQLite 表结构；docs/queries.sql 为示例查询
 db/supabase.sql        Supabase 建表和权限（GitHub Pages 版的云端进度）
 web/vendor/            第三方文件（supabase-js）
@@ -67,7 +67,7 @@ make ingest    # 从 ~/Documents/Gemini Spark/Lyrics 导入新歌（可用 LYRIC
                # 仓库里改过的歌词默认不覆盖；要用歌词库的版本覆盖：make ingest FORCE=1
 make all       # 分词 → 导出 data.json → 生成 web/index.html
 make db        # 生成 local/kotoba.sqlite，用来做 SQL 组合查询
-make graph     # 关系图演示的数据 web/demos/graph.json（需要 pip install networkx）；演示页：网址后面加 demos/
+make graph     # 星空图的数据 web/demos/graph.json、songs.json（需要 pip install networkx）；星空图：网址后面加 demos/force-graph.html
 make cand ALBUM=tousaku    # 这张专辑还没收录的候选词（附原句），需先 make db；scripts/candidates.py 加 --min 1 连只出现在 1 首歌里的也列出
 make audit ALBUM=tousaku   # 核对词条在这张专辑里命中的读音，抽查分词
 ```
