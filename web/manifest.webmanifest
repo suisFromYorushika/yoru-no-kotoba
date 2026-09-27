@@ -1,0 +1,18 @@
+{
+  "name": "夜の言葉 · 听ヨルシカ和あたらよ学日语",
+  "short_name": "夜の言葉",
+  "description": "边听ヨルシカ、あたらよ的歌边看歌词，学里面的单词和语法。",
+  "lang": "zh-CN",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#12172b",
+  "theme_color": "#12172b",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+    {"src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}
+  ]
+}
