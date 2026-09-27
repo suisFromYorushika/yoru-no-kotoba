@@ -1687,17 +1687,23 @@ async function ncm(path,query={},body={},o={}){
   if(pl.k)u.searchParams.set("k",pl.k);
   for(const [a,b] of Object.entries(query))u.searchParams.set(a,b);
   if(!o.cache)u.searchParams.set("timestamp",Date.now());
-  const fd=new URLSearchParams();for(const [a,b] of Object.entries(body))if(b)fd.set(a,b);
+  // 平时发表单（跨域「简单请求」，没有预检）。cookie 是 null 时只能发 JSON：api-enhanced 会先拿请求头里的 Cookie（空的也算）
+  // 当 cookie，只有请求体里明确给 null，它才改用容器的 NETEASE_COOKIE（server.js 的 Object.assign + util/option.js）
+  let init;
+  if(body.cookie===null){const b={};for(const [a,v] of Object.entries(body))if(v||v===null)b[a]=v;
+    init={body:JSON.stringify(b),headers:{"Content-Type":"application/json"}};}
+  else{const fd=new URLSearchParams();for(const [a,b] of Object.entries(body))if(b)fd.set(a,b);init={body:fd};}
   const ctl=new AbortController(), timer=setTimeout(()=>ctl.abort(),o.timeout||15000);
   let r;
-  try{r=await fetch(u,{method:"POST",body:fd,signal:ctl.signal,cache:"no-store"});}
+  try{r=await fetch(u,Object.assign({method:"POST",signal:ctl.signal,cache:"no-store"},init));}
   catch(e){throw plErr(ctl.signal.aborted?"timeout":"net");}
   finally{clearTimeout(timer);}
   let j=null;try{j=await r.json();}catch(e){}
   if(!j)throw plErr("http","播放服务器返回了 "+r.status+"，内容不是 JSON。");
   return j;
 }
-const withCookie=b=>Object.assign({cookie:pl.cookie},b);
+// 本机没登录网易云时发 null，让播放服务器用它自己的 NETEASE_COOKIE（没设就和以前一样是游客）。退出只对本机的凭证做，见 plOut
+const withCookie=b=>Object.assign({cookie:pl.cookie||null},b);
 function plErrText(e){
   if(e&&e.code==="net")return "连不上播放服务器。请检查地址（包括 https:// 和端口）、访问密码，以及 NAS 上的容器有没有在运行。";
   if(e&&e.code==="timeout")return "播放服务器太久没有响应，稍后再试。";
