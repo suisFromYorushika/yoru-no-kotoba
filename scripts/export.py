@@ -130,6 +130,26 @@ def collect(songs, finder):
     return occ, loc
 
 
+BY_TAG = re.compile(r"^\[by:(.*)\]\s*$", re.M)
+
+
+def zh_credit(meta):
+    """中文译文的译者：lyrics/*.zh.lrc 开头的 [by:昵称]（网易云音乐译文的署名）。"""
+    path = ROOT / "lyrics" / (meta["file"] + ".zh.lrc")
+    if not path.exists():
+        return ""
+    m = BY_TAG.search(path.read_text(encoding="utf-8"))
+    return m.group(1).strip() if m else ""
+
+
+def song_entry(m):
+    d = {k: m[k] for k in ("id", "album", "track", "ja", "zh", "dup_of", "links") if k in m}
+    by = zh_credit(m)
+    if by:
+        d["zh_by"] = by
+    return d
+
+
 def build():
     cat = load("catalog.json")
     lemmas = load("lemmas.json")
@@ -166,7 +186,7 @@ def build():
         "pending": [{k: a[k] for k in ("id", "band", "ja", "zh", "short", "year", "cover") if k in a}
                     for a in cat["albums"] if not a.get("done")],
         "bands": cat["bands"],
-        "songs": [{k: m[k] for k in ("id", "album", "track", "ja", "zh", "dup_of", "links") if k in m} for m in song_meta],
+        "songs": [song_entry(m) for m in song_meta],
         "lines": {s["id"]: [[l["ja"], l["zh"], segments(l), l["t"]] for l in s["lines"]] for s in songs},
         "vocab": vocab,
         "rare": rare,
