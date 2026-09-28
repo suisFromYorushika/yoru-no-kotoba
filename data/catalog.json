@@ -9,6 +9,30 @@
    "id": "yorushika",
    "ja": "ヨルシカ",
    "zh": "夜鹿"
+  },
+  {
+   "id": "anohana",
+   "ja": "超平和バスターズ",
+   "zh": "超和平Busters"
+  }
+ ],
+ "collections": [
+  {
+   "id": "yoru",
+   "zh": "夜鹿 · 可惜夜",
+   "tag": "ヨルシカ × あたらよ",
+   "bands": [
+    "yorushika",
+    "atarayo"
+   ]
+  },
+  {
+   "id": "anohana",
+   "zh": "未闻花名",
+   "tag": "あの花 · 未闻花名",
+   "bands": [
+    "anohana"
+   ]
   }
  ],
  "albums": [
@@ -208,6 +232,19 @@
    "done": true,
    "dir": "atarayo/watakushiame",
    "cover": "covers/watakushiame.jpg"
+  },
+  {
+   "id": "anohana",
+   "band": "anohana",
+   "ja": "あの日見た花の名前を僕達はまだ知らない。",
+   "zh": "我们仍未知道那天所看见的花的名字。",
+   "year": "2011.08",
+   "type": "动画歌曲",
+   "note": "动画《未闻花名》（2011）的片尾曲：翻唱 ZONE 2001 年的原曲，由三位女主角的声优演唱",
+   "done": true,
+   "dir": "anohana/anohana",
+   "cover": "covers/anohana.jpg",
+   "short": "未闻花名"
   }
  ],
  "songs": [
@@ -2111,6 +2148,18 @@
    "links": {
     "qq": "003rFw554NjQFy",
     "ne": 3419824399
+   }
+  },
+  {
+   "id": "s157",
+   "album": "anohana",
+   "ja": "secret base ～君がくれたもの～ (10 years after Ver.)",
+   "zh": "secret base～你给我的所有～",
+   "track": 1,
+   "file": "anohana/anohana/01.secret base ～君がくれたもの～ (10 years after Ver.)",
+   "links": {
+    "qq": "003ceA8v07IL1k",
+    "ne": 33911781
    }
   }
  ]
