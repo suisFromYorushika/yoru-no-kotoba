@@ -351,6 +351,13 @@ details.lyr>summary{cursor:pointer;color:var(--accent);padding:6px 0;font-size:.
 .pbtn.pplay svg{width:22px;height:22px;}
 .pseek{flex:1;min-width:0;accent-color:var(--accent);margin:0;}
 .pmsg{font-size:.76rem;color:var(--muted);line-height:1.4;}
+/* 收起：只留封面、歌名、播放键和收起键一行 */
+.pbar.mini{padding-top:6px;padding-bottom:6px;}
+.pbar.mini .pb2,.pbar.mini .pline,.pbar.mini .pzh,.pbar.mini .pmsg{display:none;}
+.pbar.mini .pcov{width:32px;height:32px;}
+.pbar.mini .pplay{width:36px;height:36px;}
+.pmini svg{transition:transform .2s;}
+.pbar.mini .pmini svg{transform:rotate(180deg);}
 .pmsg.err{color:var(--bad);}
 body.pb .wrap{padding-bottom:calc(var(--pbb,0px) + var(--pbh,120px) + 28px);}
 body.pb .pop{bottom:calc(var(--pbb,0px) + var(--pbh,120px) + 10px);max-height:calc(100vh - var(--pbb,0px) - var(--pbh,120px) - 40px);}
@@ -419,7 +426,7 @@ footer details[open] summary{margin-bottom:6px;}
     </button>
     <div class="fbody" id="fbody" hidden>
       <div class="frow"><span class="flabel">乐队</span><div id="fArtist" class="tags"></div></div>
-      <div class="frow"><span class="flabel">专辑（可多选）</span><div id="fAlbum" class="tags"></div></div>
+      <div class="frow" id="fAlbumRow"><span class="flabel">专辑（可多选）</span><div id="fAlbum" class="tags"></div></div>
       <div class="frow" id="fSongRow" hidden><span class="flabel">歌曲（可多选，不选就是整张专辑）</span><div id="fSong" class="tags"></div></div>
       <div class="frow" id="fTierRow"><span class="flabel">频率</span><div id="fTier" class="tags"></div></div>
       <div class="frow" id="fStateRow"><span class="flabel">状态</span><div id="fState" class="tags"></div></div>
@@ -478,6 +485,7 @@ footer details[open] summary{margin-bottom:6px;}
       <div class="pzh" id="pbZh"></div>
     </div>
     <button class="pbtn pplay" id="pbPlay" type="button" aria-label="播放"></button>
+    <button class="pbtn pmini" id="pbMini" type="button" aria-pressed="false" aria-label="收起播放条" title="收起 / 展开"></button>
   </div>
   <div class="pb2">
     <button class="pbtn" id="pbPrevL" type="button" aria-label="从这句开头再听一遍；刚开始时回到上一句" title="再听这句 / 上一句"></button>
@@ -570,8 +578,6 @@ footer details[open] summary{margin-bottom:6px;}
   </section>
   <section>
     <h3>显示与朗读</h3>
-    <div class="optrow">显示范围 <div class="tags" id="optScope"></div></div>
-    <p id="scopeNote"></p>
     <div class="optrow">外观 <div class="tags" id="optTheme"></div></div>
     <label class="toggle">汉字上注假名 <input type="checkbox" id="optRt"></label>
     <label class="toggle">歌词下标罗马音 <input type="checkbox" id="optRo"></label>
@@ -598,35 +604,6 @@ footer details[open] summary{margin-bottom:6px;}
 const DATA = __DATA__;
 const SITE = __SITE__;
 
-// ================= 显示范围（「我的 → 显示与朗读 → 显示范围」，或网址后面加 ?only=合集id） =================
-// 合集在 catalog.json 的 collections 里（例：只看《未闻花名》）。页面打开时把范围外的乐队、专辑、歌和词的出现位置去掉，
-// 后面的代码照常用 DATA。只影响这台设备显示哪些歌；已掌握的词、复习记录照常保存和同步，范围外的词的进度不会动。
-const COLLS=DATA.collections||[];
-const SCOPE=(()=>{let id=null;
-  try{const q=new URLSearchParams(location.search).get("only");
-    if(q!==null){id=q;const url=new URL(location.href);url.searchParams.delete("only");history.replaceState(history.state,"",url.pathname+url.search+url.hash);
-      const u=JSON.parse(localStorage.getItem("yoru_ui_v1")||"{}");u.scope=q;localStorage.setItem("yoru_ui_v1",JSON.stringify(u));}}catch(e){}
-  if(id===null)try{id=JSON.parse(localStorage.getItem("yoru_ui_v1")||"{}").scope;}catch(e){}
-  return COLLS.find(c=>c.id===id)||null;})();
-let MIN_SONGS=2;   // 词出现在几首歌以上才进主词表（闪卡默认用主词表）
-if(SCOPE){const keepB=new Set(SCOPE.bands), nS=it=>Object.keys(it.occ).length;
-  DATA.bands=DATA.bands.filter(b=>keepB.has(b.id));
-  DATA.albums=DATA.albums.filter(a=>keepB.has(a.artist));
-  DATA.pending=(DATA.pending||[]).filter(a=>keepB.has(a.band));
-  const keepA=new Set(DATA.albums.map(a=>a.id));
-  DATA.songs=DATA.songs.filter(s=>keepA.has(s.album));
-  const keepS=new Set(DATA.songs.map(s=>s.id));
-  const cut=it=>{const occ={},loc={};for(const sid in it.occ)if(keepS.has(sid)){occ[sid]=it.occ[sid];loc[sid]=it.loc[sid];}
-    const f=Object.keys(loc)[0], x=it.x&&keepS.has(it.x[0])?it.x:f?[f,loc[f][0][0]]:null;return {...it,occ,loc,x};};
-  // 歌很少的合集（例：只有一首）里每个词都只出现在 1 首歌里，这时 1 首也算，闪卡才有词
-  if(DATA.songs.filter(s=>!s.dup_of).length<5)MIN_SONGS=1;
-  const words=DATA.vocab.concat(DATA.rare||[]).map(cut).filter(v=>nS(v));
-  const tot=v=>Object.values(v.occ).reduce((a,b)=>a+b,0);
-  DATA.vocab=words.filter(v=>nS(v)>=MIN_SONGS).sort((a,b)=>nS(b)-nS(a)||tot(b)-tot(a));
-  DATA.rare=words.filter(v=>nS(v)<MIN_SONGS);
-  DATA.grammar=DATA.grammar.map(cut);
-  document.querySelector(".tagline").textContent=SCOPE.tag||SCOPE.zh;
-}
 
 // ================= 基础数据 =================
 const albumById=Object.fromEntries(DATA.albums.map(a=>[a.id,a]));
@@ -675,7 +652,18 @@ function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 const ui=Object.assign({theme:"system",view:"flash",fmode:"browse",qtype:"zh2ja",filtersOpen:false,rt:true,ro:true,zh:true,rate:0.85,newPerDay:15,graphW:null,graphKind:"line",roMode:"word",roDots:false},lsGet(LS_UI,{}));
 function saveUI(){lsSet(LS_UI,ui);}
+// 筛选（乐队、专辑、歌）记在本机 ui.f 里，下次打开还在；网址后面加 ?artist=乐队id 可以直接选好乐队（例如发给只学某个乐队的朋友）
+function saveFilter(){ui.f={artist:st.artist,albums:[...st.albums],songs:[...st.songs]};saveUI();}
+function loadFilter(){
+  try{const q=new URLSearchParams(location.search).get("artist");
+    if(q!==null){ui.f={artist:q,albums:[],songs:[]};saveUI();const u=new URL(location.href);u.searchParams.delete("artist");history.replaceState(history.state,"",u.pathname+u.search+u.hash);}}catch(e){}
+  const f=ui.f||{};
+  if(f.artist&&(f.artist==="all"||bandById[f.artist]))st.artist=f.artist;
+  (f.albums||[]).forEach(id=>{if(albumById[id]&&(st.artist==="all"||albumById[id].artist===st.artist))st.albums.add(id);});
+  (f.songs||[]).forEach(id=>{if(songById[id]&&st.albums.has(songById[id].album))st.songs.add(id);});
+}
 const st={album:null,artist:"all",albums:new Set(),songs:new Set(),tier:"all",state:"all",idx:0,order:null,q:"",rq:null,extraNew:0,qz:null,qs:{n:0,ok:0}};
+loadFilter();
 let learned=lsGet(LS,{});           // {词: true}
 let srs=lsGet(LS_SRS,{});            // {词: [盒子, 到期日]}
 let log=lsGet(LS_LOG,{});            // {日: {r:复习, n:新掌握, i:新词, q:测验}}
@@ -1053,7 +1041,7 @@ function exampleBox(item,label){
   if(!item.x)return null;
   const [sid,li]=item.x, s=songById[sid];
   const b=el("div","exbox");b.appendChild(el("div","exlabel",label||"歌词例句"));
-  b.appendChild(lyricLine(sid,li,{spans:spansAt(item,sid,li),base:item}));
+  b.appendChild(lyricLine(sid,li,{spans:spansAt(item,sid,li),base:item,seek:true}));
   const src=el("div","src");src.append("出自 ",el("b",null,"《"+songTitle(s)+"》")," · "+albumName(albumById[s.album]));
   b.appendChild(src);return b;
 }
@@ -1070,7 +1058,7 @@ function occDetails(item,hits,label){
     head.append(left,el("div","gcount",c+" 次"));box.appendChild(head);
     const byLine=new Map();
     ((item.loc||{})[sid]||[]).forEach(([li,x,y])=>{if(!byLine.has(li))byLine.set(li,[]);byLine.get(li).push([x,y]);});
-    const lis=[...byLine.keys()].sort((p,q)=>p-q), line=li=>lyricLine(sid,li,{spans:byLine.get(li),base:item});
+    const lis=[...byLine.keys()].sort((p,q)=>p-q), line=li=>lyricLine(sid,li,{spans:byLine.get(li),base:item,seek:true});
     lis.slice(0,OCC_LINES).forEach(li=>box.appendChild(line(li)));
     if(lis.length>OCC_LINES)box.appendChild(moreBtn("这首还有 "+(lis.length-OCC_LINES)+" 句",b=>b.replaceWith(...lis.slice(OCC_LINES).map(line))));
     return box;
@@ -1148,8 +1136,9 @@ function matchVocab(v,q){if(!q)return true;const n=norm(q);
 function scopeVocab(){const ids=activeSongIds(), bySong=st.songs.size>0, one=st.tier==="one";
   // 平时：主词表里在当前范围出现在 ≥2 首歌的词，按首数排；
   // 选了具体的歌、在词表里搜索、或选「只在 1 首」：只出现在 1 首歌里的词也算，只要在范围里出现就行
-  const any=bySong||one||(!!st.q&&ui.view==="list");
-  let list=(one?RARE:any?ALLV:DATA.vocab).map(v=>{const s=scoped(v,ids);return {...v,...s,tier:v.one?"one":tierOf(bySong?Object.keys(v.occ).length:s.songs)};}).filter(v=>v.songs>=(any?1:MIN_SONGS));
+  // 范围里不到 5 首歌（例：只收了一首歌的乐队）时也算，不然闪卡会是空的
+  const any=bySong||one||(!!st.q&&ui.view==="list")||ids.length<5;
+  let list=(one?RARE:any?ALLV:DATA.vocab).map(v=>{const s=scoped(v,ids);return {...v,...s,tier:v.one?"one":tierOf(bySong?Object.keys(v.occ).length:s.songs)};}).filter(v=>v.songs>=(any?1:2));
   if(st.tier!=="all"&&!one)list=list.filter(v=>v.tier===st.tier);
   return list.sort(bySong?(a,b)=>b.total-a.total||Object.keys(b.occ).length-Object.keys(a.occ).length:(a,b)=>b.songs-a.songs||b.total-a.total);}
 function filteredVocab(){let list=scopeVocab();
@@ -1159,37 +1148,38 @@ function filteredVocab(){let list=scopeVocab();
 function chipRow(box,items,isOn,onPick){box.innerHTML="";items.forEach(it=>{const c=el("button","chip"+(isOn(it)?" on":""),it.label);c.type="button";if(it.disabled)c.disabled=true;if(it.title)c.title=it.title;c.onclick=()=>onPick(it);box.appendChild(c);});}
 function renderFilters(){
   const f=document.getElementById("filters");
-  f.hidden=ui.view==="songs";
+  const songsV=ui.view==="songs";   // 歌曲页只用「乐队」一行：专辑架、推荐、搜索都只看这个乐队
   f.classList.toggle("open",ui.filtersOpen);
   document.getElementById("fbody").hidden=!ui.filtersOpen;
   document.getElementById("ftoggle").setAttribute("aria-expanded",String(ui.filtersOpen));
   const gram=ui.view==="gram"||ui.view==="graph";
-  document.getElementById("fTierRow").hidden=gram;document.getElementById("fStateRow").hidden=gram;
+  document.getElementById("fTierRow").hidden=gram||songsV;document.getElementById("fStateRow").hidden=gram||songsV;document.getElementById("fAlbumRow").hidden=songsV;
   chipRow(document.getElementById("fArtist"),ARTISTS.map(a=>{const has=a.id==="all"||DATA.albums.some(x=>x.artist===a.id);return {...a,label:has?a.label:a.label+"（待收录）",disabled:!has};}),
     a=>st.artist===a.id,a=>{st.artist=a.id;st.albums.clear();st.songs.clear();reset();});
   chipRow(document.getElementById("fAlbum"),[{id:"",label:"全部"}].concat(DATA.albums.filter(a=>st.artist==="all"||a.artist===st.artist).map(a=>({id:a.id,label:albumName(a),title:a.ja+" · "+a.zh}))),
     a=>a.id?st.albums.has(a.id):st.albums.size===0,a=>{if(!a.id)st.albums.clear();else st.albums.has(a.id)?st.albums.delete(a.id):st.albums.add(a.id);
       [...st.songs].forEach(id=>{if(!st.albums.has(songById[id].album))st.songs.delete(id);});reset();});
   // 选了专辑以后才出现「歌曲」一行（同一首歌的其他版本不计数，不列出来）
-  document.getElementById("fSongRow").hidden=!st.albums.size;
+  document.getElementById("fSongRow").hidden=!st.albums.size||songsV;
   if(st.albums.size)chipRow(document.getElementById("fSong"),[{id:"",label:"全部"}].concat(DATA.songs.filter(s=>st.albums.has(s.album)&&!s.dup_of).map(s=>({id:s.id,label:s.ja,title:s.zh}))),
     x=>x.id?st.songs.has(x.id):st.songs.size===0,x=>{if(!x.id)st.songs.clear();else st.songs.has(x.id)?st.songs.delete(x.id):st.songs.add(x.id);reset();});
   chipRow(document.getElementById("fTier"),TIERS.map(t=>({...t,label:t.label+(t.min?" ≥"+t.min+"首":"")})),t=>st.tier===t.id,t=>{st.tier=t.id;reset();});
   chipRow(document.getElementById("fState"),[{id:"all",label:"全部"},{id:"todo",label:"未掌握"},{id:"done",label:"已掌握"}],x=>st.state===x.id,x=>{st.state=x.id;reset();});
   const songNames=[...st.songs].map(id=>"《"+songById[id].ja+"》");
-  const parts=[st.artist==="all"?"全部乐队":bandById[st.artist].ja,st.albums.size?[...st.albums].map(id=>albumName(albumById[id])).join("、"):"全部专辑"];
+  const parts=[st.artist==="all"?"全部乐队":bandById[st.artist].ja];
+  if(!songsV)parts.push(st.albums.size?[...st.albums].map(id=>albumName(albumById[id])).join("、"):"全部专辑");
   if(songNames.length)parts.push(songNames.length>2?songNames.slice(0,2).join("")+" 等 "+songNames.length+" 首":songNames.join(""));
   if(!gram){if(st.tier!=="all")parts.push(TIERNAME[st.tier]);if(st.state!=="all")parts.push(st.state==="todo"?"未掌握":"已掌握");}
   document.getElementById("fsum").textContent=parts.join(" · ");
   const ids=activeSongIds(), inScope=scopeVocab();
-  document.getElementById("stat").textContent=gram
+  document.getElementById("stat").textContent=songsV?`${DATA.songs.filter(s=>st.artist==="all"||albumById[s.album].artist===st.artist).length} 首歌`:gram
     ?`${ids.length} 首歌 · ${DATA.grammar.filter(g=>scoped(g,ids).songs>0).length} 个语法点`
     :`${ids.length} 首歌 · ${inScope.length} 个词 · 已掌握 ${inScope.filter(v=>learned[v.w]).length}`;
   const sb=document.getElementById("searchbar");sb.hidden=ui.view==="flash";
   document.getElementById("q").placeholder={list:"搜索词：汉字、假名、罗马音或中文，也会搜歌词",gram:"搜索语法",graph:"换一个中心词：输入汉字、假名、罗马音或中文",songs:"搜索歌名（日文或中文）"}[ui.view]||"搜索";
   document.getElementById("qclear").hidden=!st.q;
 }
-function reset(){st.idx=0;st.order=null;st.rq=null;st.qz=null;render();}
+function reset(){st.idx=0;st.order=null;st.rq=null;st.qz=null;saveFilter();render();}
 // 只看一首歌里的词：筛选设成这首歌所在的专辑 + 这首歌，并展开筛选框让人看到
 function filterSong(sid){const s=songById[sid];st.artist="all";st.albums=new Set([s.album]);st.songs=new Set([sid]);st.tier="all";
   st.q="";document.getElementById("q").value="";ui.filtersOpen=true;saveUI();reset();window.scrollTo(0,0);}
@@ -1381,7 +1371,7 @@ function renderList(){
   if(st.q){
     const ms=lyricMatches(st.q,activeSongIds(),30);
     if(ms.length){box.appendChild(el("div","h2","歌词里的「"+st.q+"」（"+(ms.length>=30?"前 30 句":ms.length+" 句")+"）"));
-      ms.forEach(([sid,li,sp])=>{const d=el("div","lmatch"),s=songById[sid];d.appendChild(el("div","src","《"+songTitle(s)+"》· "+albumName(albumById[s.album])));d.appendChild(lyricLine(sid,li,{spans:sp}));box.appendChild(d);});}
+      ms.forEach(([sid,li,sp])=>{const d=el("div","lmatch"),s=songById[sid];d.appendChild(el("div","src","《"+songTitle(s)+"》· "+albumName(albumById[s.album])));d.appendChild(lyricLine(sid,li,{spans:sp,seek:true}));box.appendChild(d);});}
   }
 }
 
@@ -1520,7 +1510,7 @@ function renderGraph(){
         const keys=r.keys.slice(0,4);
         keys.forEach(k=>{const [sid,li]=k.split("|"), l=+li, s=songById[sid], d=el("div","lmatch");
           d.appendChild(el("div","src","《"+songTitle(s)+"》· "+albumName(albumById[s.album])));
-          d.appendChild(lyricLine(sid,l,{spans:spansAt(c,sid,l).concat(spansAt(r.v,sid,l))}));body.appendChild(d);});
+          d.appendChild(lyricLine(sid,l,{spans:spansAt(c,sid,l).concat(spansAt(r.v,sid,l)),seek:true}));body.appendChild(d);});
         if(r.keys.length>keys.length)body.appendChild(el("div","sub","还有 "+(r.keys.length-keys.length)+" 句"));
       }else if(ui.graphKind==="song"){
         body.appendChild(el("div","sub","「"+shortW(c)+"」和「"+shortW(r.v)+"」都出现在这几首歌里，点歌名打开歌词："));
@@ -1550,7 +1540,7 @@ function listenLinks(s){
   return d;
 }
 function renderRecommend(box){
-  const cands=DATA.songs.filter(s=>!s.dup_of).map(s=>({s,...coverage(s.id)})).filter(c=>c.tot&&c.pct<0.999);
+  const cands=DATA.songs.filter(s=>!s.dup_of&&(st.artist==="all"||albumById[s.album].artist===st.artist)).map(s=>({s,...coverage(s.id)})).filter(c=>c.tot&&c.pct<0.999);
   if(!cands.length)return;
   cands.forEach(c=>{c.gain=c.un.slice(0,5).reduce((x,[,n])=>x+n,0);c.score=(c.kn+c.gain)/c.tot;});
   cands.sort((a,b)=>b.score-a.score||b.pct-a.pct);
@@ -1605,7 +1595,7 @@ function closeAlbum(){if(history.state&&history.state.album)history.back();else{
 window.addEventListener("popstate",e=>{st.album=(e.state&&e.state.album)||null;if(ui.view==="songs")renderSongs();});
 function renderShelf(box){
   box.appendChild(el("div","h2","全部专辑"));
-  ARTISTS.slice(1).map(b=>b.id).filter(bid=>DATA.albums.some(a=>a.artist===bid)).forEach(bid=>{
+  ARTISTS.slice(1).map(b=>b.id).filter(bid=>(st.artist==="all"||st.artist===bid)&&DATA.albums.some(a=>a.artist===bid)).forEach(bid=>{
     const b=bandById[bid], albums=DATA.albums.filter(a=>a.artist===bid);
     box.appendChild(el("div","shelfband",b.ja+" · "+b.zh));
     const g=el("div","shelf");
@@ -1618,7 +1608,7 @@ function renderShelf(box){
     });
     box.appendChild(g);
   });
-  if(DATA.pending&&DATA.pending.length){
+  if(DATA.pending&&DATA.pending.length&&st.artist==="all"){
     box.appendChild(el("div","h2","待收录（"+DATA.pending.length+" 张）"));
     const g=el("div","pending");
     DATA.pending.forEach(a=>{const p=el("div","pend");p.append(coverEl(a),el("span",null,a.ja));p.title=a.ja+" · "+a.zh+" · "+a.year;g.appendChild(p);});
@@ -1642,7 +1632,7 @@ function renderSongs(){
   const box=document.getElementById("v-songs");box.innerHTML="";
   if(st.q){   // 搜索：按专辑列出歌名匹配的歌
     const n=norm(st.q);let shown=0;
-    DATA.albums.forEach(a=>{
+    DATA.albums.filter(a=>st.artist==="all"||a.artist===st.artist).forEach(a=>{
       const songs=DATA.songs.filter(s=>s.album===a.id&&(norm(s.ja).includes(n)||s.zh.includes(st.q)));
       if(!songs.length)return;shown++;
       box.appendChild(el("div","h2","《"+a.ja+"》"+a.zh));
@@ -1712,9 +1702,6 @@ function openSheet(o){document.getElementById("sheet").hidden=!o;document.getEle
   if(o){renderStats();renderSettings();renderPlayerSettings();document.getElementById("ioMsg").textContent="";document.getElementById("sheetClose").focus();}
   else qrStop();}
 function renderSettings(){
-  chipRow(document.getElementById("optScope"),[{id:"all",label:"全部"}].concat(COLLS.map(c=>({id:c.id,label:c.zh}))),x=>(SCOPE?SCOPE.id:"all")===x.id,
-    x=>{if(x.id===(SCOPE?SCOPE.id:"all"))return;ui.scope=x.id;saveUI();location.reload();});
-  document.getElementById("scopeNote").textContent="只显示这个范围里的歌和词（只在这台设备上），学习进度照常保存和同步。"+(SCOPE?"网址后面加 ?only="+SCOPE.id+" 打开也是这个范围，可以把这样的链接发给别人。":"");
   chipRow(document.getElementById("optTheme"),THEMES,x=>ui.theme===x.id,x=>{ui.theme=x.id;saveUI();applyTheme();renderSettings();});
   chipRow(document.getElementById("optRate"),[{v:0.7,label:"慢"},{v:0.85,label:"中"},{v:1,label:"正常"}],x=>ui.rate===x.v,x=>{ui.rate=x.v;saveUI();renderSettings();speak("ことば");});
   chipRow(document.getElementById("optRoMode"),[{v:"word",label:"按词"},{v:"char",label:"按字"}],x=>ui.roMode===x.v,x=>{ui.roMode=x.v;saveUI();renderSettings();renderView();});
@@ -1954,6 +1941,7 @@ const PICON={play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v1
   loop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3l3 3-3 3"/><path d="M4 11V9a3 3 0 0 1 3-3h13"/><path d="M7 21l-3-3 3-3"/><path d="M20 13v2a3 3 0 0 1-3 3H4"/><path d="M11 10.5l1.5-1v5"/></svg>',
   next:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6l9 6-9 6z" fill="currentColor"/><path d="M17.5 6v12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
   close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>'};
+document.getElementById("pbMini").innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 [["pbPrevL","replay"],["pbNextL","nextl"],["pbLoop","loop"],["pbNext","next"],["pbClose","close"]].forEach(([id,ic])=>document.getElementById(id).innerHTML=PICON[ic]);
 const pbar=document.getElementById("pbar");
 function albumQueue(aid){return DATA.songs.filter(s=>s.album===aid).map(s=>s.id);}
@@ -1968,7 +1956,10 @@ async function neId(s){
   pl.ne[s.id]=hit.id;savePl();return hit.id;
 }
 function plMsg(t,kind){const m=document.getElementById("pbMsg");m.textContent=t||"";m.hidden=!t;m.className="pmsg"+(kind==="err"?" err":"");P.msgKind=t?kind||"info":null;}
-function plShowBar(){pbar.hidden=false;document.body.classList.add("pb");}
+function plShowBar(){pbar.hidden=false;document.body.classList.add("pb");plMini(!!ui.pbMini);}
+// 收起 / 展开播放条（记在本机）
+function plMini(on){ui.pbMini=on;pbar.classList.toggle("mini",on);const b=document.getElementById("pbMini");b.setAttribute("aria-pressed",String(on));b.setAttribute("aria-label",on?"展开播放条":"收起播放条");}
+document.getElementById("pbMini").onclick=()=>{plMini(!ui.pbMini);saveUI();};
 // --pbh 播放条高度；--pbb 播放条离底边的距离（手机上底部导航是固定的，播放条放在它上面）
 const tabsEl=document.getElementById("tabs");
 function plLayout(){const r=document.documentElement.style;r.setProperty("--pbh",pbar.offsetHeight+"px");

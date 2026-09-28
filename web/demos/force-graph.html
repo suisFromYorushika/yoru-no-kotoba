@@ -301,10 +301,11 @@
     side.appendChild(rows);
   }
   function sideBand() {
-    const cat = { yorushika: [], atarayo: [], both: [] }; nodes.forEach(n => (cat[n.band] || cat.both).push(n));
-    sideHead("两个乐队的对比", "蓝色只在 ヨルシカ 的歌里出现，粉色只在 あたらよ 的歌里出现，金色两个乐队都唱过。");
-    [["both", "两个乐队都唱过"], ["yorushika", "只有 ヨルシカ"], ["atarayo", "只有 あたらよ"]].forEach(([k, t]) => {
-      const h = $("div"); h.style.margin = "10px 0 4px"; const dt = $("i", "dot"); dt.style.background = dt.style.color = BAND[k];
+    // 乐队从数据里来（新收录的乐队自动出现）；金色 = 不止一个乐队唱过
+    const cat = { both: [] }; Object.keys(d.bands).forEach(k => cat[k] = []); nodes.forEach(n => (cat[n.band] || cat.both).push(n));
+    sideHead("乐队的对比", "蓝色只在 ヨルシカ 的歌里出现，粉色只在 あたらよ 的歌里出现，金色不止一个乐队唱过。");
+    [["both", "不止一个乐队唱过"]].concat(Object.entries(d.bands).map(([k, ja]) => [k, "只有 " + ja])).forEach(([k, t]) => {
+      const h = $("div"); h.style.margin = "10px 0 4px"; const dt = $("i", "dot"); dt.style.background = dt.style.color = BAND[k] || "#b8c1ec";
       h.append(dt, t + "（" + cat[k].length + " 个）"); side.appendChild(h);
       const tg = $("div", "tags2");
       cat[k].sort((a, b) => b.n - a.n).slice(0, 16).forEach(n => { const b = $("button", null, n.w); b.title = n.m; b.onclick = () => focusNode(n.raw); tg.appendChild(b); });
