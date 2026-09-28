@@ -192,6 +192,7 @@ def build():
         "pending": [{k: a[k] for k in ("id", "band", "ja", "zh", "short", "year", "cover") if k in a}
                     for a in cat["albums"] if not a.get("done")],
         "bands": cat["bands"],
+        "collections": cat.get("collections", []),
         "songs": [song_entry(m) for m in song_meta],
         "lines": {s["id"]: [[l["ja"], l["zh"], segments(l), l["t"]] for l in s["lines"]] for s in songs},
         "vocab": vocab,

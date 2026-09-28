@@ -570,6 +570,8 @@ footer details[open] summary{margin-bottom:6px;}
   </section>
   <section>
     <h3>显示与朗读</h3>
+    <div class="optrow">显示范围 <div class="tags" id="optScope"></div></div>
+    <p id="scopeNote"></p>
     <div class="optrow">外观 <div class="tags" id="optTheme"></div></div>
     <label class="toggle">汉字上注假名 <input type="checkbox" id="optRt"></label>
     <label class="toggle">歌词下标罗马音 <input type="checkbox" id="optRo"></label>
@@ -595,6 +597,36 @@ footer details[open] summary{margin-bottom:6px;}
 <script>
 const DATA = __DATA__;
 const SITE = __SITE__;
+
+// ================= 显示范围（「我的 → 显示与朗读 → 显示范围」，或网址后面加 ?only=合集id） =================
+// 合集在 catalog.json 的 collections 里（例：只看《未闻花名》）。页面打开时把范围外的乐队、专辑、歌和词的出现位置去掉，
+// 后面的代码照常用 DATA。只影响这台设备显示哪些歌；已掌握的词、复习记录照常保存和同步，范围外的词的进度不会动。
+const COLLS=DATA.collections||[];
+const SCOPE=(()=>{let id=null;
+  try{const q=new URLSearchParams(location.search).get("only");
+    if(q!==null){id=q;const url=new URL(location.href);url.searchParams.delete("only");history.replaceState(history.state,"",url.pathname+url.search+url.hash);
+      const u=JSON.parse(localStorage.getItem("yoru_ui_v1")||"{}");u.scope=q;localStorage.setItem("yoru_ui_v1",JSON.stringify(u));}}catch(e){}
+  if(id===null)try{id=JSON.parse(localStorage.getItem("yoru_ui_v1")||"{}").scope;}catch(e){}
+  return COLLS.find(c=>c.id===id)||null;})();
+let MIN_SONGS=2;   // 词出现在几首歌以上才进主词表（闪卡默认用主词表）
+if(SCOPE){const keepB=new Set(SCOPE.bands), nS=it=>Object.keys(it.occ).length;
+  DATA.bands=DATA.bands.filter(b=>keepB.has(b.id));
+  DATA.albums=DATA.albums.filter(a=>keepB.has(a.artist));
+  DATA.pending=(DATA.pending||[]).filter(a=>keepB.has(a.band));
+  const keepA=new Set(DATA.albums.map(a=>a.id));
+  DATA.songs=DATA.songs.filter(s=>keepA.has(s.album));
+  const keepS=new Set(DATA.songs.map(s=>s.id));
+  const cut=it=>{const occ={},loc={};for(const sid in it.occ)if(keepS.has(sid)){occ[sid]=it.occ[sid];loc[sid]=it.loc[sid];}
+    const f=Object.keys(loc)[0], x=it.x&&keepS.has(it.x[0])?it.x:f?[f,loc[f][0][0]]:null;return {...it,occ,loc,x};};
+  // 歌很少的合集（例：只有一首）里每个词都只出现在 1 首歌里，这时 1 首也算，闪卡才有词
+  if(DATA.songs.filter(s=>!s.dup_of).length<5)MIN_SONGS=1;
+  const words=DATA.vocab.concat(DATA.rare||[]).map(cut).filter(v=>nS(v));
+  const tot=v=>Object.values(v.occ).reduce((a,b)=>a+b,0);
+  DATA.vocab=words.filter(v=>nS(v)>=MIN_SONGS).sort((a,b)=>nS(b)-nS(a)||tot(b)-tot(a));
+  DATA.rare=words.filter(v=>nS(v)<MIN_SONGS);
+  DATA.grammar=DATA.grammar.map(cut);
+  document.querySelector(".tagline").textContent=SCOPE.tag||SCOPE.zh;
+}
 
 // ================= 基础数据 =================
 const albumById=Object.fromEntries(DATA.albums.map(a=>[a.id,a]));
@@ -1117,7 +1149,7 @@ function scopeVocab(){const ids=activeSongIds(), bySong=st.songs.size>0, one=st.
   // 平时：主词表里在当前范围出现在 ≥2 首歌的词，按首数排；
   // 选了具体的歌、在词表里搜索、或选「只在 1 首」：只出现在 1 首歌里的词也算，只要在范围里出现就行
   const any=bySong||one||(!!st.q&&ui.view==="list");
-  let list=(one?RARE:any?ALLV:DATA.vocab).map(v=>{const s=scoped(v,ids);return {...v,...s,tier:v.one?"one":tierOf(bySong?Object.keys(v.occ).length:s.songs)};}).filter(v=>v.songs>=(any?1:2));
+  let list=(one?RARE:any?ALLV:DATA.vocab).map(v=>{const s=scoped(v,ids);return {...v,...s,tier:v.one?"one":tierOf(bySong?Object.keys(v.occ).length:s.songs)};}).filter(v=>v.songs>=(any?1:MIN_SONGS));
   if(st.tier!=="all"&&!one)list=list.filter(v=>v.tier===st.tier);
   return list.sort(bySong?(a,b)=>b.total-a.total||Object.keys(b.occ).length-Object.keys(a.occ).length:(a,b)=>b.songs-a.songs||b.total-a.total);}
 function filteredVocab(){let list=scopeVocab();
@@ -1680,6 +1712,9 @@ function openSheet(o){document.getElementById("sheet").hidden=!o;document.getEle
   if(o){renderStats();renderSettings();renderPlayerSettings();document.getElementById("ioMsg").textContent="";document.getElementById("sheetClose").focus();}
   else qrStop();}
 function renderSettings(){
+  chipRow(document.getElementById("optScope"),[{id:"all",label:"全部"}].concat(COLLS.map(c=>({id:c.id,label:c.zh}))),x=>(SCOPE?SCOPE.id:"all")===x.id,
+    x=>{if(x.id===(SCOPE?SCOPE.id:"all"))return;ui.scope=x.id;saveUI();location.reload();});
+  document.getElementById("scopeNote").textContent="只显示这个范围里的歌和词（只在这台设备上），学习进度照常保存和同步。"+(SCOPE?"网址后面加 ?only="+SCOPE.id+" 打开也是这个范围，可以把这样的链接发给别人。":"");
   chipRow(document.getElementById("optTheme"),THEMES,x=>ui.theme===x.id,x=>{ui.theme=x.id;saveUI();applyTheme();renderSettings();});
   chipRow(document.getElementById("optRate"),[{v:0.7,label:"慢"},{v:0.85,label:"中"},{v:1,label:"正常"}],x=>ui.rate===x.v,x=>{ui.rate=x.v;saveUI();renderSettings();speak("ことば");});
   chipRow(document.getElementById("optRoMode"),[{v:"word",label:"按词"},{v:"char",label:"按字"}],x=>ui.roMode===x.v,x=>{ui.roMode=x.v;saveUI();renderSettings();renderView();});
