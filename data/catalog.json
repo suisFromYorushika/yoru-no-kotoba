@@ -16,25 +16,6 @@
    "zh": "超和平Busters"
   }
  ],
- "collections": [
-  {
-   "id": "yoru",
-   "zh": "夜鹿 · 可惜夜",
-   "tag": "ヨルシカ × あたらよ",
-   "bands": [
-    "yorushika",
-    "atarayo"
-   ]
-  },
-  {
-   "id": "anohana",
-   "zh": "未闻花名",
-   "tag": "あの花 · 未闻花名",
-   "bands": [
-    "anohana"
-   ]
-  }
- ],
  "albums": [
   {
    "id": "natsukusa",
