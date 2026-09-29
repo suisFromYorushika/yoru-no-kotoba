@@ -741,7 +741,8 @@ const GLOSS={
 const LS="yorushika_learned_v1", LS_SRS="yoru_srs_v1", LS_LOG="yoru_log_v1", LS_UI="yoru_ui_v1", LS_SYNC="yoru_synced_v1";
 function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-const ui=Object.assign({theme:"system",view:"flash",fmode:"browse",qtype:"zh2ja",filtersOpen:false,rt:true,ro:true,zh:true,rate:0.85,newPerDay:15,graphW:null,graphKind:"line",roMode:"word",roDots:false},lsGet(LS_UI,{}));
+const ui=Object.assign({theme:"system",view:"flash",fmode:"browse",qtype:"zh2ja",filtersOpen:false,rt:true,ro:true,zh:true,rate:0.85,newPerDay:15,graphW:null,graphKind:"line",roMode:"word",roDots:true},lsGet(LS_UI,{}));
+if(ui.roDotsV!==2){ui.roDots=true;ui.roDotsV=2;}   // 「用 · 分开词和词尾」改为默认开启（2026-09）：以前存过关闭的设备也只在这里改这一次，之后按用户自己的选择
 function saveUI(){lsSet(LS_UI,ui);}
 // 筛选（乐队、专辑、歌）记在本机 ui.f 里，下次打开还在；网址后面加 ?artist=乐队id 可以直接选好乐队（例如发给只学某个乐队的朋友）
 function saveFilter(){ui.f={artist:st.artist,albums:[...st.albums],songs:[...st.songs]};saveUI();}
