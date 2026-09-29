@@ -50,6 +50,21 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-vi
 .tab{flex:1;padding:9px 4px;border-radius:10px;border:1px solid var(--border);background:var(--card);font-size:.92rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
 .tab .ic{font-family:var(--jp);font-weight:700;opacity:.8;}
 .tab.active{background:var(--accent);color:var(--card);border-color:var(--accent);}
+.tab .ic{position:relative;}
+.tab.me.synced .ic::after{content:"";position:absolute;right:-9px;top:1px;width:6px;height:6px;border-radius:50%;background:var(--ok);}
+@media (min-width:641px){.tab.me{display:none;}}
+.intro{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px 12px;margin-bottom:12px;font-size:.92rem;}
+.intro ol{margin:6px 0 8px;padding-left:1.3em;line-height:1.7;}
+.intro .srow{margin-top:2px;}
+.dopts{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px;}
+.dopts .chip[aria-pressed="true"]{background:var(--soft);border-color:var(--accent);font-weight:600;}
+#npDopts{justify-content:center;margin-top:8px;}
+.mset>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:2px 0;font-size:1rem;font-weight:600;}
+.mset>summary::-webkit-details-marker{display:none;}
+.mset>summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:0 6px 4px 2px;transition:transform .2s;}
+.mset[open]>summary::after{transform:rotate(-135deg);margin:4px 6px 0 2px;}
+.mset[open]>summary{margin-bottom:8px;}
+.mset h4{margin:14px 0 6px;font-size:.92rem;}
 
 /* ---------- 筛选 / 搜索 ---------- */
 .filters{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;}
@@ -138,7 +153,8 @@ details.occ>summary{cursor:pointer;color:var(--accent);padding:6px 0;}
 .modes{display:flex;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:10px;}
 .mode{flex:1;border:0;background:none;padding:7px 4px;border-radius:8px;cursor:pointer;font-size:.88rem;color:var(--muted);}
 .mode.on{background:var(--soft);color:var(--ink);font-weight:600;}
-.rvinfo{font-size:.8rem;color:var(--muted);margin:0 2px 10px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.rvinfo{font-size:.8rem;color:var(--muted);margin:0 2px 10px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+.rvinfo .chip{font-size:.76rem;padding:3px 9px;}
 .stage{perspective:1400px;margin-bottom:12px;touch-action:pan-y;}
 .card{display:grid;cursor:pointer;transform-style:preserve-3d;transition:transform .45s;}
 .card.flipped{transform:rotateY(180deg);}
@@ -451,7 +467,11 @@ footer details[open] summary{margin-bottom:6px;}
 /* ---------- 手机 ---------- */
 @media (max-width:640px){
   .wrap{padding-block:14px calc(var(--nav-h) + 28px + env(safe-area-inset-bottom,0px));}
-  .logo{font-size:1.35rem;}
+  .top{margin-bottom:10px;}
+  .brand{display:flex;align-items:baseline;gap:8px;min-width:0;}
+  .logo{font-size:1.25rem;}
+  .tagline{margin-top:0;}
+  .acct{display:none;}
   .tabs{position:fixed;z-index:10;left:0;right:0;bottom:0;margin:0;gap:0;background:var(--card);border-top:1px solid var(--border);padding:4px 6px calc(4px + env(safe-area-inset-bottom,0px));}
   .tab{flex-direction:column;gap:1px;border:0;border-radius:10px;padding:6px 2px;font-size:.72rem;background:none;color:var(--muted);}
   .tab .ic{font-size:1.1rem;opacity:1;}
@@ -484,11 +504,10 @@ footer details[open] summary{margin-bottom:6px;}
   </header>
 
   <nav class="tabs" id="tabs">
-    <button class="tab active" data-v="flash" type="button"><span class="ic">札</span><span>闪卡</span></button>
+    <button class="tab active" data-v="songs" type="button"><span class="ic">歌</span><span>歌曲</span></button>
+    <button class="tab" data-v="flash" type="button"><span class="ic">札</span><span>闪卡</span></button>
     <button class="tab" data-v="list" type="button"><span class="ic">語</span><span>词表</span></button>
-    <button class="tab" data-v="gram" type="button"><span class="ic">文</span><span>语法</span></button>
-    <button class="tab" data-v="graph" type="button"><span class="ic">関</span><span>关系</span></button>
-    <button class="tab" data-v="songs" type="button"><span class="ic">歌</span><span>歌曲</span></button>
+    <button class="tab me" data-v="me" type="button"><span class="ic">私</span><span>我的</span></button>
   </nav>
 
   <section class="filters" id="filters">
@@ -511,6 +530,19 @@ footer details[open] summary{margin-bottom:6px;}
   </div>
 
   <main>
+    <div class="intro" id="intro" hidden>
+      <b>第一次来？三步就能开始</b>
+      <ol>
+        <li>在「歌曲」里选一首熟悉的歌，打开歌页看歌词：汉字上有假名，下面有罗马音和中文。</li>
+        <li>点歌词里的词能查意思；配好播放器以后可以边听边跟读，播放页里能单句循环。</li>
+        <li>到「闪卡」复习这首歌的词，记住的词会隔几天再出现，直到算作已掌握。</li>
+      </ol>
+      <div class="srow"><button class="btn primary" id="introOk" type="button">知道了</button></div>
+    </div>
+    <div class="modes" id="lmodes" role="tablist" aria-label="词表或语法" hidden>
+      <button class="mode" data-lv="list" type="button">词表</button>
+      <button class="mode" data-lv="gram" type="button">语法</button>
+    </div>
     <div id="v-flash">
       <div class="modes" role="tablist" aria-label="闪卡模式">
         <button class="mode on" data-m="browse" type="button">浏览</button>
@@ -601,6 +633,7 @@ footer details[open] summary{margin-bottom:6px;}
       <button class="chip" id="npFollow" type="button" aria-pressed="true">歌词跟着滚动</button>
       <button class="chip" id="npBar" type="button">收起播放条</button>
     </div>
+    <div class="dopts" id="npDopts"></div>
   </div>
 </div>
 <div class="scrim" id="scrim" hidden></div>
@@ -673,8 +706,6 @@ footer details[open] summary{margin-bottom:6px;}
       </form>
       <div class="msg" id="plLoginMsg" role="status"></div>
       <button class="btn" id="plOut" type="button" hidden>退出网易云</button>
-      <div class="optrow">音质 <div class="tags" id="plLevel"></div></div>
-      <label class="toggle">播放时歌词自动滚到正在唱的那句 <input type="checkbox" id="plFollow"></label>
     </div>
   </section>
   <section>
@@ -683,26 +714,27 @@ footer details[open] summary{margin-bottom:6px;}
     <div class="chart" id="chart"></div>
   </section>
   <section>
-    <h3>显示与朗读</h3>
-    <div class="optrow">外观 <div class="tags" id="optTheme"></div></div>
-    <label class="toggle">汉字上注假名 <input type="checkbox" id="optRt"></label>
-    <label class="toggle">歌词下标罗马音 <input type="checkbox" id="optRo"></label>
-    <div class="optrow">罗马音对齐 <div class="tags" id="optRoMode"></div></div>
-    <label class="toggle" id="optDotsRow">按词时用「·」分开词和词尾（wasure·rare·nai） <input type="checkbox" id="optDots"></label>
-    <label class="toggle">显示中文翻译 <input type="checkbox" id="optZh"></label>
-    <div class="optrow">朗读速度 <div class="tags" id="optRate"></div></div>
-    <div class="optrow">复习时每天的新词 <div class="tags" id="optNew"></div></div>
-    <p id="ttsNote"></p>
+    <h3>外观</h3>
+    <div class="optrow">跟随系统还是固定 <div class="tags" id="optTheme"></div></div>
+    <p>注音、罗马音、中文翻译的开关在歌页和播放页的顶部，看歌词时随手改。</p>
   </section>
-  <section>
-    <h3>备份进度</h3>
-    <p>把已掌握的词和复习记录复制出来，粘贴到另一台设备或另一个浏览器里导入。导入是合并，不会删掉已有的记录。</p>
-    <textarea id="io" spellcheck="false" aria-label="进度数据"></textarea>
-    <div class="srow">
-      <button class="btn" id="exportBtn" type="button">复制我的进度</button>
-      <button class="btn primary" id="importBtn" type="button">导入上面的进度</button>
-    </div>
-    <div class="msg" id="ioMsg" role="status"></div>
+  <section class="moresec">
+    <details class="mset" id="moreSet">
+      <summary>更多设置</summary>
+      <div class="optrow" id="plLevelRow" hidden>播放音质 <div class="tags" id="plLevel"></div></div>
+      <div class="optrow">罗马音对齐 <div class="tags" id="optRoMode"></div></div>
+      <label class="toggle" id="optDotsRow">按词时用「·」分开词和词尾（wasure·rare·nai） <input type="checkbox" id="optDots"></label>
+      <div class="optrow">朗读速度 <div class="tags" id="optRate"></div></div>
+      <p id="ttsNote"></p>
+      <h4>备份进度</h4>
+      <p>登录后进度会自动同步，一般用不到这里。把已掌握的词和复习记录复制出来，粘贴到另一台设备或另一个浏览器里导入。导入是合并，不会删掉已有的记录。</p>
+      <textarea id="io" spellcheck="false" aria-label="进度数据"></textarea>
+      <div class="srow">
+        <button class="btn" id="exportBtn" type="button">复制我的进度</button>
+        <button class="btn primary" id="importBtn" type="button">导入上面的进度</button>
+      </div>
+      <div class="msg" id="ioMsg" role="status"></div>
+    </details>
   </section>
 </div>
 
@@ -756,7 +788,7 @@ const GLOSS={
 const LS="yorushika_learned_v1", LS_SRS="yoru_srs_v1", LS_LOG="yoru_log_v1", LS_UI="yoru_ui_v1", LS_SYNC="yoru_synced_v1";
 function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-const ui=Object.assign({theme:"system",view:"flash",fmode:"browse",qtype:"zh2ja",filtersOpen:false,rt:true,ro:true,zh:true,rate:0.85,newPerDay:15,graphW:null,graphKind:"line",roMode:"word",roDots:true},lsGet(LS_UI,{}));
+const ui=Object.assign({theme:"system",view:"songs",fmode:"browse",qtype:"zh2ja",filtersOpen:false,rt:true,ro:true,zh:true,rate:0.85,newPerDay:15,graphW:null,graphKind:"line",roMode:"word",roDots:true},lsGet(LS_UI,{}));
 if(ui.roDotsV!==2){ui.roDots=true;ui.roDotsV=2;}   // 「用 · 分开词和词尾」改为默认开启（2026-09）：以前存过关闭的设备也只在这里改这一次，之后按用户自己的选择
 function saveUI(){lsSet(LS_UI,ui);}
 // 筛选（乐队、专辑、歌）记在本机 ui.f 里，下次打开还在；网址后面加 ?artist=乐队id 可以直接选好乐队（例如发给只学某个乐队的朋友）
@@ -1356,13 +1388,24 @@ function grade(g){
   st.rq.shift();if(g===0)st.rq.push(w);
   persist();renderReview();
 }
+function openNewPerDayPop(){
+  pop.innerHTML="";
+  const h=el("div","pophead");h.appendChild(el("div","popm","复习时每天的新词"));
+  const x=el("button","popx","×");x.type="button";x.setAttribute("aria-label","关闭");x.onclick=closePop;h.appendChild(x);
+  const tags=el("div","tags");
+  chipRow(tags,[5,10,15,20,30].map(n=>({v:n,label:String(n)+" 个"})),x=>ui.newPerDay===x.v,x=>{ui.newPerDay=x.v;saveUI();st.rq=null;closePop();renderReview();});
+  pop.append(h,el("div","popmeta","到期的词先复习，复习完再按这个数补新词。"),tags);pop.hidden=false;
+}
 function renderReview(){
   if(!st.rq)buildReview();
   while(st.rq.length&&learned[st.rq[0]])st.rq.shift();
   const info=document.getElementById("rvinfo"), ctl=document.getElementById("reviewCtl");
   const t=today(), scope=scopeVocab().filter(v=>!learned[v.w]);
   const dueN=scope.filter(v=>srs[v.w]&&srs[v.w][1]<=t).length;
-  info.innerHTML="";info.append(el("span",null,`还剩 ${st.rq.length} 张 · 到期 ${dueN} · 今天新词 ${newToday()}/${ui.newPerDay+st.extraNew}`),el("span",null,`今天复习了 ${(log[t]||{}).r||0} 次`));
+  info.innerHTML="";
+  const nb=el("button","chip",`今天新词 ${newToday()}/${ui.newPerDay+st.extraNew}`);nb.type="button";nb.title="改每天学几个新词";nb.onclick=e=>{e.stopPropagation();openNewPerDayPop();};
+  const left=el("span");left.append(`还剩 ${st.rq.length} 张 · 到期 ${dueN} · `,nb);
+  info.append(left,el("span",null,`今天复习了 ${(log[t]||{}).r||0} 次`));
   ctl.innerHTML="";
   const w=st.rq[0], v=w&&scopeVocab().find(x=>x.w===w);
   if(!v){
@@ -1555,6 +1598,7 @@ let gResize=null, gWidth=0;
 window.addEventListener("resize",()=>{clearTimeout(gResize);gResize=setTimeout(()=>{const w=document.getElementById("v-graph").clientWidth;if(ui.view==="graph"&&w!==gWidth){gWidth=w;renderGraph();}},200);});
 // o.keep：在关系图里点别的词，只换图，页面不动；o.toGraph：从下面的列表换中心，滚到图上；其他地方打开时回到顶部
 function openGraph(w,o={}){if(ui.graphW&&ui.graphW!==w){gTrail=[ui.graphW,...gTrail.filter(x=>x!==ui.graphW&&x!==w)].slice(0,8);}
+  if(ui.view!=="graph")st.gFrom=ui.view;
   const y=window.scrollY;
   ui.graphW=w;ui.view="graph";saveUI();st.q="";document.getElementById("q").value="";render();
   if(o.keep)window.scrollTo(0,y);
@@ -1564,6 +1608,9 @@ const SVGNS="http://www.w3.org/2000/svg";
 function svg(tag,attrs,text){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;return e;}
 function renderGraph(){
   const box=document.getElementById("v-graph");box.innerHTML="";
+  const back=el("button","aback","‹ "+({flash:"闪卡",songs:"歌曲",gram:"语法"}[st.gFrom]||"词表"));back.type="button";
+  back.onclick=()=>{ui.view=st.gFrom&&st.gFrom!=="graph"?st.gFrom:"list";saveUI();st.q="";document.getElementById("q").value="";render();window.scrollTo(0,0);};
+  box.appendChild(back);
   const set=new Set(activeSongIds());
   if(st.q){   // 搜索：列出匹配的词，点一个换成中心
     const ms=scopeVocab().filter(v=>!v.one&&matchVocab(v,st.q)).slice(0,12);
@@ -1693,6 +1740,7 @@ function renderSongPage(box,s){
   box.appendChild(head);spRender();
   const o=s.dup_of&&songById[s.dup_of];
   box.appendChild(el("p","sub",s.dup_of?"与《"+(o?songTitle(o):s.dup_of)+"》是同一首歌的不同版本，不重复计数":`${sw.length} 个词 · 认识 ${Math.round(cv.pct*100)}%`));
+  box.appendChild(dispOpts());
   const lb=el("div","lyrics"), lines=DATA.lines[s.id]||[];
   lines.forEach((_,li)=>lb.appendChild(lyricLine(s.id,li,{seek:true,song:true})));
   if(lines.some(l=>l[1]))lb.appendChild(el("div","dupnote lyrcredit","中文翻译："+(s.zh_by?s.zh_by+"（"+(s.zh_src||"网易云音乐用户译文")+"）":(s.zh_src||"网易云音乐用户译文"))));
@@ -1798,6 +1846,7 @@ function renderAccount(){
   const synced=syncState==="synced", shortName=account?[...(account.name||"")].slice(0,8).join("")+([...(account.name||"")].length>8?"…":""):"";
   const b=document.getElementById("acct");b.innerHTML="";
   b.append(avatarNode(),el("span","dot"+(synced?" on":"")),el("span","an",synced?(shortName||"已同步"):syncState==="connecting"?"连接中":syncState==="offline"?"离线":"我的"));
+  const mt=document.querySelector(".tab.me");if(mt)mt.classList.toggle("synced",synced);
   const who=document.getElementById("who");who.innerHTML="";
   if(account){const t=el("div");t.append(el("b",null,account.name||"已登录"));if(account.email&&account.email.split("@")[0]!==account.name)t.append(el("div","am",account.email));who.append(avatarNode(),t);}
   const p=document.getElementById("syncText");p.textContent=(SYNC_TEXT[CLOUD]||{})[syncState]||SYNC_TEXT.none.local;
@@ -1834,6 +1883,7 @@ function renderStats(){
   if(!max)c.appendChild(el("p",null,"在闪卡的「复习」或「测验」里学习后，这里会显示每天的记录。"));
 }
 function openSheet(o){document.getElementById("sheet").hidden=!o;document.getElementById("scrim").hidden=!o;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.v==="me"?o:(!o&&t.dataset.v===TAB_OF[ui.view])));
   if(o){renderStats();renderSettings();renderPlayerSettings();document.getElementById("ioMsg").textContent="";document.getElementById("sheetClose").focus();}
   else qrStop();}
 function renderSettings(){
@@ -1842,13 +1892,19 @@ function renderSettings(){
   chipRow(document.getElementById("optRoMode"),[{v:"word",label:"按词"},{v:"char",label:"按字"}],x=>ui.roMode===x.v,x=>{ui.roMode=x.v;saveUI();renderSettings();renderView();});
   const dots=document.getElementById("optDots");dots.checked=ui.roDots;dots.disabled=ui.roMode==="char";
   document.getElementById("optDotsRow").classList.toggle("off",ui.roMode==="char");
-  chipRow(document.getElementById("optNew"),[5,10,15,20,30].map(n=>({v:n,label:String(n)})),x=>ui.newPerDay===x.v,x=>{ui.newPerDay=x.v;saveUI();st.rq=null;renderSettings();});
+  const lr=document.getElementById("plLevelRow");lr.hidden=!plOn();
+  if(plOn())chipRow(document.getElementById("plLevel"),[{v:"standard",label:"标准"},{v:"exhigh",label:"极高"},{v:"lossless",label:"无损"}],x=>pl.level===x.v,x=>{pl.level=x.v;savePl();renderSettings();});
   document.getElementById("ttsNote").textContent=!TTS.ok?"这个浏览器不支持朗读。":TTS.voice?"朗读用的是这台设备自带的日语语音（"+TTS.voice.name+"）。":"朗读用的是这台设备自带的语音。如果听起来不像日语，可以在系统设置里添加日语语音。";
 }
+// 注音 / 罗马音 / 中文 三个开关放在看歌词的地方（歌页顶部、播放页），所有地方的这一行一起刷新
+const DOPTS=[["rt","注音"],["ro","罗马音"],["zh","中文"]];
+function dispOpts(box){box=box||el("div","dopts");box.innerHTML="";
+  DOPTS.forEach(([k,label])=>{const b=el("button","chip",label);b.type="button";b.dataset.k=k;b.setAttribute("aria-pressed",String(!!ui[k]));
+    b.onclick=()=>{ui[k]=!ui[k];saveUI();applyDisplay();};box.appendChild(b);});return box;}
 function applyDisplay(){const r=document.documentElement.classList;r.toggle("no-rt",!ui.rt);r.toggle("no-ro",!ui.ro);r.toggle("no-zh",!ui.zh);
-  document.getElementById("optRt").checked=ui.rt;document.getElementById("optRo").checked=ui.ro;document.getElementById("optZh").checked=ui.zh;}
+  document.querySelectorAll(".dopts .chip").forEach(b=>b.setAttribute("aria-pressed",String(!!ui[b.dataset.k])));}
+dispOpts(document.getElementById("npDopts"));
 document.getElementById("optDots").onchange=e=>{ui.roDots=e.target.checked;saveUI();renderView();};
-[["optRt","rt"],["optRo","ro"],["optZh","zh"]].forEach(([id,k])=>document.getElementById(id).onchange=e=>{ui[k]=e.target.checked;saveUI();applyDisplay();});
 document.getElementById("acct").onclick=()=>openSheet(true);
 document.getElementById("sheetClose").onclick=()=>openSheet(false);
 document.getElementById("scrim").onclick=()=>openSheet(false);
@@ -1954,9 +2010,6 @@ function renderPlayerSettings(){
   document.getElementById("plLoginBtns").hidden=logged||!!qr;
   document.getElementById("plSms").hidden=logged||!smsOpen;
   document.getElementById("plOut").hidden=!pl.cookie;   // 只退本机的凭证（过期的也能退，退了就改用服务器上的账号）；服务器上的账号只能在 NAS 上换
-  chipRow(document.getElementById("plLevel"),[{v:"standard",label:"标准"},{v:"exhigh",label:"极高"},{v:"lossless",label:"无损"}],
-    x=>pl.level===x.v,x=>{pl.level=x.v;savePl();renderPlayerSettings();});
-  document.getElementById("plFollow").checked=pl.follow;
 }
 document.getElementById("plForm").onsubmit=async e=>{
   e.preventDefault();
@@ -1982,7 +2035,6 @@ document.getElementById("plForget").onclick=()=>{
   document.getElementById("plMsg").textContent="已清除。";
   renderPlayerSettings();plRefresh();
 };
-document.getElementById("plFollow").onchange=e=>{pl.follow=e.target.checked;savePl();};
 function loginMsg(t,err){const m=document.getElementById("plLoginMsg");m.className="msg"+(err?" err":"");m.textContent=t||"";}
 async function plLoggedIn(cookie){
   pl.cookie=cookie||"";savePl();smsOpen=false;
@@ -2469,14 +2521,22 @@ function renderFooter(){
 
 // ================= 主流程 =================
 function renderView(){if(ui.view==="flash")renderFlash();if(ui.view==="list")renderList();if(ui.view==="gram")renderGram();if(ui.view==="graph")renderGraph();if(ui.view==="songs")renderSongs();}
+const TAB_OF={flash:"flash",list:"list",gram:"list",graph:"list",songs:"songs"};   // 语法、关系图都归在「词表」这一格下面
 function render(){
   renderFilters();
   ["flash","list","gram","graph","songs"].forEach(v=>document.getElementById("v-"+v).hidden=(ui.view!==v));
-  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.v===ui.view));
+  const sheetOpen=!document.getElementById("sheet").hidden;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.v==="me"?sheetOpen:(!sheetOpen&&t.dataset.v===TAB_OF[ui.view])));
+  const lm=document.getElementById("lmodes");lm.hidden=!(ui.view==="list"||ui.view==="gram");
+  lm.querySelectorAll(".mode").forEach(b=>b.classList.toggle("on",b.dataset.lv===ui.view));
+  document.getElementById("intro").hidden=!!ui.introSeen||ui.view!=="songs";
   renderView();
-  if(!document.getElementById("sheet").hidden)renderStats();
+  if(sheetOpen)renderStats();
 }
-document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{ui.view=t.dataset.v;saveUI();closePop();render();window.scrollTo(0,0);});
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{if(t.dataset.v==="me"){closePop();openSheet(document.getElementById("sheet").hidden);return;}
+  ui.view=t.dataset.v;saveUI();closePop();render();window.scrollTo(0,0);});
+document.querySelectorAll("#lmodes .mode").forEach(b=>b.onclick=()=>{if(ui.view===b.dataset.lv)return;ui.view=b.dataset.lv;saveUI();closePop();render();window.scrollTo(0,0);});
+document.getElementById("introOk").onclick=()=>{ui.introSeen=true;saveUI();render();};
 document.getElementById("ftoggle").onclick=()=>{ui.filtersOpen=!ui.filtersOpen;saveUI();renderFilters();};
 const card=document.getElementById("card");
 const HAS_KB=matchMedia("(hover:hover) and (pointer:fine)").matches;   // 有鼠标的设备才提示快捷键
